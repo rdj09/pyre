@@ -42,7 +42,7 @@ extra-dependencies = [
 [tool.hatch.envs.default]
 dependencies = [
   "pandas",
-  "openpyxl",
+  "openpyxl"
 ]
 
 [tool.hatch.envs.types.scripts]
