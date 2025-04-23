@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pyre"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Rhys Jones", email = "rhysjones437@googlemail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = ["pandas","openpyxl"]
+
+[project.urls]
+Documentation = "https://github.com/Rhys Jones/pyre#readme"
+Issues = "https://github.com/Rhys Jones/pyre/issues"
+Source = "https://github.com/Rhys Jones/pyre"
+
+[tool.hatch.version]
+path = "src/pyre/__about__.py"
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/pyre tests}"
+
+[tool.coverage.run]
+source_pkgs = ["pyre", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/pyre/__about__.py",
+]
+
+[tool.coverage.paths]
+pyre = ["src/pyre", "*/pyre/src/pyre"]
+tests = ["tests", "*/pyre/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
