@@ -38,6 +38,13 @@ path = "src/pyre/__about__.py"
 extra-dependencies = [
   "mypy>=1.0.0",
 ]
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pandas",
+  "openpyxl",
+]
+
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/pyre tests}"
 
