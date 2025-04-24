@@ -1,6 +1,6 @@
 from typing import List, Dict
 import pandas as pd
-from claims.claims import AggregateClaims
+from pyre.claims.claims import AggregateClaims
 
 class TriangleExporter:
     @staticmethod
