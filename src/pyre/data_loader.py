@@ -2,7 +2,7 @@ import sqlite3
 from typing import List
 import pandas as pd
 from datetime import date
-from exposures import Exposure, AggregateExposure, ExposureType
+from pyre.exposures.exposures import Exposure, AggregateExposure, ExposureType
 
 def load_from_excel(file_path, sheet_name=0):
     return pd.read_excel(file_path, sheet_name=sheet_name)
