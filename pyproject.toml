@@ -5,9 +5,9 @@ build-backend = "hatchling.build"
 [project]
 name = "pyre"
 dynamic = ["version"]
-description = ''
+description = 'Python package for Reinsurance Pricing'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "MIT"
 keywords = []
 authors = [
@@ -16,8 +16,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -27,9 +25,9 @@ classifiers = [
 dependencies = ["pandas","openpyxl"]
 
 [project.urls]
-Documentation = "https://github.com/Rhys Jones/pyre#readme"
-Issues = "https://github.com/Rhys Jones/pyre/issues"
-Source = "https://github.com/Rhys Jones/pyre"
+Documentation = "https://github.com/rdj09/pyre#readme"
+Issues = "https://github.com/rdj09/pyre/issues"
+Source = "https://github.com/rdj09/pyre"
 
 [tool.hatch.version]
 path = "src/pyre/__about__.py"

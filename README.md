@@ -1,6 +1,5 @@
 # pyRe
 
-[![PyPI - Version](https://img.shields.io/pypi/v/pyre.svg)](https://pypi.org/project/pyre)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyre.svg)](https://pypi.org/project/pyre)
 
 -----
@@ -10,11 +9,6 @@
 - [Installation](#installation)
 - [License](#license)
 
-## Installation
-
-```console
-pip install pyre
-```
 
 ## License
 
