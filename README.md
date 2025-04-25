@@ -1,8 +1,6 @@
 # pyRe
 
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyre.svg)](https://pypi.org/project/pyre)
-
------
+Python package for non-life reinsurance pricing exercises.
 
 ## Table of Contents
 

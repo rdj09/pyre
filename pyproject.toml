@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "pyre"
 dynamic = ["version"]
-description = 'Python package for Reinsurance Pricing'
+description = 'Python package for non-life reinsurance pricing exercises.'
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
