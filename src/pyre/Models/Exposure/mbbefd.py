@@ -13,9 +13,8 @@ class swissRe_c_values(Enum):
     CAPTIVE_BI_PD = 3.4
     INDUSTRIAL_LARGE_COMMERCIAL = 4.0
     LLOYDS_INDUSTRY = 5.0
-
+    
 def mbbefd_curve(swissRe_c_values, curve_position):
     b = exp(3.1 - 0.15 * (1 + swissRe_c_values.value) * swissRe_c_values.value)
     g = exp((0.78 + 0.12 * swissRe_c_values.value) * swissRe_c_values.value)
     return log(((g - 1) * b + (1 - b * g) * b ** curve_position) / (1 - b)) / log(b * g)
-
