@@ -3,6 +3,18 @@ from pyre.Models.Exposure.riebesell import riebesell_curve
 
 
 def share_of_risk(curve_parameter, band_mid_point, policy_lower_bound_attachment, policy_upper_bound_attachment, policy_limit_lower_Bound, policy_limit_upper_Bound, treaty_layer_attachment, treaty_layer_limit):
+    """_summary_
+
+    Args:
+        curve_parameter (_type_): _description_
+        band_mid_point (_type_): _description_
+        policy_lower_bound_attachment (_type_): _description_
+        policy_upper_bound_attachment (_type_): _description_
+        policy_limit_lower_Bound (_type_): _description_
+        policy_limit_upper_Bound (_type_): _description_
+        treaty_layer_attachment (_type_): _description_
+        treaty_layer_limit (_type_): _description_
+    """
     selected_policy_limit = policy_limit_lower_Bound + band_mid_point * (policy_limit_upper_Bound - policy_limit_lower_Bound)
     selected_policy_attachment = policy_lower_bound_attachment + band_mid_point * (policy_upper_bound_attachment - policy_lower_bound_attachment)
     selected_total_insured_value = selected_policy_limit + selected_policy_attachment
