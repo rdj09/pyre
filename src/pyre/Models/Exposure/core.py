@@ -1,7 +1,6 @@
 from pyre.Models.Exposure.mbbefd import mbbefd_curve
 from pyre.Models.Exposure.riebesell import riebesell_curve
 
-
 def share_of_risk(curve_parameter, band_mid_point, policy_lower_bound_attachment, policy_upper_bound_attachment, policy_limit_lower_Bound, policy_limit_upper_Bound, treaty_layer_attachment, treaty_layer_limit):
     """_summary_
 
