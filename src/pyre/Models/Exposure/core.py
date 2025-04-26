@@ -26,14 +26,14 @@ def share_of_risk(curve_parameter, band_mid_point, policy_lower_bound_attachment
     else:
         seleceted_treaty_top = selected_total_insured_value
     
-    policy_bottom = selected_policy_attachment / selected_total_insured_value
-    policy_top = (selected_policy_limit + selected_policy_attachment) / selected_total_insured_value
-    treaty_policy_bottom = seleceted_treaty_bottom / selected_total_insured_value
-    treaty_policy_top = seleceted_treaty_top / selected_total_insured_value
+    policy_bottom_pct = selected_policy_attachment / selected_total_insured_value
+    policy_top_pct = (selected_policy_limit + selected_policy_attachment) / selected_total_insured_value
+    treaty_policy_bottom_pct = seleceted_treaty_bottom / selected_total_insured_value
+    treaty_policy_top_pct = seleceted_treaty_top / selected_total_insured_value
 
-#TODO generalise curve approach
-    curve_position_policy_lower = mbbefd_curve(curve_parameter,policy_bottom) 
-    curve_position_policy_higher = mbbefd_curve(curve_parameter,policy_top)
-    curve_position_treaty_lower = mbbefd_curve(curve_parameter,treaty_policy_bottom)
-    curve_position_treaty_higher = mbbefd_curve(curve_parameter,treaty_policy_top)
+#TODO generalise curve approach -> mbbefd method with share of SI below but riebesell and mixed expo expect value not pct.
+    curve_position_policy_lower = mbbefd_curve(curve_parameter,policy_bottom_pct) 
+    curve_position_policy_higher = mbbefd_curve(curve_parameter,policy_top_pct)
+    curve_position_treaty_lower = mbbefd_curve(curve_parameter,treaty_policy_bottom_pct)
+    curve_position_treaty_higher = mbbefd_curve(curve_parameter,treaty_policy_top_pct)
     return (curve_position_treaty_higher - curve_position_treaty_lower) / (curve_position_policy_higher - curve_position_policy_lower)
