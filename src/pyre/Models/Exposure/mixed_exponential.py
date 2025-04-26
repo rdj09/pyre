@@ -1,6 +1,16 @@
 from math import exp
 
-def mixed_exponential_curve(paramaters_mus, parameter_weights, curve_position_value):
+def mixed_exponential_curve(paramaters_mus:list[float], parameter_weights:list[float], curve_position_value:float) -> float:
+    """_summary_
+
+    Args:
+        paramaters_mus (list[float]): _description_
+        parameter_weights (list[float]): _description_
+        curve_position_value (float): _description_
+
+    Returns:
+        float: _description_
+    """
     total_limited_severity = 0
     for mu, weight in zip(paramaters_mus, parameter_weights):
         if mu != 0:  
