@@ -5,6 +5,11 @@ from collections import defaultdict
 
 @dataclass
 class Claim:
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     claim_id: str
     policy_id: str
     cedent_name: str
@@ -23,27 +28,59 @@ class Claim:
 
     @property
     def total_incurred(self) -> float:
+        """_summary_
+
+        Returns:
+        _type_: _description_
+        """
         return self.paid_amount + self.reserved_amount
 
     @property
     def reinsurer_incurred(self) -> Optional[float]:
+        """_summary_
+
+        Returns:
+            Optional[float]: _description_
+        """
         if self.reinsurer_share is not None:
             return self.total_incurred * self.reinsurer_share
         return None
 
     def add_development_point(self, month: int, paid: float, incurred: float):
+        """_summary_
+
+        Args:
+            month (int): _description_
+            paid (float): _description_
+            incurred (float): _description_
+        """
         self.development_months.append(month)
         self.dev_paid.append(paid)
         self.dev_incurred.append(incurred)
 
     def cumulative_dev_paid(self) -> float:
+        """_summary_
+
+        Returns:
+            float: _description_
+        """
         return sum(self.dev_paid)
 
     def cumulative_dev_incurred(self) -> float:
+        """_summary_
+
+        Returns:
+            float: _description_
+        """
         return sum(self.dev_incurred)
     
 @dataclass
 class AggregateClaims:
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     year: int
     total_paid: float
     total_reserved: float
@@ -54,6 +91,11 @@ class AggregateClaims:
 
     @classmethod
     def from_claims(cls, claims: List["Claim"]) -> List["AggregateClaims"]:
+        """_summary_
+
+        Returns:
+            _type_: _description_
+        """
         yearly_data: Dict[int, List[Claim]] = defaultdict(list)
 
         # Group claims by the year of loss date
