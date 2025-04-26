@@ -1,27 +1,29 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional, List, Dict
 from collections import defaultdict
+from enum import Enum, auto
+from uuid import uuid4
+
+class ClaimDataType(Enum):
+    """_summary_
+
+    Args:
+        Enum (_type_): _description_
+    """
+    INCREMENTAL = auto()
+    CUMULATIVE = auto()
 
 @dataclass
-class Claim:
+class ClaimDevelopmentHistory:
     """_summary_
 
     Returns:
         _type_: _description_
     """
-    claim_id: str
-    policy_id: str
-    cedent_name: str
-    loss_date: date
-    report_date: date
     paid_amount: float
     reserved_amount: float
-    currency: str
-    loss_cause: Optional[str] = None
-    line_of_business: Optional[str] = None
-    reinsurer_share: Optional[float] = None
-    status: Optional[str] = "Open"
+    data_type: Optional[ClaimDataType] = ClaimDataType.CUMULATIVE
     development_months: List[int] = field(default_factory=list)
     dev_paid: List[float] = field(default_factory=list)
     dev_incurred: List[float] = field(default_factory=list)
@@ -34,17 +36,6 @@ class Claim:
         _type_: _description_
         """
         return self.paid_amount + self.reserved_amount
-
-    @property
-    def reinsurer_incurred(self) -> Optional[float]:
-        """_summary_
-
-        Returns:
-            Optional[float]: _description_
-        """
-        if self.reinsurer_share is not None:
-            return self.total_incurred * self.reinsurer_share
-        return None
 
     def add_development_point(self, month: int, paid: float, incurred: float):
         """_summary_
@@ -73,7 +64,35 @@ class Claim:
             float: _description_
         """
         return sum(self.dev_incurred)
-    
+
+@dataclass
+class ClaimsMetaData:
+    """_summary_
+    """
+    claim_id: str
+    policy_id: str
+    cedent_name: str
+    currency: str
+    loss_date: Optional[date] = None
+    report_date: Optional[date] = None
+    loss_cause: Optional[str] = None
+    line_of_business: Optional[str] = None
+    status: Optional[str] = "Open"
+
+
+@dataclass
+class Claim:
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    claims_uuid = uuid4()
+    claims_meta_data = ClaimsMetaData
+    claims_development_history = ClaimDevelopmentHistory
+
+
+
 @dataclass
 class AggregateClaims:
     """_summary_
