@@ -26,4 +26,6 @@ def mbbefd_curve(swissRe_c_values, curve_position):
     """
     b = exp(3.1 - 0.15 * (1 + swissRe_c_values.value) * swissRe_c_values.value)
     g = exp((0.78 + 0.12 * swissRe_c_values.value) * swissRe_c_values.value)
-    return log(((g - 1) * b + (1 - b * g) * b ** curve_position) / (1 - b)) / log(b * g)
+    return log(((g - 1) * b + (1 - b * g) * b ** curve_position) / (1 - b),2) / log(b * g,2)
+
+print(mbbefd_curve(swissRe_c_values.LLOYDS_INDUSTRY,0.5))
