@@ -20,6 +20,8 @@ Python package for non-life reinsurance pricing exercises.
 
 - Link needed to be added for readme docs 
 
+[Documentation](https://rdj09.github.io/pyre/)
+
 ## License
 
 `pyre` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
