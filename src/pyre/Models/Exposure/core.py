@@ -1,18 +1,24 @@
+from typing import Any
 from pyre.Models.Exposure.mbbefd import mbbefd_curve
 from pyre.Models.Exposure.riebesell import riebesell_curve
+from pyre.Models.Exposure.mixed_exponential import mixed_exponential_curve
 
-def share_of_risk(curve_parameter, band_mid_point, policy_lower_bound_attachment, policy_upper_bound_attachment, policy_limit_lower_Bound, policy_limit_upper_Bound, treaty_layer_attachment, treaty_layer_limit):
+#TODO need to generalise share of risk curve_parameter focused on mbbefd curve approach. 
+def share_of_risk(curve_parameter:Any, band_mid_point: float, policy_lower_bound_attachment: float, policy_upper_bound_attachment:float, policy_limit_lower_Bound:float, policy_limit_upper_Bound:float, treaty_layer_attachment:float, treaty_layer_limit:float)->float:
     """_summary_
 
     Args:
-        curve_parameter (_type_): _description_
-        band_mid_point (_type_): _description_
-        policy_lower_bound_attachment (_type_): _description_
-        policy_upper_bound_attachment (_type_): _description_
-        policy_limit_lower_Bound (_type_): _description_
-        policy_limit_upper_Bound (_type_): _description_
-        treaty_layer_attachment (_type_): _description_
-        treaty_layer_limit (_type_): _description_
+        curve_parameter (float): _description_
+        band_mid_point (float): _description_
+        policy_lower_bound_attachment (float): _description_
+        policy_upper_bound_attachment (float): _description_
+        policy_limit_lower_Bound (float): _description_
+        policy_limit_upper_Bound (float): _description_
+        treaty_layer_attachment (float): _description_
+        treaty_layer_limit (float): _description_
+
+    Returns:
+        float: _description_
     """
     selected_policy_limit = policy_limit_lower_Bound + band_mid_point * (policy_limit_upper_Bound - policy_limit_lower_Bound)
     selected_policy_attachment = policy_lower_bound_attachment + band_mid_point * (policy_upper_bound_attachment - policy_lower_bound_attachment)

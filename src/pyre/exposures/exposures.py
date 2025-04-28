@@ -1,150 +1,57 @@
-from dataclasses import dataclass, field
-from typing import Optional, List, Dict
+from dataclasses import dataclass 
+from typing import Optional
 from datetime import date
-from enum import Enum
+from enum import Enum, auto
 
-class ExposureType(Enum):
-    """_summary_
-
-    Args:
-        Enum (_type_): _description_
-    """
-    EARNED = "earned"
-    WRITTEN = "written"
+class ExposureBasis(Enum):
+    EARNED = auto()
+    WRITTEN = auto()
 
 @dataclass
-class Exposure:
-    """_summary_
-
-    Raises:
-        ValueError: _description_
-        ValueError: _description_
-        ValueError: _description_
-        ValueError: _description_
-        ValueError: _description_
-        ValueError: _description_
-
-    Returns:
-        _type_: _description_
-    """
+class ExposureMetaData():
     exposure_id: str
-    insured_value: float
-    attachment_point: float
-    limit: float
-    deductible: float
-    policy_start: date
-    policy_end: date
-    exposure_type: ExposureType
+    exposure_name: str
+    exposure_period_start: date
+    exposure_period_end: date
+    currency: str
+    line_of_business: str
+    aggregate: bool = False
+    stacking_id: Optional[str] = None
+    exposure_type: Optional[ExposureBasis] = ExposureBasis.EARNED
     location: Optional[str] = None
     peril: Optional[str] = None
     occupancy: Optional[str] = None
-    aggregate: bool = False
-
-    def __post_init__(self):
-        self.validate()
-
-    def policy_term_days(self) -> int:
-        """_summary_
-
-        Returns:
-            int: _description_
-        """
-        return (self.policy_end - self.policy_start).days
-
-    def validate(self) -> None:
-        """_summary_
-
-        Raises:
-            ValueError: _description_
-            ValueError: _description_
-            ValueError: _description_
-            ValueError: _description_
-            ValueError: _description_
-            ValueError: _description_
-        """
-        if self.insured_value < 0:
-            raise ValueError(f"[{self.exposure_id}] Insured value cannot be negative.")
-        if self.attachment_point < 0:
-            raise ValueError(f"[{self.exposure_id}] Attachment point cannot be negative.")
-        if self.limit < 0:
-            raise ValueError(f"[{self.exposure_id}] Limit cannot be negative.")
-        if self.deductible < 0:
-            raise ValueError(f"[{self.exposure_id}] Deductible cannot be negative.")
-        if self.policy_end <= self.policy_start:
-            raise ValueError(f"[{self.exposure_id}] Policy end date must be after start date.")
-        if not isinstance(self.exposure_type, ExposureType):
-            raise ValueError(f"[{self.exposure_id}] exposure_type must be an instance of ExposureType.")
-
+    
+    @property
+    def exposure_term_length_days(self) -> int:
+        return (self.exposure_period_end - self.exposure_period_start).days
+    
 @dataclass
+class ExposureValues:
+    exposure_value: float
+    attachment_point: float
+    limit: float
+
+class Exposure:
+    def __init__(self, exposure_meta: ExposureMetaData, exposure_values: ExposureValues) -> None:
+        self._exposure_meta = exposure_meta
+        self._exposure_values = exposure_values
+
+    @property
+    def modelling_year(self) -> int:
+        return self._exposure_meta.exposure_period_start.year
+    
+    def _earned_pct(self, analysis_date: date) -> float:
+        if self._exposure_meta.exposure_term_length_days == 0:
+            return 0.0
+        if self._exposure_meta.aggregate == True:
+            return 0.0 #TODO parallelogram method when handling aggreagte exposures
+        return min((analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days, 1.0)
+    
+    def earned_exposure_value(self, analysis_date: date) -> float:
+        return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
+
+
 class AggregateExposure:
-    """_summary_
-
-    Raises:
-        ValueError: _description_
-        ValueError: _description_
-
-    Returns:
-        _type_: _description_
-    """
-    exposures_by_year: Dict[int, List[Exposure]] = field(default_factory=dict)
-    exposure_type: ExposureType = ExposureType.WRITTEN  # Default value
-
-    def __post_init__(self):
-        self.validate()
-
-    def add_exposure(self, exposure: Exposure) -> None:
-        """_summary_
-
-        Args:
-            exposure (Exposure): _description_
-        """
-        year = exposure.policy_start.year
-        self.exposures_by_year.setdefault(year, []).append(exposure)
-
-    def total_insured_value_by_year(self) -> Dict[int, float]:
-        """_summary_
-
-        Returns:
-            Dict[int, float]: _description_
-        """
-        return {
-            year: sum(e.insured_value for e in exposures)
-            for year, exposures in self.exposures_by_year.items()
-        }
-
-    def total_limit_by_year(self) -> Dict[int, float]:
-        """_summary_
-
-        Returns:
-            Dict[int, float]: _description_
-        """
-        return {
-            year: sum(e.limit for e in exposures)
-            for year, exposures in self.exposures_by_year.items()
-        }
-
-    def count_aggregate_exposures_by_year(self) -> Dict[int, int]:
-        """_summary_
-
-        Returns:
-            Dict[int, int]: _description_
-        """
-        return {
-            year: sum(1 for e in exposures if e.aggregate)
-            for year, exposures in self.exposures_by_year.items()
-        }
-
-    def validate(self) -> None:
-        """_summary_
-
-        Raises:
-            ValueError: _description_
-            ValueError: _description_
-        """
-        if not self.exposures_by_year:
-            raise ValueError("AggregateExposure must contain exposures.")
-        if not isinstance(self.exposure_type, ExposureType):
-            raise ValueError("exposure_type must be an instance of ExposureType.")
-        for year, exposures in self.exposures_by_year.items():
-            for exposure in exposures:
-                exposure.validate()
+    def __init_(self) -> None:
+        pass
