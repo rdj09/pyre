@@ -13,8 +13,12 @@ Python package for non-life reinsurance pricing exercises.
 ## Table of Contents
 
 - [Installation](#installation)
+- [Documentation](#documentation)
 - [License](#license)
 
+## Documentation
+
+- Link needed to be added for readme docs 
 
 ## License
 
