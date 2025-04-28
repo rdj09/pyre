@@ -22,7 +22,8 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
-dependencies = ["pandas","openpyxl","math"]
+dependencies = ["pandas","openpyxl"]
+
 
 [project.urls]
 Documentation = "https://github.com/rdj09/pyre#readme"
@@ -40,8 +41,7 @@ extra-dependencies = [
 [tool.hatch.envs.default]
 dependencies = [
   "pandas",
-  "openpyxl",
-  "math"
+  "openpyxl"
 ]
 
 [tool.hatch.envs.types.scripts]
