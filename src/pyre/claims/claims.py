@@ -31,6 +31,16 @@ class ClaimDevelopmentHistory:
     def latest_development_month(self) -> int:
         return self.development_months[-1] if self.development_months else 0
     
+    @property
+    def incremental_dev_paid(self) -> List[float]:
+        return [self.cumulative_dev_paid[i] - self.cumulative_dev_paid[i - 1] for i in range(1, len(self.cumulative_dev_paid))]
+    
+    @property
+    def mean_payment_duration(self) -> Optional[float]:
+        if self.latest_paid > 0:
+            time_weighted_payments = sum(month * paid for month, paid in zip(self.development_months, self.cumulative_dev_paid))
+            return time_weighted_payments / self.latest_paid
+        return None
     
 @dataclass
 class ClaimsMetaData:
@@ -54,11 +64,10 @@ class ClaimsMetaData:
             return self.policy_inception_date.year
         return None
 
-
 class Claim:
-    def __init__(self, ClaimsMetaData:ClaimsMetaData,ClaimDevelopmentHistory:ClaimDevelopmentHistory) -> None:
-        self.claims_meta_data =  ClaimsMetaData
-        self.claims_development_history = ClaimDevelopmentHistory
+    def __init__(self, claims_meta_data: ClaimsMetaData, claim_development_history: ClaimDevelopmentHistory) -> None:
+        self._claims_meta_data =  claims_meta_data
+        self._claims_development_history = claim_development_history
 
 
 
