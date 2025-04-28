@@ -81,8 +81,8 @@ class Claim:
     def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:
         self._claims_meta_data = claims_meta_data
         self._claim_development_history = claims_development_history
+    
 
-class AggregateClaims:
+class AggregateClaimsByYear:
     def __init__(self, claims: List[Claim]) -> None:
         self._claims = claims
-    
