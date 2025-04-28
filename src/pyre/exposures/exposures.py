@@ -45,7 +45,7 @@ class Exposure:
         if self._exposure_meta.exposure_term_length_days == 0:
             return 0.0
         if self._exposure_meta.aggregate == True:
-            return None #TODO parallelogram method when handling aggreagte exposures
+            return 0.0 #TODO parallelogram method when handling aggreagte exposures
         return min((analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days, 1.0)
     
     def earned_exposure_value(self, analysis_date: date) -> float:
