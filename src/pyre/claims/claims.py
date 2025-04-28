@@ -2,94 +2,63 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Optional, List, Dict
 from collections import defaultdict
-from enum import Enum, auto
-from uuid import uuid4
-
-class ClaimDataType(Enum):
-    """_summary_
-
-    Args:
-        Enum (_type_): _description_
-    """
-    INCREMENTAL = auto()
-    CUMULATIVE = auto()
 
 @dataclass
 class ClaimDevelopmentHistory:
-    """_summary_
-
-    Returns:
-        _type_: _description_
-    """
-    paid_amount: float
-    reserved_amount: float
-    data_type: Optional[ClaimDataType] = ClaimDataType.CUMULATIVE
     development_months: List[int] = field(default_factory=list)
-    dev_paid: List[float] = field(default_factory=list)
-    dev_incurred: List[float] = field(default_factory=list)
+    cumulative_dev_paid: List[float] = field(default_factory=list)
+    cumulative_dev_incurred: List[float] = field(default_factory=list)
 
     @property
-    def total_incurred(self) -> float:
-        """_summary_
+    def cumulative_reserved_amount(self) -> list[float]:
+        if len(self.cumulative_dev_incurred) != len(self.cumulative_dev_paid):
+            raise ValueError("Both lists must have the same length.")
+        return [cumulative_incurred - cumulative_paid for cumulative_incurred, cumulative_paid in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)]
 
-        Returns:
-        _type_: _description_
-        """
-        return self.paid_amount + self.reserved_amount
+    @property
+    def latest_paid(self) -> float:
+        return self.cumulative_dev_paid[-1] if self.cumulative_dev_paid else 0.0
+    
+    @property
+    def latest_incurred(self) -> float:
+        return self.cumulative_dev_incurred[-1] if self.cumulative_dev_incurred else 0.0
 
-    def add_development_point(self, month: int, paid: float, incurred: float):
-        """_summary_
-
-        Args:
-            month (int): _description_
-            paid (float): _description_
-            incurred (float): _description_
-        """
-        self.development_months.append(month)
-        self.dev_paid.append(paid)
-        self.dev_incurred.append(incurred)
-
-    def cumulative_dev_paid(self) -> float:
-        """_summary_
-
-        Returns:
-            float: _description_
-        """
-        return sum(self.dev_paid)
-
-    def cumulative_dev_incurred(self) -> float:
-        """_summary_
-
-        Returns:
-            float: _description_
-        """
-        return sum(self.dev_incurred)
-
+    @property
+    def latest_reserved_amount(self) -> float:
+        return self.cumulative_dev_incurred[-1] - self.cumulative_dev_paid[-1] if self.cumulative_dev_paid else 0.0
+    
+    @property
+    def latest_development_month(self) -> int:
+        return self.development_months[-1] if self.development_months else 0
+    
+    
 @dataclass
 class ClaimsMetaData:
-    """_summary_
-    """
     claim_id: str
-    policy_id: str
-    cedent_name: str
     currency: str
     loss_date: Optional[date] = None
+    policy_inception_date: Optional[date] = None
     report_date: Optional[date] = None
-    loss_cause: Optional[str] = None
     line_of_business: Optional[str] = None
     status: Optional[str] = "Open"
 
+    @property
+    def accident_year (self) -> Optional[int]:
+        if self.loss_date:
+            return self.loss_date.year
+        return None
+    
+    @property
+    def underwriting_year (self) -> Optional[int]:
+        if self.policy_inception_date:
+            return self.policy_inception_date.year
+        return None
 
-@dataclass
+
 class Claim:
-    """_summary_
-
-    Returns:
-        _type_: _description_
-    """
-    claims_uuid = uuid4()
-    claims_meta_data = ClaimsMetaData
-    claims_development_history = ClaimDevelopmentHistory
+    def __init__(self, ClaimsMetaData:ClaimsMetaData,ClaimDevelopmentHistory:ClaimDevelopmentHistory) -> None:
+        self.claims_meta_data =  ClaimsMetaData
+        self.claims_development_history = ClaimDevelopmentHistory
 
 
 
