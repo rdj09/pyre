@@ -10,3 +10,5 @@ plugins:
         python:
           options:
             docstring_style: google
+markdown_extensions:
+  - admonition
