@@ -9,4 +9,4 @@ plugins:
         # See: https://mkdocstrings.github.io/python/usage/
         python:
           options:
-            docstring_style: sphinx
+            docstring_style: google
