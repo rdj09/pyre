@@ -77,30 +77,10 @@ class ClaimsMetaData:
         else:
             return 0
 
-    @property
-    def accident_year (self) -> Optional[int]:
-        if self.loss_date:
-            return self.loss_date.year
-        return None
-    
-    @property
-    def underwriting_year (self) -> Optional[int]:
-        if self.policy_inception_date:
-            return self.policy_inception_date.year
-        return None
-    
-    @property
-    def reported_year (self) -> Optional[int]:
-        if self.report_date:
-            return self.report_date.year
-        return None
-
-@dataclass
 class Claim:
-    _claims_meta_data : ClaimsMetaData
-    _claim_development_history : ClaimDevelopmentHistory
-
-
+    def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:
+        self._claims_meta_data = claims_meta_data
+        self._claim_development_history = claims_development_history
 
 class AggregateClaims:
     def __init__(self, claims: List[Claim]) -> None:
