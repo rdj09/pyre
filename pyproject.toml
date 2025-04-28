@@ -69,8 +69,10 @@ exclude_lines = [
 [tool.hatch.envs.docs]
 dependencies = [
   "mkdocs",
-  "mkdocstrings[python]"
+  "mkdocstrings[python]",
+  "mkdocs-material"
 ]
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"
+deploy = "mkdocs gh-deploy --force --clean --remote-branch gh-pages"
 serve = "mkdocs serve --dev-addr localhost:8000"
