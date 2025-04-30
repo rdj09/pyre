@@ -22,5 +22,5 @@ def power_ilf(limit:float, basic_limit:float, power_parameter:float)->float:
     if limit is None:
         return 0.0
     else:
-        return (limit / basic_limit) ** power_parameter)
+        return (limit / basic_limit) ** power_parameter
     
