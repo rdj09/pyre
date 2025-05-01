@@ -18,12 +18,12 @@ class ClaimDevelopmentHistory:
     def cumulative_reserved_amount(self) -> list[float]:
         if len(self.cumulative_dev_incurred) != len(self.cumulative_dev_paid):
             raise ValueError("Both lists must have the same length.")
-        return [cumulative_incurred - cumulative_paid for cumulative_incurred, cumulative_paid in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)]
+        return [incurred - paid for incurred, paid in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)]
 
     @property
     def latest_paid(self) -> float:
         return self.cumulative_dev_paid[-1] if self.cumulative_dev_paid else 0.0
-    
+       
     @property
     def latest_incurred(self) -> float:
         return self.cumulative_dev_incurred[-1] if self.cumulative_dev_incurred else 0.0
@@ -38,16 +38,21 @@ class ClaimDevelopmentHistory:
     
     @property
     def incremental_dev_paid(self) -> List[float]:
-        return [self.cumulative_dev_paid[i] - self.cumulative_dev_paid[i - 1] for i in range(1, len(self.cumulative_dev_paid))]
+        incremental_dev_paid = [self.cumulative_dev_paid[0]]
+        incremental_dev_paid.extend([self.cumulative_dev_paid[i] - self.cumulative_dev_paid[i - 1] for i in range(1, len(self.cumulative_dev_paid))])
+        return incremental_dev_paid
+
     
-    @property
+    @property # TODO Duplicate Code nee to be refactored into cumulative to incremental function
     def incremental_dev_incurred(self) -> List[float]:
-        return [self.cumulative_dev_incurred[i] - self.cumulative_dev_incurred[i - 1] for i in range(1, len(self.cumulative_dev_incurred))]
+        incremental_dev_incurred = [self.cumulative_dev_incurred[0]]
+        incremental_dev_incurred.extend([self.cumulative_dev_incurred[i] - self.cumulative_dev_incurred[i - 1] for i in range(1, len(self.cumulative_dev_incurred))])
+        return incremental_dev_incurred
 
     @property
     def mean_payment_duration(self) -> Optional[float]:
         if self.latest_paid > 0:
-            time_weighted_payments = sum(month * paid for month, paid in zip(self.development_months, self.cumulative_dev_paid))
+            time_weighted_payments = sum(month * paid for month, paid in zip(self.development_months, self.incremental_dev_paid))
             return time_weighted_payments / self.latest_paid
         return None
     
@@ -154,4 +159,6 @@ class Claim:
 # )
 
 # claim = Claim(claims_meta_data, claim_development_history)
+
+
 
