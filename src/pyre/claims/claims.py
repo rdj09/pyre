@@ -1,10 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date
-from functools import cached_property
 from typing import Optional, List, Sequence
 from enum import Enum, auto
-
-from click import Option
 
 class ClaimYearType(Enum):
     ACCIDENT_YEAR = auto()
@@ -85,8 +82,8 @@ class Claim:
         self._claim_development_history = claims_development_history
         self._uncapped_claim_development_history: Optional[ClaimDevelopmentHistory] = None
         self._capped_claim_development_history: Optional[ClaimDevelopmentHistory] = None
-
-    @cached_property
+    
+    @property
     def uncapped_claim_development_history(self) -> ClaimDevelopmentHistory:
         if self._claims_meta_data.claim_in_xs_of_deductible:
             uncapped_paid = self._claim_development_history.cumulative_dev_paid
@@ -97,14 +94,22 @@ class Claim:
         self._uncapped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, uncapped_paid, uncapped_incurred)
         return self._uncapped_claim_development_history
 
-    @cached_property
+    @property
     def capped_claim_development_history(self) -> ClaimDevelopmentHistory:
-        uncapped_paid = self.uncapped_claim_development_history.cumulative_dev_paid
-        uncapped_incurred = self.uncapped_claim_development_history.cumulative_dev_incurred
-        capped_paid = [min(paid, self._claims_meta_data.contract_limit) for paid in uncapped_paid]
-        capped_incurred = [min(incurred, self._claims_meta_data.contract_limit) for incurred in uncapped_incurred]
+        capped_paid = [min(paid, self._claims_meta_data.contract_limit) for paid in self.uncapped_claim_development_history.cumulative_dev_paid]
+        capped_incurred = [min(incurred, self._claims_meta_data.contract_limit) for incurred in self.uncapped_claim_development_history.cumulative_dev_incurred]
         self._capped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, capped_paid, capped_incurred)
         return self._capped_claim_development_history
+    
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(self._claims_meta_data, name) if hasattr(self._claims_meta_data, name) else getattr(self._claim_development_history, name) if hasattr(self._claim_development_history, name) else self.__getattribute__(name)
+    
+    def __repr__(self) -> str:
+        return (
+            f"claim_id={self._claims_meta_data.claim_id},modelling_year={self._claims_meta_data.modelling_year},latest_incurred={self._claim_development_history.latest_incurred},latest_capped_incurred={self.capped_claim_development_history.latest_incurred}"
+        )
+
 
 # claims_meta_data = ClaimsMetaData(
 #     claim_id="123",
@@ -121,15 +126,17 @@ class Claim:
 #     cumulative_dev_incurred=[1500.0, 2500.0, 3500.0]
 # )
 
-# print(claim_development_history.latest_paid)
 
 # # Create a Claim object
 # claim = Claim(claims_meta_data, claim_development_history)
+# print(claim)
 
-# #print(claim.uncapped_claim_development_history.development_months) # Access development_months
-# # Access uncapped_claim_development_history.latest_paid
-# print(claim.uncapped_claim_development_history.latest_incurred)  
-# print(claim.capped_claim_development_history.latest_incurred)  
+#print(claim.capped_claim_development_history.cumulative_reserved_amount)
+
+#print(claim.uncapped_claim_development_history.development_months) # Access development_months
+# Access uncapped_claim_development_history.latest_paid
+#print(claim.uncapped_claim_development_history.latest_incurred)  
+#print(claim.capped_claim_development_history.latest_incurred)  
 
 # claims_meta_data = ClaimsMetaData(
 #     claim_id="123",
@@ -148,5 +155,3 @@ class Claim:
 
 # claim = Claim(claims_meta_data, claim_development_history)
 
-# print(claim.uncapped_claim_development_history.latest_incurred)  
-# print(claim.capped_claim_development_history.latest_incurred)  
