@@ -1,6 +1,6 @@
-site_name: Basic MkDocs Example Project
+site_name: pyRE - python package for non-life reinsurance pricing
 theme:
-  name: readthedocs
+  name: material
   highlightjs: true
 plugins:
   - search
@@ -9,4 +9,6 @@ plugins:
         # See: https://mkdocstrings.github.io/python/usage/
         python:
           options:
-            docstring_style: sphinx
+            docstring_style: google
+markdown_extensions:
+  - admonition

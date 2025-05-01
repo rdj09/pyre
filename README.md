@@ -18,7 +18,7 @@ Python package for non-life reinsurance pricing exercises.
 
 ## Documentation
 
-- Link needed to be added for readme docs 
+- [Documentation](https://rdj09.github.io/pyre/)
 
 ## License
 

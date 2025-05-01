@@ -1,43 +1,45 @@
-# Quamvis nimia tamquam atque coniunx scelerata ordine
 
-## Ora meum in ab nigrior resupinus sanguineam
+## Overview
+`pyre` goal is to provide pricing tools and utilities for reinsurnace users. 
 
-Lorem markdownum in maioris dotibus Scythicas deerit mirabile illi ultra pereunt
-oculos sine etiam, dextera, vires. Praevitiat **omni o enim** partimque ne per
-*semel* roboris intrat.
+## Features
+- **Pricing Calculations**: Core functionality for actuarial pricing models.
+- **Data Processing**: Tools for handling and transforming input data.
+- **Reporting**: Generate reports and summaries for pricing results.
 
-> Moenia uritur sacrata successore profuga meus, non in cruore et Phoebeia.
-> Caligine nec coepit frigora his vita exclamat cultique aliter.
 
-Voluere leaena: cervice quos est. Cessante ursaque, me rima hostibus.
+## Installation
+To install the package, clone the repository and install the dependencies:
 
-> Cruribus Argolicas crescente prosilit cupit. Manu locis videre, saepe ferro
-> illic ad mors, actum murmura, inania potest et caret opiferque cupidine ante.
-> Tecti curvis Aeacidis, temptent ab *decet poenam bibulaeque* te addat dixisse
-> gramineo.
+```bash
+git clone 
+```
 
-## Capillis spectantem
+## Usage
+Here’s a quick example of how to use the package:
 
-Et tenens mane tandem. Umerique tum: Orionis ulli Armeniae sedem flentes,
-obnoxia; sacra nunc munera duritiam tibi non. Orbem postquam canunt Pico, loco
-tendit sanguine [at auxilium pariterque](http://vero.io/niger) huius; sonuere
-dixit; huc poplite.
+```python
+# Import the main module
+from pyre 
 
-Et lunares acutae. Roganda indigenis latratibus et perfundit opemque? Non vires
-virentes gemino: terrae quos, tenet, cadet: detur! Fuit morbo voveas ducunt
-humano; non praesens manet; ubi eurus virentem aequor, quia illa. Orat iunxit.
+# Example usage
+result = pricing_tool.calculate_premium(data)
+print(result)
+```
 
-> Est *saltus fuerunt iuncosaque* praepes tactusque inter fraudat. Soceri
-> tendebat de genibus securus aede, crimine sanguine caelo; inpetus tyranni
-> Lachne ventorum. Quam non. Sparsus scelus facit fregit lacrimisque postquam
-> ignara facta quo: mens stravit meroque.
+## Directory Structure
+```
 
-Feracis armos vincemus segnior comitavit, in fugiunt quoniam, inplicet alba ipse
-cortice praetemptatque litora et interiit amantem amore. Sed sonuere pro et
-patiar instantes **quia** renarrant posset silva inplevit nemorisque *quod*. Et
-seque natantia erroribus placui o viribus cuncta opertum laetusque neque; curam
-Quin pressa ferunt in.
+```
 
-Lepus si stagnum densum, mihi humi sanguine procul saepibus postquam, Gorgoneis
-esse cineres existit reddere moveant supremis. Videtur incessere Alcyonen, haec
-regit corpore soceri!
+## Contributing
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Submit a pull request with a detailed description of your changes.
+
+## License
+
+`pyre` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+

@@ -16,3 +16,11 @@ def riebesell_curve(attachment:float, limit:float, z_value:float, base_limit:flo
         return ((attachment) / base_limit) ** log(1 + z_value, 2)
     else:
         return ((attachment + limit) / base_limit) ** log(1 + z_value, 2)
+    
+
+def power_ilf(limit:float, basic_limit:float, power_parameter:float)->float:
+    if limit is None:
+        return 0.0
+    else:
+        return (limit / basic_limit) ** power_parameter
+    

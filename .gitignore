@@ -1,1 +1,7 @@
 dist/*
+.vscode/*
+src/pyre/__pycache__/*
+src/pyre/claims/__pycache__/*
+src/pyre/exposures/__pycache__/*   
+tests/__pycache__/*
+
