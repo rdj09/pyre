@@ -14,8 +14,8 @@ class ExposureMetaData():
     exposure_period_start: date
     exposure_period_end: date
     currency: str
-    line_of_business: str
     aggregate: bool = False
+    line_of_business: Optional[str] = None
     stacking_id: Optional[str] = None
     exposure_type: Optional[ExposureBasis] = ExposureBasis.EARNED
     location: Optional[str] = None
@@ -52,6 +52,6 @@ class Exposure:
         return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
 
-class AggregateExposure:
-    def __init_(self) -> None:
+class AggregateExposures:
+    def __init__(self) -> None:
         pass

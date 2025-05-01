@@ -57,8 +57,7 @@ class ClaimsMetaData:
     currency: str
     contract_limit: float = 0.0
     contract_deductible: float = 0.0
-    xs_deductible: bool = False
-    from_ground_up: bool = True
+    claim_in_xs_of_deductible: bool = False
     claim_year_basis: ClaimYearType = ClaimYearType.ACCIDENT_YEAR
     loss_date: Optional[date] = None
     policy_inception_date: Optional[date] = None
@@ -81,8 +80,40 @@ class Claim:
     def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:
         self._claims_meta_data = claims_meta_data
         self._claim_development_history = claims_development_history
-    
+        self._uncapped_claim_development_history = None
 
-class AggregateClaimsByYear:
-    def __init__(self, claims: List[Claim]) -> None:
-        self._claims = claims
+        # TODO NEED TO THINK THROUGH AND MAKE CHANGES CURRENTLY UNEXPECTED BEHAVIOR   
+    def uncapped_claim_development_history(self):
+        if self._claims_meta_data.claim_in_xs_of_deductible:
+            uncapped_paid = self._claim_development_history.cumulative_dev_paid
+            uncapped_incurred = self._claim_development_history.cumulative_dev_incurred
+        else:
+            uncapped_paid = [max(paid - self._claims_meta_data.contract_deductible, 0.0) for paid in self._claim_development_history.cumulative_dev_paid]
+            uncapped_incurred = [max(incurred - self._claims_meta_data.contract_deductible, 0.0) for incurred in self._claim_development_history.cumulative_dev_incurred]
+        self._uncapped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, uncapped_paid, uncapped_incurred)
+        return self._uncapped_claim_development_history
+
+
+claims_meta_data = ClaimsMetaData(
+    claim_id="123",
+    currency="USD",
+    contract_limit=100000.0,
+    contract_deductible=5000.0,
+    claim_in_xs_of_deductible=False
+)
+
+# Create a ClaimDevelopmentHistory object
+claim_development_history = ClaimDevelopmentHistory(
+    development_months=[1, 2, 3],
+    cumulative_dev_paid=[1000.0, 2000.0, 3000.0],
+    cumulative_dev_incurred=[1500.0, 2500.0, 3500.0]
+)
+
+print(claim_development_history.latest_paid)
+
+# Create a Claim object
+claim = Claim(claims_meta_data, claim_development_history)
+
+#print(claim.uncapped_claim_development_history.development_months) # Access development_months
+# Access uncapped_claim_development_history.latest_paid
+print(claim.uncapped_claim_development_history().latest_incurred)  
