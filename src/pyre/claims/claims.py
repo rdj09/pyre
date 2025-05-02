@@ -36,18 +36,20 @@ class ClaimDevelopmentHistory:
     def latest_development_month(self) -> int:
         return self.development_months[-1] if self.development_months else 0
     
+    @staticmethod
+    def incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
+        incremental_dev = [cumulative_dev[0]]
+        incremental_dev.extend([cumulative_dev[i] - cumulative_dev[i - 1] for i in range(1, len(cumulative_dev))])
+        return incremental_dev
     @property
-    def incremental_dev_paid(self) -> List[float]:
-        incremental_dev_paid = [self.cumulative_dev_paid[0]]
-        incremental_dev_paid.extend([self.cumulative_dev_paid[i] - self.cumulative_dev_paid[i - 1] for i in range(1, len(self.cumulative_dev_paid))])
-        return incremental_dev_paid
-
-    
-    @property # TODO Duplicate Code nee to be refactored into cumulative to incremental function
     def incremental_dev_incurred(self) -> List[float]:
-        incremental_dev_incurred = [self.cumulative_dev_incurred[0]]
-        incremental_dev_incurred.extend([self.cumulative_dev_incurred[i] - self.cumulative_dev_incurred[i - 1] for i in range(1, len(self.cumulative_dev_incurred))])
-        return incremental_dev_incurred
+        self.incremental_dev(self.cumulative_dev_incurred)
+        return self.incremental_dev(self.cumulative_dev_incurred)
+    
+    @property #
+    def incremental_dev_paid(self) -> List[float]:
+        self.incremental_dev(self.cumulative_dev_paid)
+        return self.incremental_dev(self.cumulative_dev_paid)
 
     @property
     def mean_payment_duration(self) -> Optional[float]:
@@ -55,7 +57,7 @@ class ClaimDevelopmentHistory:
             time_weighted_payments = sum(month * paid for month, paid in zip(self.development_months, self.incremental_dev_paid))
             return time_weighted_payments / self.latest_paid
         return None
-    
+
 @dataclass
 class ClaimsMetaData:
     claim_id: str
@@ -106,7 +108,7 @@ class Claim:
         self._capped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, capped_paid, capped_incurred)
         return self._capped_claim_development_history
     
-
+    #TODO: exposed all underlying attributes of composing classes but need to review. Should be explicit about what's to be exposed.
     def __getattr__(self, name: str) -> object:
         return getattr(self._claims_meta_data, name) if hasattr(self._claims_meta_data, name) else getattr(self._claim_development_history, name) if hasattr(self._claim_development_history, name) else self.__getattribute__(name)
     
