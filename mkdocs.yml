@@ -1,6 +1,8 @@
 site_name: pyRE - python package for non-life reinsurance pricing
 theme:
   name: material
+  palette:
+    primary: teal
   highlightjs: true
 plugins:
   - search
