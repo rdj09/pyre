@@ -1,33 +1,41 @@
-from pyre.claims.claims import Claim
-from typing import List, Dict, Any
+from collections import defaultdict
+from dataclasses import dataclass
+from datetime import date
+from statistics import mean
+from typing import Callable, Dict, List
+
+from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData
 
 
+@dataclass
 class ClaimAggregator:
-    def __init__(self, claims: List[Claim]) -> None:
-        self.claims = claims
+    claims: List[Claim]
 
     @property
-    def total_paid_by_year(self) -> float:
-        return sum(claim.uncapped_claim_development_history.latest_paid for claim in self.claims)
-
+    def modelling_years(self) -> List:
+        return [claim.modelling_year for claim in self.claims]
+    
     @property
-    def total_incurred_by_year(self) -> float:
-        return sum(claim.uncapped_claim_development_history.latest_incurred for claim in self.claims)
+    def currencies(self) -> List:
+        return [claim.currency for claim in self.claims]
     
-    def number_of_claims_by_year(self, by_year:bool) -> Any:
-        if by_year:
-            return None
-        return len(self.claims)
-    
-    def number_of_open_claims_by_year(self, by_year:bool) -> Any:
-        if by_year:
-            return None 
-        return len([claim for claim in self.claims if claim._claims_meta_data.status == "Open"])
-    
-    def number_of_closed_claims(self, by_year:bool) -> Any:
-        # held a s a balance but should have validation in place to ensure that the number of closed claims is equal to the total number of claims minus the total number of open claims
-        if by_year:
-            return None
-        return None
 
+    def aggregate_by_attribute(self, attributes: List[str], aggregator: Callable = sum) -> Dict:
+        grouped_claims = defaultdict(list)
+        for claim in self.claims:
+            key = tuple(getattr(claim, attr, None) for attr in attributes)
+            grouped_claims[key].append(claim)
 
+        aggregated_results = {}
+        for key, claims in grouped_claims.items():
+            aggregated_results[key] = {
+                "total_paid": aggregator([claim.capped_claim_development_history.latest_paid for claim in claims]),
+                "total_incurred": aggregator([claim.capped_claim_development_history.latest_incurred for claim in claims]),
+                "number_of_claims": len(claims),
+                "mean_payment_duration": mean([claim.mean_payment_duration for claim in claims]) if claims else None,
+                "total_paid_open_claims": aggregator([claim.capped_claim_development_history.latest_paid for claim in claims if claim.status == "Open"]),
+                "total_incurred_open_claims": aggregator([claim.capped_claim_development_history.latest_incurred for claim in claims if claim.status == "Open"]),
+                "number_of_open_claims": len([claim for claim in claims if claim.status == "Open"]),
+                "mean_payment_duration_open_claims": mean([claim.mean_payment_duration for claim in claims if claim.status == "Open"] ) if claims else None
+            }
+        return aggregated_results
