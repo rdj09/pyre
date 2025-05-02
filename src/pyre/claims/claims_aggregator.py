@@ -29,13 +29,13 @@ class ClaimAggregator:
         aggregated_results = {}
         for key, claims in grouped_claims.items():
             aggregated_results[key] = {
-                "total_paid": aggregator([claim.capped_claim_development_history.latest_paid for claim in claims]),
-                "total_incurred": aggregator([claim.capped_claim_development_history.latest_incurred for claim in claims]),
+                "total_paid": aggregator(claim.capped_claim_development_history.latest_paid for claim in claims),
+                "total_incurred": aggregator(claim.capped_claim_development_history.latest_incurred for claim in claims),
                 "number_of_claims": len(claims),
-                "mean_payment_duration": mean([claim.mean_payment_duration for claim in claims]) if claims else None,
-                "total_paid_open_claims": aggregator([claim.capped_claim_development_history.latest_paid for claim in claims if claim.status == "Open"]),
-                "total_incurred_open_claims": aggregator([claim.capped_claim_development_history.latest_incurred for claim in claims if claim.status == "Open"]),
+                "mean_payment_duration": mean(claim.capped_claim_development_history.mean_payment_duration for claim in claims) if claims else None,
+                "total_paid_open_claims": aggregator(claim.capped_claim_development_history.latest_paid for claim in claims if claim.status == "Open"),
+                "total_incurred_open_claims": aggregator(claim.capped_claim_development_history.latest_incurred for claim in claims if claim.status == "Open"),
                 "number_of_open_claims": len([claim for claim in claims if claim.status == "Open"]),
-                "mean_payment_duration_open_claims": mean([claim.mean_payment_duration for claim in claims if claim.status == "Open"] ) if claims else None
+               # "mean_payment_duration_open_claims": mean(claim.capped_claim_development_history.mean_payment_duration for claim in claims if claim.status == "Open") Need to produce further work here
             }
         return aggregated_results

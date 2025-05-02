@@ -21,8 +21,8 @@ class TestClaimAggregator(unittest.TestCase):
             claim_id="002",
             currency="EUR",
             contract_limit=50000.0,
-            contract_deductible=10000.0,
-            claim_in_xs_of_deductible=False,
+            contract_deductible=5000.0,
+            claim_in_xs_of_deductible=True,
             loss_date=date(2023, 1, 1),
             status="Closed"
         )
