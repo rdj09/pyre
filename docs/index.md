@@ -1,42 +1,43 @@
-# Mihi foliisque Hister acrior puellis galeae
+# pyRE
 
-# Reference
+## Overview
+`pyre` goal is to provide pricing tools and utilities for reinsurnace users. 
 
-::: pyre.claims.triangles.TriangleExporter
+## Features
+- **Pricing Calculations**: Core functionality for actuarial pricing models.
 
-!!! note
 
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla et euismod
-    nulla. Curabitur feugiat, tortor non consequat finibus, justo purus auctor
-    massa, nec semper lorem quam in massa.
+## Installation
+To install the package, clone the repository and install the dependencies:
 
-## Armis nymphae
+```bash
+git clone https://github.com/rdj09/pyre.git
+```
 
-Lorem markdownum canis, qui te Quirine Labros is inops partes et indomito tereti
-locutum, detur! Unum *est coirent saucia* suos vento! Inque pontusque sucus
-trepidantum quae, attonitamque *quae tantum* et sanguine temptasse Caenis
-ornant, pressus. Manus inspicitur quod!
+## Usage
+Here’s a quick example of how to use the package:
 
-Et audeat mirabere cupiasque insidias tegit: [pepulere
-videt](http://www.noster-hippomenes.io/iliades). Summo tepido exhortantur lupo.
+```python
+# Import the main module
+from pyre 
 
-1. Pontus frustra quidem
-2. Illi clarus tamen nescis agitavit
-3. Inachis crepitantibus draconi deficiunt poteram
-4. Usque relictum urbem hac prudentia
-5. Si quae quondam altera
+# Example usage
 
-## Meis est labefactaque relicta mihi quamvis est
+```
 
-Matre sub habenas everberat Ulixem mitescere iam genus: Echion obprobrium quod,
-busta contigerant fortius. [Belli velavit
-eruerit](http://celeri.net/sacros-cecidere) equorum tecta sitim pariterque
-virgo, pavefactaque viderat qua habet, transferre intus, *Iri suos ferrumque*.
-Refers corripit moris ne tamen anni unda aura [adversos vires](http://ino.com/).
-*Nec novae volucres* premeret et delet trepidos annum. Flore cum ut gravitate
-duarum memorant sparsus si multum iubasque stratosque nervis annosa?
+## Directory Structure
+```
 
-> Ipse **fatali**, quatiens, o proditione mutum, clausit annum cum postquam suam
-> dubium. Perque tu nullos moveo; exacta spumantis quemquam, explevit, tamen
-> caelo sola splendida.
+```
+
+## Contributing
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Submit a pull request with a detailed description of your changes.
+
+## License
+
+`pyre` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
 
