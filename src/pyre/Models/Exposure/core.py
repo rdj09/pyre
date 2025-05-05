@@ -1,7 +1,14 @@
 from typing import Any
-from pyre.Models.Exposure.mbbefd import mbbefd_curve
-from pyre.Models.Exposure.riebesell import riebesell_curve
-from pyre.Models.Exposure.mixed_exponential import mixed_exponential_curve
+from ..models import Model
+from .mbbefd import mbbefd_curve
+from .riebesell import riebesell_curve
+from .mixed_exponential import mixed_exponential_curve
+
+class ExposureModel(Model):
+    def __init__(self, data: Any):
+        self.data = data
+
+
 
 #TODO need to generalise share of risk curve_parameter focused on mbbefd curve approach. 
 def share_of_risk(curve_parameter:Any, band_mid_point: float, policy_lower_bound_attachment: float, policy_upper_bound_attachment:float, policy_limit_lower_Bound:float, policy_limit_upper_Bound:float, treaty_layer_attachment:float, treaty_layer_limit:float)->float:
