@@ -1,3 +1,9 @@
+from ..models import Model
+
+class ExperienceModel(Model):
+    def __init__(self, data):
+        self.data = data
+
 
 
 def chainladder_method():
