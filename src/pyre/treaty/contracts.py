@@ -1,7 +1,6 @@
 from datetime import date
 from enum import Enum
-from pickle import NONE
-from typing import List, Dict, Optional
+from typing import List, Dict, Sequence
 from dataclasses import dataclass
 
 class ContractType(Enum):
@@ -49,7 +48,8 @@ class RILayer:
 @dataclass
 class RIContractMetadata:
     contract_id: int
-    contract_name: str
+    contract_description: str
+    cedent_name: str 
     contract_type: ContractType
     trigger_basis: ClaimTriggerBasis
     indexation_clause: IndexationClauseType
@@ -57,10 +57,9 @@ class RIContractMetadata:
     inception_date: date
     expiration_date: date
     fx_rates: Dict # {"GBP":1.0, "USD":1.25}
-    cedent_name: str   
 
 class RIContract:
-    def __init__(self, contract_meta_data: RIContractMetadata, layers:List[RILayer]) -> None:
+    def __init__(self, contract_meta_data: RIContractMetadata, layers:Sequence[RILayer]) -> None:
         self._contract_meta_data = contract_meta_data
         self._contract_layers = {layer.layer_id: layer for layer in layers}
 
