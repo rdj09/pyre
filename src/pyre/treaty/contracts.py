@@ -3,6 +3,8 @@ from enum import Enum
 from typing import List, Dict, Sequence
 from dataclasses import dataclass
 
+from pyre.claims.claims import ClaimYearType #TODO need to move this to a common ENUM module so no dependency on claims module
+
 class ContractType(Enum):
     QUOTA_SHARE = "Quota Share"
     EXCESS_OF_LOSS = "Excess of Loss"
@@ -57,14 +59,23 @@ class RIContractMetadata:
     inception_date: date
     expiration_date: date
     fx_rates: Dict # {"GBP":1.0, "USD":1.25}
+    
+    @property
+    def claim_year_basis(self) -> ClaimYearType:
+        if self.trigger_basis == ClaimTriggerBasis.RAD:
+            return ClaimYearType.UNDERWRITING_YEAR
+        elif self.trigger_basis == ClaimTriggerBasis.CMB:
+            return ClaimYearType.REPORTED_YEAR
+        else:
+            return ClaimYearType.ACCIDENT_YEAR # default is accident year basis.
+
 
 class RIContract:
     def __init__(self, contract_meta_data: RIContractMetadata, layers:Sequence[RILayer]) -> None:
         self._contract_meta_data = contract_meta_data
         self._contract_layers = {layer.layer_id: layer for layer in layers}
 
-
-
+    
 
 
 
