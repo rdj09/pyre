@@ -1,5 +1,7 @@
+from datetime import date
 from enum import Enum
-from typing import List, Dict
+from pickle import NONE
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 
 class ContractType(Enum):
@@ -12,6 +14,11 @@ class ClaimTriggerBasis(Enum):
     LOD = "Losses Occurrence" #Accident Year
     RAD = "Risk Attaching" # Policy Inception Year
     CMB = "Claims Made Basis" # Reported Year
+
+class IndexationClauseType(Enum):
+    FULL_INDEXATION = "Full Indexation"
+    FIC = "Franchise - FIC"
+    SIC = "Severe Inflation (also London Market) - SIC"
 
 @dataclass
 class RILayer:
@@ -44,9 +51,11 @@ class RIContractMetadata:
     contract_id: int
     contract_name: str
     contract_type: ContractType
-    claim_trigger_basis: ClaimTriggerBasis
-    inception_date: str
-    expiration_date: str
+    trigger_basis: ClaimTriggerBasis
+    indexation_clause: IndexationClauseType
+    indexation_margin: float
+    inception_date: date
+    expiration_date: date
     fx_rates: Dict # {"GBP":1.0, "USD":1.25}
     cedent_name: str   
 
