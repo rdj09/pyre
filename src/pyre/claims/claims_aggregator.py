@@ -1,10 +1,9 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import date
 from statistics import mean
 from typing import Callable, Dict, List
 
-from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData
+from pyre.claims.claims import Claim
 
 
 @dataclass
