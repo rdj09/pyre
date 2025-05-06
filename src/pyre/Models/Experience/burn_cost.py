@@ -6,38 +6,23 @@ class ExperienceModel(Model):
 
 
 
-def chainladder_method():
-    """
-    This function implements the Chain Ladder method for estimating the reserve
-    for unpaid claims in insurance. It uses the cumulative claims data to
-    calculate the reserve needed to cover future claims.
+def chainladder_method(data: float, development_factor: float) -> float:
+    return data*development_factor
 
-    Returns:
-        float: The estimated reserve for unpaid claims.
-    """
-    # Placeholder for actual implementation
-    pass
+def bf_method(data: float, exposure:float, development_factor: float, a_priori:float):
+    return data + (1 - (1/development_factor))*a_priori*exposure
 
-def bf_method():
-    """
-    This function implements the Bornhuetter-Ferguson method for estimating the reserve
-    for unpaid claims in insurance. It combines the Chain Ladder method with an a priori
-    estimate of the ultimate claims.
+#citation source Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
+# https://www.actuaries.org.uk/documents/claims-reserving-working-party-paper
+def cape_cod_method():
+        # determine expected loss ratio 
+    #bf_method(derived_expected)
+    return NotImplementedError
 
-    Returns:
-        float: The estimated reserve for unpaid claims.
-    """
-    # Placeholder for actual implementation
-    pass
 
+#citation source Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
+# https://www.actuaries.org.uk/documents/claims-reserving-working-party-paper
 def generalised_cape_cod_method():
-    """
-    This function implements the Generalised Cape Cod method for estimating the reserve
-    for unpaid claims in insurance. It uses a combination of the Chain Ladder method and
-    an a priori estimate of the ultimate claims.
-
-    Returns:
-        float: The estimated reserve for unpaid claims.
-    """
-    # Placeholder for actual implementation
-    pass
+    # determine expected loss ratio with decay factor
+    #bf_method(derived_expected)
+    return NotImplementedError
