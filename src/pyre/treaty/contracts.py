@@ -77,6 +77,8 @@ class RIContract:
 
     
 
+#TODO Franchise Deductible > inherits from xl contract except calculation of claim is different.
+#TODO  Should consider generalised class and protocol routine.
 
 
 # class QuotaShareContract:
