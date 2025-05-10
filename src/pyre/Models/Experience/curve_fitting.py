@@ -193,8 +193,3 @@ def assess_error_assumptions(actual: List[float], expected: List[float], num_par
         "mean_residual": mean_residual,
         "std_residual": std_residual,
     }
-
-#TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
-
-def ibner_development():
-    pass

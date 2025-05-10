@@ -67,3 +67,73 @@ class TriangleExporter:
         triangle_df = triangle_df.sort_index(axis=0)
 
         return triangle_df
+
+
+#TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
+
+
+class IBNERPatternExtractor:
+    def __init__(self, cumulative_triangle):
+        """
+        Initialize with a cumulative claims triangle.
+        :param cumulative_triangle: dict of dicts, where outer keys are accident years and
+                                    inner keys are development years with cumulative values.
+        Example:
+            {
+                2018: {1: 100, 2: 180, 3: 250},
+                2019: {1: 150, 2: 240},
+                2020: {1: 200}
+            }
+        """
+        self.X = cumulative_triangle
+        self.accident_years = sorted(cumulative_triangle.keys())
+        self.development_years = sorted({dev for row in cumulative_triangle.values() for dev in row})
+        self.N = {ay: {} for ay in self.accident_years}
+        self.D = {ay: {} for ay in self.accident_years}
+        self._compute_N_and_D()
+
+    def _compute_N_and_D(self):
+        """
+        Compute the N and D triangles from cumulative data.
+        """
+        for ay in self.accident_years:
+            for idx, dy in enumerate(self.development_years):
+                current = self.X.get(ay, {}).get(dy)
+                if idx == 0:
+                    self.N[ay][dy] = current
+                    self.D[ay][dy] = None
+                else:
+                    prev_dy = self.development_years[idx - 1]
+                    prev = self.X.get(ay, {}).get(prev_dy)
+
+                    if current is None or prev is None:
+                        self.N[ay][dy] = None
+                        self.D[ay][dy] = None
+                    else:
+                        self.D[ay][dy] = prev - current
+                        self.N[ay][dy] = current - prev + self.D[ay][dy]
+
+    def get_N_triangle(self):
+        """Returns the N triangle (new claims)."""
+        return self.N
+
+    def get_D_triangle(self):
+        """Returns the D triangle (IBNER development)."""
+        return self.D
+
+    def get_IBNER_pattern(self):
+        """
+        Returns the average D (IBNER) pattern per development year.
+        :return: dict with development year as key and average IBNER as value
+        """
+        sums = {dy: 0.0 for dy in self.development_years}
+        counts = {dy: 0 for dy in self.development_years}
+
+        for ay in self.accident_years:
+            for dy in self.development_years:
+                val = self.D.get(ay, {}).get(dy)
+                if val is not None:
+                    sums[dy] += val
+                    counts[dy] += 1
+
+        return {dy: (sums[dy] / counts[dy]) if counts[dy] > 0 else None for dy in self.development_years}
