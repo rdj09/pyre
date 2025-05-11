@@ -6,6 +6,26 @@ from dataclasses import dataclass
 from pyre.claims.claims import ClaimYearType
 from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
 
+
+def xol_calculation(gross_amount: float, attachment: float, limit: float):
+    return max(min(gross_amount - attachment,limit),0)
+
+def qs_calculation(gross_amount:float, cession:float):
+    return max(gross_amount * cession,0)
+
+def franchise_calculation(    gross_amount: float, attachment: float, limit: float):
+    if gross_amount > attachment:
+        return min(gross_amount,limit)
+    else: 
+        return 0.0
+
+def surplus_share_calculation(gross_amount: float, sum_insured:float, attachment:float):
+    if sum_insured <= attachment:
+        return 0.0  # No ceded amount if the sum insured is within the retention
+    surplus = sum_insured - attachment
+    share = surplus / sum_insured
+    return share * gross_amount
+
 class ContractType(Enum):
     QUOTA_SHARE = "Quota Share"
     EXCESS_OF_LOSS = "Excess of Loss"
@@ -68,7 +88,7 @@ class RIContractMetadata:
             ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,
             ClaimTriggerBasis.CMB:ClaimYearType.REPORTED_YEAR,
             ClaimTriggerBasis.LOD:ClaimYearType.ACCIDENT_YEAR
-        }
+        } # not sure this needs to be in the function as a generic mapping. Might be best placed outside as mapping to enums together.
 
         if self.trigger_basis in _claim_year_basis:
             return _claim_year_basis[self.trigger_basis]
@@ -81,14 +101,28 @@ class RIContractMetadata:
 
 
 class RIContract:
+
+    _layer_loss_calculation = {
+        ContractType.QUOTA_SHARE: qs_calculation,
+        ContractType.FRANCHISE_DEDUCTIBLE: franchise_calculation,
+        ContractType.EXCESS_OF_LOSS: xol_calculation,
+        ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
+        ContractType.SURPLUS_SHARE: surplus_share_calculation
+    } # not sure this needs to be in the function as a generic mapping. Might be best placed outside as mapping to enums together.
+
     def __init__(self, contract_meta_data: RIContractMetadata, layers:Sequence[RILayer]) -> None:
         self._contract_meta_data = contract_meta_data
         self._contract_layers = {layer.layer_id: layer for layer in layers}
+    
+    def loss_to_layer_function(self, gross_amount:float):
+        for layer_if, layer in self._contract_layers.items():
+            pass
+
+
+
 
     
 
-#TODO Franchise Deductible > inherits from xl contract except calculation of claim is different.
-#TODO  Should consider generalised class and protocol routine.
 
 
 # class QuotaShareContract:
