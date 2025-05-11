@@ -3,6 +3,8 @@ from datetime import date
 from typing import Optional, List, Sequence
 from enum import Enum, auto
 
+from pyre.exceptions.exceptions import ClaimsException
+
 class ClaimYearType(Enum):
     ACCIDENT_YEAR = auto()
     UNDERWRITING_YEAR = auto()
@@ -66,22 +68,27 @@ class ClaimsMetaData:
     contract_deductible: float = 0.0
     claim_in_xs_of_deductible: bool = False
     claim_year_basis: ClaimYearType = ClaimYearType.ACCIDENT_YEAR
-    loss_date: Optional[date] = None
-    policy_inception_date: Optional[date] = None
-    report_date: Optional[date] = None
+    loss_date: date = date(day=1,month=1,year= 1900)
+    policy_inception_date: date = date(day=1,month=1,year= 1900)
+    report_date: date = date(day=1,month=1,year= 1900)
     line_of_business: Optional[str] = None
     status: Optional[str] = "Open"
 
     @property
-    def modelling_year (self) -> int:
-        if self.claim_year_basis == ClaimYearType.ACCIDENT_YEAR:
-            return self.loss_date.year if self.loss_date else 0
-        elif self.claim_year_basis == ClaimYearType.UNDERWRITING_YEAR:
-            return self.policy_inception_date.year if self.policy_inception_date else 0
-        elif self.claim_year_basis == ClaimYearType.REPORTED_YEAR:
-            return self.report_date.year if self.report_date else 0
-        else:
-            return 0
+    def modelling_year (self) -> ClaimsException | int:
+        _modeling_basis_years={
+            ClaimYearType.ACCIDENT_YEAR: self.loss_date.year,
+            ClaimYearType.UNDERWRITING_YEAR: self.policy_inception_date.year,
+            ClaimYearType.REPORTED_YEAR: self.report_date.year
+        }
+        if self.claim_year_basis in _modeling_basis_years:
+            return _modeling_basis_years[self.claim_year_basis]
+        else: 
+            return ClaimsException(
+                claim_id=self.claim_id, 
+                message="Required date missing from data"
+                )
+
 
 class Claim:
     def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:

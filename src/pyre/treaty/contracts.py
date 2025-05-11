@@ -3,11 +3,13 @@ from enum import Enum
 from typing import List, Dict, Sequence
 from dataclasses import dataclass
 
-from pyre.claims.claims import ClaimYearType #TODO need to move this to a common ENUM module so no dependency on claims module
+from pyre.claims.claims import ClaimYearType
+from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
 
 class ContractType(Enum):
     QUOTA_SHARE = "Quota Share"
     EXCESS_OF_LOSS = "Excess of Loss"
+    FRANCHISE_DEDUCTIBLE = "Franchise Deductible"
     SURPLUS_SHARE = "Surplus Share"
     AGGREGATE_STOP_LOSS = "Aggregate Stop Loss"
 
@@ -49,7 +51,7 @@ class RILayer:
 
 @dataclass
 class RIContractMetadata:
-    contract_id: int
+    contract_id: str
     contract_description: str
     cedent_name: str 
     contract_type: ContractType
@@ -59,15 +61,23 @@ class RIContractMetadata:
     inception_date: date
     expiration_date: date
     fx_rates: Dict # {"GBP":1.0, "USD":1.25}
-    
+
     @property
-    def claim_year_basis(self) -> ClaimYearType:
-        if self.trigger_basis == ClaimTriggerBasis.RAD:
-            return ClaimYearType.UNDERWRITING_YEAR
-        elif self.trigger_basis == ClaimTriggerBasis.CMB:
-            return ClaimYearType.REPORTED_YEAR
+    def claim_year_basis(self) -> ContractException | ClaimYearType:
+        _claim_year_basis ={
+            ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,
+            ClaimTriggerBasis.CMB:ClaimYearType.REPORTED_YEAR,
+            ClaimTriggerBasis.LOD:ClaimYearType.ACCIDENT_YEAR
+        }
+
+        if self.trigger_basis in _claim_year_basis:
+            return _claim_year_basis[self.trigger_basis]
         else:
-            return ClaimYearType.ACCIDENT_YEAR # default is accident year basis.
+            raise ContractException(
+                contract_id= self.contract_id, 
+                message="Trigger basis missing in data"
+                )
+
 
 
 class RIContract:
