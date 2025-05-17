@@ -82,16 +82,16 @@ class RIContractMetadata:
     expiration_date: date
     fx_rates: Dict # {"GBP":1.0, "USD":1.25}
 
-    @property
-    def claim_year_basis(self) -> ContractException | ClaimYearType:
-        _claim_year_basis ={
-            ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,
-            ClaimTriggerBasis.CMB:ClaimYearType.REPORTED_YEAR,
-            ClaimTriggerBasis.LOD:ClaimYearType.ACCIDENT_YEAR
+    _claim_year_basis ={
+        ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,
+        ClaimTriggerBasis.CMB:ClaimYearType.REPORTED_YEAR,
+        ClaimTriggerBasis.LOD:ClaimYearType.ACCIDENT_YEAR
         } # not sure this needs to be in the function as a generic mapping. Might be best placed outside as mapping to enums together.
 
-        if self.trigger_basis in _claim_year_basis:
-            return _claim_year_basis[self.trigger_basis]
+    @property
+    def claim_year_basis(self) -> ContractException | ClaimYearType:
+        if self.trigger_basis in self._claim_year_basis:
+            return self._claim_year_basis[self.trigger_basis]
         else:
             raise ContractException(
                 contract_id= self.contract_id, 
@@ -108,7 +108,7 @@ class RIContract:
         ContractType.EXCESS_OF_LOSS: xol_calculation,
         ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
         ContractType.SURPLUS_SHARE: surplus_share_calculation
-    } # not sure this needs to be in the function as a generic mapping. Might be best placed outside as mapping to enums together.
+    }
 
     def __init__(self, contract_meta_data: RIContractMetadata, layers:Sequence[RILayer]) -> None:
         self._contract_meta_data = contract_meta_data
