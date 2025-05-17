@@ -52,6 +52,6 @@ class Exposure:
         return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
 
-class AggregateExposures:
+class ExposuresAggregator:
     def __init__(self) -> None:
         pass

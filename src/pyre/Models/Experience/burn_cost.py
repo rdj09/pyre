@@ -1,5 +1,6 @@
 from typing import List
 from ..models import Model
+from pyre.Models.Experience.experience_preparer import ExperienceModelData
 
 class ExperienceModel(Model):
     def __init__(self, data):
