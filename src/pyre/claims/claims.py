@@ -95,9 +95,11 @@ class Claim:
     def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:
         self._claims_meta_data = claims_meta_data
         self._claim_development_history = claims_development_history
-        self._uncapped_claim_development_history: Optional[ClaimDevelopmentHistory] = None
-        self._capped_claim_development_history: Optional[ClaimDevelopmentHistory] = None
-    
+        
+    @property
+    def claims_meta_data(self):
+        return self._claims_meta_data
+
     @property
     def uncapped_claim_development_history(self) -> ClaimDevelopmentHistory:
         if self._claims_meta_data.claim_in_xs_of_deductible:
@@ -116,151 +118,28 @@ class Claim:
         self._capped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, capped_paid, capped_incurred)
         return self._capped_claim_development_history
     
-    #TODO: exposed all underlying attributes of composing classes but need to review. Should be explicit about what's to be exposed.
-    def __getattr__(self, name: str) -> object:
-        return getattr(self._claims_meta_data, name) if hasattr(self._claims_meta_data, name) else getattr(self._claim_development_history, name) if hasattr(self._claim_development_history, name) else self.__getattribute__(name)
-    
     def __repr__(self) -> str:
         return (
             f"claim_id={self._claims_meta_data.claim_id},modelling_year={self._claims_meta_data.modelling_year},latest_incurred={self._claim_development_history.latest_incurred},latest_capped_incurred={self.capped_claim_development_history.latest_incurred}"
         )
 
-class ClaimAggregator:
-    def __init__(self, claims: List[Claim]):
-        """
-        Initialize the ClaimAggregator with a list of claims.
-
-        Args:
-            claims (List[Claim]): List of Claim objects to aggregate.
-        """
-        self._claims = claims
+@dataclass
+class Claims:
+    claims: List[Claim]
 
     @property
-    def claims(self):
-        return self._claims
-
-    @claims.setter
-    def claims(self, values):
-        self._claims = values
-
-    @property
-    def modelling_years(self) -> List:
+    def modelling_years(self) -> List[int]:
         """
         Returns a list of modelling years for all claims.
         """
-        return [claim.modelling_year for claim in self.claims]
-
+        years = {claim.modelling_year for claim in self.claims}
+        return sorted(years)
+    
     @property
-    def currencies(self) -> List:
+    def currencies(self):
         """
         Returns a list of currencies for all claims.
         """
-        return [claim.currency for claim in self.claims]
+        return {claim.currency for claim in self.claims}
 
-    def _calculate_mean(self, values: List[float]) -> None | float:
-        """
-        Calculate the mean of a list of values.
-
-        Args:
-            values (List[float]): List of numeric values.
-
-        Returns:
-            float: The mean value, or None if the list is empty.
-        """
-        if not values:
-            return None
-        return sum(values) / len(values)
-
-    def _filter_claims_by_status(self, claims: List[Claim], status: str) -> List[Claim]:
-        """
-        Filter claims by their status.
-
-        Args:
-            claims (List[Claim]): List of claims.
-            status (str): The status to filter by (e.g., "Open").
-
-        Returns:
-            List[Claim]: Filtered list of claims with the specified status.
-        """
-        return [claim for claim in claims if claim.status == status]
-
-    def aggregate_by_attribute(self, attributes: List[str], aggregator: Callable = sum) -> Dict:
-        """
-        Aggregate claims data by specified attributes.
-
-        Args:
-            attributes (List[str]): List of attributes to group claims by.
-            aggregator (Callable): Aggregation function (default is sum).
-
-        Returns:
-            Dict: Aggregated results grouped by the specified attributes.
-        """
-        grouped_claims = defaultdict(list)
-        for claim in self.claims:
-            key = tuple(getattr(claim, attr, None) for attr in attributes)
-            grouped_claims[key].append(claim)
-
-        aggregated_results = {}
-        for key, claims in grouped_claims.items():
-            open_claims = self._filter_claims_by_status(claims, "Open")
-            aggregated_results[key] = {
-                "total_paid": aggregator(claim.capped_claim_development_history.latest_paid for claim in claims),
-                "total_incurred": aggregator(claim.capped_claim_development_history.latest_incurred for claim in claims),
-                "number_of_claims": len(claims),
-                "mean_payment_duration": self._calculate_mean([claim.capped_claim_development_history.mean_payment_duration for claim in claims]),
-                "total_paid_open_claims": aggregator(claim.capped_claim_development_history.latest_paid for claim in open_claims),
-                "total_incurred_open_claims": aggregator(claim.capped_claim_development_history.latest_incurred for claim in open_claims),
-                "number_of_open_claims": len(open_claims),
-            #    "mean_payment_duration_open_claims": self._calculate_mean([claim.capped_claim_development_history.mean_payment_duration for claim in open_claims]) # needs refining
-            }
-        return aggregated_results
-
-
-
-
-# claims_meta_data = ClaimsMetaData(
-#     claim_id="123",
-#     currency="USD",
-#     contract_limit=100000.0,
-#     contract_deductible=10000.0,
-#     claim_in_xs_of_deductible=True
-# )
-
-# # Create a ClaimDevelopmentHistory object
-# claim_development_history = ClaimDevelopmentHistory(
-#     development_months=[1, 2, 3],
-#     cumulative_dev_paid=[1000.0, 2000.0, 3000.0],
-#     cumulative_dev_incurred=[1500.0, 2500.0, 3500.0]
-# )
-
-
-# # Create a Claim object
-# claim = Claim(claims_meta_data, claim_development_history)
-# print(claim)
-
-#print(claim.capped_claim_development_history.cumulative_reserved_amount)
-
-#print(claim.uncapped_claim_development_history.development_months) # Access development_months
-# Access uncapped_claim_development_history.latest_paid
-#print(claim.uncapped_claim_development_history.latest_incurred)  
-#print(claim.capped_claim_development_history.latest_incurred)  
-
-# claims_meta_data = ClaimsMetaData(
-#     claim_id="123",
-#     currency="USD",
-#     contract_limit=100.0,
-#     contract_deductible=5000.0,
-#     claim_in_xs_of_deductible=True
-# )
-
-# # Create a ClaimDevelopmentHistory object
-# claim_development_history = ClaimDevelopmentHistory(
-#     development_months=[1, 2, 3],
-#     cumulative_dev_paid=[1000.0, 2000.0, 3000.0],
-#     cumulative_dev_incurred=[1500.0, 2500.0, 3500.0]
-# )
-
-# claim = Claim(claims_meta_data, claim_development_history)
-
-
-
+    

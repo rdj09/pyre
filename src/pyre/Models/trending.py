@@ -1,7 +1,6 @@
 from typing import Protocol
-from pyre.claims.claims import Claim, ClaimDevelopmentHistory
-from pyre.claims.claims_aggregator import ClaimAggregator
-from pyre.exposures.exposures import ExposuresAggregator
+from pyre.claims.claims import Claims
+from pyre.exposures.exposures import Exposures
 
 class Trender(Protocol):
     def get_trend_factor(self, year: int) -> float:
@@ -10,39 +9,39 @@ class Trender(Protocol):
         ...
     
 class ExposureTrender(Trender):
-    def __init__(self, exposures: ExposuresAggregator) -> None:
+    def __init__(self, exposures) -> None:
         self._exposures = exposures
         
     @property
-    def exposures(self) -> ExposuresAggregator:
+    def exposures(self):
         return self._exposures
     
     @exposures.setter
-    def exposures(self, values: ExposuresAggregator):
+    def exposures(self, values):
         self._exposures = values
     
     @property
-    def trended_exposures(self) -> ExposuresAggregator:
+    def trended_exposures(self):
         #TODO apply trend factors to data
-        return ExposuresAggregator(self._exposures)
+        pass
 
 
 class ClaimTrender(Trender):
-    def __init__(self, claims: [Claim]) -> None:
+    def __init__(self, claims:Claims) -> None:
         self._claims = claims
 
     @property
-    def claims(self) -> ClaimDevelopmentHistory:
+    def claims(self):
         return self._claims
     
     @claims.setter
-    def claims(self, values: ClaimDevelopmentHistory):
+    def claims(self, values):
         self._claims = values 
         
-    @property
-    def trended_claims(self) -> ClaimDevelopmentHistory:
+    def trended_claims(self):
         #TODO #apply trend factors to the data
-        return ClaimDevelopmentHistory(self._claims)
+
+        return Claims(...) 
 
 
 #source citation: 
