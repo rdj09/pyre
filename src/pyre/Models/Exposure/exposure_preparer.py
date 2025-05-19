@@ -1,13 +1,16 @@
-from typing import Dict
+from copier import dataclass
 from pyre.Models.models import ModelData
-from pyre.Models.trending import ExposureTrender
+from pyre.Models.trending import trend_exposures
 from pyre.exposures.exposures import Exposures
 from pyre.treaty.contracts import RIContract
 
+@dataclass
 class ExposureModelData(ModelData):
-    def __init__(self, exposures: Exposures, exposure_trender: ExposureTrender, ri_contract: RIContract) -> None:
-        self._exposures = exposures
-        self._exposure_trended_values = exposure_trender.trended_values
-        self._ri_contract = ri_contract # don't need full class only key items
-        self.model_data : Dict 
-        
+    exposures: Exposures
+    ri_contract: RIContract
+    
+    @property
+    def trended_exposurer(self):
+        return trend_exposures(self.exposures, base_year=0, trend_factors={blah:blah})
+
+    

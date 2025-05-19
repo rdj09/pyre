@@ -1,29 +1,26 @@
-
-from typing import Dict
+from copier import dataclass
 from pyre.Models.models import ModelData
-from pyre.Models.trending import ClaimTrender, ExposureTrender
+from pyre.Models.trending import trend_claims
+from pyre.claims.claims import Claims
 from pyre.treaty.contracts import RIContract
 
+@dataclass
 class ExperienceModelData(ModelData):
-    def __init__(self, claim_trender: ClaimTrender, exposure_trender: ExposureTrender, ri_contract: RIContract) -> None:
-        self._claim_trender = claim_trender
-        self._exposure_trender = exposure_trender
-        self._ri_contract = ri_contract # don't need full class only key items
-
-    # def apply_treaty_terms(self) -> Any:
-    #     for claim in self._claims.claims:
-    #         for layer in self._ri_contract._contract_layers.values():
-    #             untrended_loss_to_layer = max(min(claim._capped_claim_development_history.latest_incurred - layer.occurrence_attachment, layer.occurrence_limit),0)
-    #             trended_loss_to_layer = max(min())
-    #     pass
+    claims: Claims
+    ri_contract: RIContract
+    
+    @property
+    def trended_claims(self):
+        return trend_claims(self.claims, base_year=0, trend_factors={blah:blah})
+    
+    @property
+    def contract_terms_claims(self):
+        #apply ri contract terms to trended claims
+        #self.ri_contract.loss_to_layer_function
+        return None
 
     @property
-    def model_data(self) -> Dict:
-        return {}
-        
-
-    @property
-    def data_summary(self) -> Dict:
-        #do something
-        #TODO combine untrended and trended data 
-        return {}
+    def aggreagte_data_for_model(self):
+        #counts, totals, averages
+        return None
+    
