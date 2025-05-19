@@ -1,4 +1,4 @@
-from copier import dataclass
+from dataclasses import dataclass
 from pyre.Models.models import ModelData
 from pyre.Models.trending import trend_claims
 from pyre.claims.claims import Claims
@@ -14,13 +14,12 @@ class ExperienceModelData(ModelData):
         return trend_claims(self.claims, base_year=0, trend_factors={blah:blah})
     
     @property
-    def contract_terms_claims(self):
+    def subject_contract_claims(self):
         #apply ri contract terms to trended claims
         #self.ri_contract.loss_to_layer_function
-        return None
+        return subject_contract_claims()
 
     @property
     def aggreagte_data_for_model(self):
         #counts, totals, averages
         return None
-    
