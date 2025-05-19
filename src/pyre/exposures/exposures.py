@@ -1,5 +1,5 @@
 from dataclasses import dataclass 
-from typing import Optional
+from typing import List, Optional
 from datetime import date
 from enum import Enum, auto
 
@@ -52,6 +52,6 @@ class Exposure:
         return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
 
+@dataclass
 class Exposures:
-    def __init__(self) -> None:
-        pass
+    exposures : List[Exposure]
