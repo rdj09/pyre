@@ -11,7 +11,15 @@ class ClaimAggregator:
         Args:
             claims (List[Claim]): List of Claim objects to aggregate.
         """
-        self.claims = claims
+        self._claims = claims
+
+    @property
+    def claims(self):
+        return self._claims
+
+    @claims.setter
+    def claims(self, values):
+        self._claims = values
 
     @property
     def modelling_years(self) -> List:

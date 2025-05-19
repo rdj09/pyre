@@ -1,5 +1,6 @@
 from typing import Protocol
-from pyre.claims.claims import ClaimDevelopmentHistory
+from pyre.claims.claims import Claim, ClaimDevelopmentHistory
+from pyre.claims.claims_aggregator import ClaimAggregator
 from pyre.exposures.exposures import ExposuresAggregator
 
 class Trender(Protocol):
@@ -27,7 +28,7 @@ class ExposureTrender(Trender):
 
 
 class ClaimTrender(Trender):
-    def __init__(self, claims: ClaimDevelopmentHistory) -> None:
+    def __init__(self, claims: [Claim]) -> None:
         self._claims = claims
 
     @property
