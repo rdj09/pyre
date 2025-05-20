@@ -99,7 +99,7 @@ class Claim:
     @property
     def claims_meta_data(self):
         return self._claims_meta_data
-
+    
     @property
     def uncapped_claim_development_history(self) -> ClaimDevelopmentHistory:
         if self._claims_meta_data.claim_in_xs_of_deductible:
@@ -116,30 +116,33 @@ class Claim:
         capped_paid = [min(paid, self._claims_meta_data.contract_limit) for paid in self.uncapped_claim_development_history.cumulative_dev_paid]
         capped_incurred = [min(incurred, self._claims_meta_data.contract_limit) for incurred in self.uncapped_claim_development_history.cumulative_dev_incurred]
         self._capped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, capped_paid, capped_incurred)
-        return self._capped_claim_development_history
+        return self._capped_claim_development_history 
+
     
     def __repr__(self) -> str:
         return (
             f"claim_id={self._claims_meta_data.claim_id},modelling_year={self._claims_meta_data.modelling_year},latest_incurred={self._claim_development_history.latest_incurred},latest_capped_incurred={self.capped_claim_development_history.latest_incurred}"
         )
+    
+
 
 @dataclass
 class Claims:
     claims: List[Claim]
 
     @property
-    def modelling_years(self) -> List[int]:
+    def modelling_years(self) -> Sequence:
         """
         Returns a list of modelling years for all claims.
         """
-        years = {claim.modelling_year for claim in self.claims}
+        years = {claim.claims_meta_data.modelling_year for claim in self.claims}
         return sorted(years)
     
     @property
-    def currencies(self):
+    def currencies(self) -> Sequence:
         """
         Returns a list of currencies for all claims.
         """
-        return {claim.currency for claim in self.claims}
+        return {claim.claims_meta_data.currency for claim in self.claims}
 
     
