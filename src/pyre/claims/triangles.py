@@ -27,15 +27,15 @@ class Triangle:
         """
         # Collect all unique modelling years and max development length
         origin_years = claims.modelling_years
-        dev_periods = list(range(...)) # TODO consider options
+        dev_periods = claims.development_periods
 
         # Build the triangle
         triangle = {year: {} for year in origin_years}
         for claim in claims:
-            year = claim.claims_meta_data.modelling_year
-            dev_values = getattr(claim.capped_claim_development_history, f"cumulative_dev_{value_type}")
-            for i, val in enumerate(dev_values):
-                triangle[year][i] = val
+            #TODO aggregation 
+            # claim.capped_claim_development_history.cumulative_dev_paid # paid
+            # claim.capped_claim_development_history.cumulative_dev_incurred # incurred
+            ... #TODO aggregation of claims data by modelling years
 
         return cls(triangle=triangle, origin_years=origin_years, dev_periods=dev_periods)
     

@@ -146,6 +146,14 @@ class Claims:
         """
         years = {claim.claims_meta_data.modelling_year for claim in self.claims}
         return sorted(years)
+
+    @property
+    def development_periods(self) -> List:
+        """
+        Returns a list of modelling years for all claims.
+        """
+        dev_periods = {claim.capped_claim_development_history.development_months for claim in self.claims}
+        return sorted(dev_periods)
     
     @property
     def currencies(self) -> Set:
