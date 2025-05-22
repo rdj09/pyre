@@ -8,7 +8,6 @@ class Simulation:
     def run(self)-> None:
         pass
 
-    
     def output(self) -> None:
         pass
 
