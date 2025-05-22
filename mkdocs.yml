@@ -11,6 +11,6 @@ plugins:
         # See: https://mkdocstrings.github.io/python/usage/
         python:
           options:
-            docstring_style: google
+            docstring_style: sphinx
 markdown_extensions:
   - admonition
