@@ -1,4 +1,5 @@
 from dataclasses import dataclass 
+import operator
 from typing import List, Optional
 from datetime import date
 from enum import Enum, auto
@@ -52,6 +53,32 @@ class Exposure:
         return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
 
-@dataclass
+
 class Exposures:
-    exposures : List[Exposure]
+    def __init__(self, exposures: List[Exposure])
+        self._exposures = exposures
+
+    @property
+    def exposures(self):
+        return self._exposures
+    
+    @exposures.setter
+    def exposures(self, list_of_exposure_classes:list[Exposure]):
+        self._exposures = list_of_exposure_classes
+
+    def append(self, exposure:Exposure):
+        self._exposures.append(exposure)
+    
+    def __getitem__(self, key):
+        if isinstance(key,slice):
+            cls = type(self)
+            return cls(self._exposures[key])
+        index = operator.index(key)
+        return self._exposures[index]
+
+    def __iter__(self):
+        return iter(self._exposures)
+    
+    def __len__(self):
+        return len(self._exposures)
+
