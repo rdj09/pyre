@@ -2,7 +2,8 @@
 
 # Reference
 
-::: pyre.claims.triangles.TriangleExporter
+
+::: pyre.claims.claims
 
 !!! note
 
