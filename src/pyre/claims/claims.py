@@ -7,12 +7,12 @@ from enum import Enum, auto
 from pyre.exceptions.exceptions import ClaimsException
 
 class ClaimYearType(Enum):
-    """
-    Enumeration of possible claim year bases used for actuarial analysis.
+    """Enumeration of claim year types used in insurance data analysis.
+
     Attributes:
-        ACCIDENT_YEAR: The year in which the loss event occurred.
-        UNDERWRITING_YEAR: The year in which the insurance policy incepted.
-        REPORTED_YEAR: The year in which the claim was reported.
+        ACCIDENT_YEAR: Represents the year in which the insured event (accident) occurred.
+        UNDERWRITING_YEAR: Represents the year in which the insurance policy was underwritten or issued.
+        REPORTED_YEAR: Represents the year in which the claim was reported to the insurer.
     """
     ACCIDENT_YEAR = auto()
     UNDERWRITING_YEAR = auto()
@@ -20,28 +20,27 @@ class ClaimYearType(Enum):
 
 @dataclass
 class ClaimDevelopmentHistory:
-    """
-    Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.
+    """Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.
+    
     Attributes:
-        development_months (Sequence[int]): The sequence of development months for the claim.
-        cumulative_dev_paid (Sequence[float]): The cumulative paid amounts at each development month.
-        cumulative_dev_incurred (Sequence[float]): The cumulative incurred amounts at each development month.
+        development_months (Sequence[int]): List of development months corresponding to each data point.
+        cumulative_dev_paid (Sequence[float]): Cumulative paid amounts at each development month.
+        cumulative_dev_incurred (Sequence[float]): Cumulative incurred amounts at each development month.
+    
     Properties:
-        cumulative_reserved_amount (list[float]): The list of reserved amounts (incurred minus paid) at each development month.
-        latest_paid (float): The latest cumulative paid amount, or 0.0 if no data.
-        latest_incurred (float): The latest cumulative incurred amount, or 0.0 if no data.
-        latest_reserved_amount (float): The latest reserved amount (incurred minus paid), or 0.0 if no data.
-        latest_development_month (int): The latest development month, or 0 if no data.
-        incremental_dev_incurred (List[float]): The incremental incurred amounts at each development month.
-        incremental_dev_paid (List[float]): The incremental paid amounts at each development month.
-        mean_payment_duration (Optional[float]): The mean payment duration, calculated as the time-weighted average of incremental paid amounts, or None if no payments.
+        cumulative_reserved_amount (list[float]): List of reserved amounts (incurred minus paid) at each development month.
+        latest_paid (float): Most recent cumulative paid amount, or 0.0 if no data.
+        latest_incurred (float): Most recent cumulative incurred amount, or 0.0 if no data.
+        latest_reserved_amount (float): Most recent reserved amount (incurred minus paid), or 0.0 if no data.
+        latest_development_month (int): Most recent development month, or 0 if no data.
+        incremental_dev_incurred (List[float]): List of incremental incurred amounts at each development month.
+        incremental_dev_paid (List[float]): List of incremental paid amounts at each development month.
+        mean_payment_duration (Optional[float]): Weighted average development month of payments, or None if no payments.
+    
     Methods:
         incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
-            Computes the incremental development amounts from a sequence of cumulative values.
-    Raises:
-        ValueError: If the lengths of cumulative_dev_incurred and cumulative_dev_paid do not match when calculating reserved amounts.
+            Converts a sequence of cumulative values into incremental values.
     """
-
     development_months: Sequence[int] = field(default_factory=list)
     cumulative_dev_paid: Sequence[float] = field(default_factory=list)
     cumulative_dev_incurred: Sequence[float] = field(default_factory=list)
@@ -92,24 +91,24 @@ class ClaimDevelopmentHistory:
 
 @dataclass
 class ClaimsMetaData:
-    """
-    Represents metadata for an insurance claim, including key attributes such as claim ID, currency, contract terms, relevant dates, and status.
+    """Metadata for an insurance claim, including key dates, financial limits, and classification details.
+    
     Attributes:
         claim_id (str): Unique identifier for the claim.
         currency (str): Currency code for the claim amounts.
         contract_limit (float): Maximum limit of the insurance contract. Defaults to 0.0.
         contract_deductible (float): Deductible amount for the contract. Defaults to 0.0.
         claim_in_xs_of_deductible (bool): Indicates if the claim is in excess of the deductible. Defaults to False.
-        claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, or reported year).
-        loss_date (date): Date of loss occurrence. Defaults to January 1, 1900.
-        policy_inception_date (date): Policy inception date. Defaults to January 1, 1900.
-        report_date (date): Date the claim was reported. Defaults to January 1, 1900.
+        claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, reported). Defaults to ClaimYearType.ACCIDENT_YEAR.
+        loss_date (date): Date of loss occurrence. Defaults to 1900-01-01.
+        policy_inception_date (date): Policy inception date. Defaults to 1900-01-01.
+        report_date (date): Date the claim was reported. Defaults to 1900-01-01.
         line_of_business (Optional[str]): Line of business associated with the claim. Defaults to None.
         status (Optional[str]): Status of the claim (e.g., "Open", "Closed"). Defaults to "Open".
+    
     Properties:
-        modelling_year (int | ClaimsException): Returns the modelling year based on the claim_year_basis, or raises a ClaimsException if the required date is missing.
+        modelling_year (ClaimsException | int): Returns the modelling year based on the claim_year_basis, or raises ClaimsException if required date is missing.
     """
-
     claim_id: str
     currency: str
     contract_limit: float = 0.0
@@ -139,22 +138,29 @@ class ClaimsMetaData:
 
 
 class Claim:
-    """
-    Represents an insurance claim with associated metadata and development history, 
-    providing access to both capped and uncapped claim development values.
+    """Represents an insurance claim with associated metadata and development history.
+    
+    This class provides access to the claim's metadata, uncapped and capped development histories,
+    and a string representation for easy inspection. The uncapped and capped development histories
+    are calculated based on the contract deductible and limit specified in the claim's metadata.
+    
     Attributes:
-        _claims_meta_data (ClaimsMetaData): Metadata describing the claim, including deductible and limit information.
+        _claims_meta_data (ClaimsMetaData): Metadata associated with the claim, such as claim ID, deductible, and limit.
         _claim_development_history (ClaimDevelopmentHistory): The development history of the claim, including paid and incurred amounts over time.
+    
     Properties:
         claims_meta_data: Returns the claim's metadata.
-        uncapped_claim_development_history (ClaimDevelopmentHistory): Returns the claim development history after adjusting for deductible, but before applying the contract limit.
-        capped_claim_development_history (ClaimDevelopmentHistory): Returns the claim development history after applying both deductible and contract limit.
-    Methods:
-        __repr__(): Returns a string representation of the claim, including claim ID, modelling year, latest incurred, and latest capped incurred values.
-    Note:
-        The class assumes the existence of ClaimsMetaData and ClaimDevelopmentHistory classes with appropriate attributes and methods.
+        uncapped_claim_development_history: Returns the claim's development history after applying the deductible, but before applying the contract limit.
+        capped_claim_development_history: Returns the claim's development history after applying both the deductible and the contract limit.
+    
+    Args:
+        claims_meta_data (ClaimsMetaData): Metadata for the claim.
+        claims_development_history (ClaimDevelopmentHistory): Development history for the claim.
+    
+    Example:
+        >>> claim = Claim(meta_data, dev_history)
+        >>> print(claim.capped_claim_development_history)
     """
-
     def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:
         self._claims_meta_data = claims_meta_data
         self._claim_development_history = claims_development_history
@@ -190,25 +196,26 @@ class Claim:
 
 
 class Claims:
-    """
-    A container class for managing a collection of Claim objects.
-    The Claims class provides convenient accessors and utilities for handling
-    multiple Claim instances, including properties for extracting modelling years,
-    development periods, and currencies from the underlying claims. It also
-    supports list-like behaviors such as indexing, slicing, appending, and iteration.
+    """A container class for managing a collection of Claim objects.
+    
+    This class provides convenient accessors and methods for working with a list of claims,
+    including retrieving modelling years, development periods, and currencies represented in the claims.
+    It also supports list-like behaviors such as indexing, slicing, appending, and iteration.
+    
     Attributes:
         claims (list[Claim]): The list of Claim objects managed by this container.
+    
     Properties:
         modelling_years (List): Sorted list of unique modelling years across all claims.
-        development_periods (List): Sorted list of unique development periods across all claims.
-        currencies (Set): Set of unique currencies across all claims.
+        development_periods (List): Sorted list of unique development periods (in months) across all claims.
+        currencies (Set): Set of unique currencies represented in the claims.
+    
     Methods:
         append(claim: Claim): Appends a Claim object to the collection.
         __getitem__(key): Supports indexing and slicing to access claims.
         __iter__(): Returns an iterator over the claims.
         __len__(): Returns the number of claims in the collection.
     """
-
     def __init__(self, claims: list[Claim]) -> None:
         self._claims = claims
 
