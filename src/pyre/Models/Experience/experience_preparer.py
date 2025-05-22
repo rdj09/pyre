@@ -21,9 +21,6 @@ class ExperienceModelData(ModelData):
     @property
     def subject_contract_claims(self):
         # TODO ricontract class should carry the details of loss to layer functions. 
-        
-        for layer in self.ri_contract._contract_layers
-
         return None
 
     @property
