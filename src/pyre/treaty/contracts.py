@@ -1,7 +1,7 @@
 from datetime import date
 from enum import Enum
 from typing import List, Dict, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from pyre.claims.claims import ClaimYearType
 from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
@@ -60,6 +60,8 @@ class RILayer:
     number_of_reinstatements: int # unlimited 999 default need to build in logic elsewhere
     reinstatement_cost: Dict # {1:100%,2:125%,3:125%} unlimited = 0% cost
     cession: float = 1.0 # us for order and QS
+    inures_to_benefit_of: List = field(default_factory = list) # list of layers that layer inures to
+    interlocking_classes: List = field(default_factory= list) # subject classes for which interlcoking clause applies
 
     @property
     def written_line_premium(self) -> float:
