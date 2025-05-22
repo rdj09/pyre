@@ -325,20 +325,133 @@
     <div class="doc doc-contents ">
 
 
-        <p>Represents an insurance claim with associated metadata and development history, 
-providing access to both capped and uncapped claim development values.
-Attributes:
-    _claims_meta_data (ClaimsMetaData): Metadata describing the claim, including deductible and limit information.
-    _claim_development_history (ClaimDevelopmentHistory): The development history of the claim, including paid and incurred amounts over time.
-Properties:
-    claims_meta_data: Returns the claim's metadata.
-    uncapped_claim_development_history (ClaimDevelopmentHistory): Returns the claim development history after adjusting for deductible, but before applying the contract limit.
-    capped_claim_development_history (ClaimDevelopmentHistory): Returns the claim development history after applying both deductible and contract limit.
-Methods:
-    <strong>repr</strong>(): Returns a string representation of the claim, including claim ID, modelling year, latest incurred, and latest capped incurred values.
-Note:
-    The class assumes the existence of ClaimsMetaData and ClaimDevelopmentHistory classes with appropriate attributes and methods.</p>
+        <p>Represents an insurance claim with associated metadata and development history.</p>
+<p>This class provides access to the claim's metadata, uncapped and capped development histories,
+and a string representation for easy inspection. The uncapped and capped development histories
+are calculated based on the contract deductible and limit specified in the claim's metadata.</p>
 
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.Claim._claims_meta_data">_claims_meta_data</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ClaimsMetaData
+
+
+  
+      dataclass
+   (pyre.claims.claims.ClaimsMetaData)" href="#pyre.claims.claims.ClaimsMetaData">ClaimsMetaData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Metadata associated with the claim, such as claim ID, deductible, and limit.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.Claim._claim_development_history">_claim_development_history</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ClaimDevelopmentHistory
+
+
+  
+      dataclass
+   (pyre.claims.claims.ClaimDevelopmentHistory)" href="#pyre.claims.claims.ClaimDevelopmentHistory">ClaimDevelopmentHistory</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The development history of the claim, including paid and incurred amounts over time.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="properties" open>
+  <summary>Properties</summary>
+  <p>claims_meta_data: Returns the claim's metadata.
+uncapped_claim_development_history: Returns the claim's development history after applying the deductible, but before applying the contract limit.
+capped_claim_development_history: Returns the claim's development history after applying both the deductible and the contract limit.</p>
+</details>
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>claims_meta_data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ClaimsMetaData
+
+
+  
+      dataclass
+   (pyre.claims.claims.ClaimsMetaData)" href="#pyre.claims.claims.ClaimsMetaData">ClaimsMetaData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Metadata for the claim.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>claims_development_history</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ClaimDevelopmentHistory
+
+
+  
+      dataclass
+   (pyre.claims.claims.ClaimDevelopmentHistory)" href="#pyre.claims.claims.ClaimDevelopmentHistory">ClaimDevelopmentHistory</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Development history for the claim.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <blockquote>
+<blockquote>
+<blockquote>
+<p>claim = Claim(meta_data, dev_history)
+print(claim.capped_claim_development_history)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+</details>
 
 
 
@@ -347,7 +460,8 @@ Note:
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\claims\claims.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">141</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">140</span>
+<span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
 <span class="normal">144</span>
@@ -394,23 +508,36 @@ Note:
 <span class="normal">185</span>
 <span class="normal">186</span>
 <span class="normal">187</span>
-<span class="normal">188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Claim</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents an insurance claim with associated metadata and development history, </span>
-<span class="sd">    providing access to both capped and uncapped claim development values.</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Claim</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an insurance claim with associated metadata and development history.</span>
+
+<span class="sd">    This class provides access to the claim&#39;s metadata, uncapped and capped development histories,</span>
+<span class="sd">    and a string representation for easy inspection. The uncapped and capped development histories</span>
+<span class="sd">    are calculated based on the contract deductible and limit specified in the claim&#39;s metadata.</span>
+
 <span class="sd">    Attributes:</span>
-<span class="sd">        _claims_meta_data (ClaimsMetaData): Metadata describing the claim, including deductible and limit information.</span>
+<span class="sd">        _claims_meta_data (ClaimsMetaData): Metadata associated with the claim, such as claim ID, deductible, and limit.</span>
 <span class="sd">        _claim_development_history (ClaimDevelopmentHistory): The development history of the claim, including paid and incurred amounts over time.</span>
+
 <span class="sd">    Properties:</span>
 <span class="sd">        claims_meta_data: Returns the claim&#39;s metadata.</span>
-<span class="sd">        uncapped_claim_development_history (ClaimDevelopmentHistory): Returns the claim development history after adjusting for deductible, but before applying the contract limit.</span>
-<span class="sd">        capped_claim_development_history (ClaimDevelopmentHistory): Returns the claim development history after applying both deductible and contract limit.</span>
-<span class="sd">    Methods:</span>
-<span class="sd">        __repr__(): Returns a string representation of the claim, including claim ID, modelling year, latest incurred, and latest capped incurred values.</span>
-<span class="sd">    Note:</span>
-<span class="sd">        The class assumes the existence of ClaimsMetaData and ClaimDevelopmentHistory classes with appropriate attributes and methods.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">        uncapped_claim_development_history: Returns the claim&#39;s development history after applying the deductible, but before applying the contract limit.</span>
+<span class="sd">        capped_claim_development_history: Returns the claim&#39;s development history after applying both the deductible and the contract limit.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        claims_meta_data (ClaimsMetaData): Metadata for the claim.</span>
+<span class="sd">        claims_development_history (ClaimDevelopmentHistory): Development history for the claim.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; claim = Claim(meta_data, dev_history)</span>
+<span class="sd">        &gt;&gt;&gt; print(claim.capped_claim_development_history)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims_meta_data</span><span class="p">:</span> <span class="n">ClaimsMetaData</span><span class="p">,</span> <span class="n">claims_development_history</span><span class="p">:</span> <span class="n">ClaimDevelopmentHistory</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_claims_meta_data</span> <span class="o">=</span> <span class="n">claims_meta_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_claim_development_history</span> <span class="o">=</span> <span class="n">claims_development_history</span>
@@ -483,25 +610,88 @@ Note:
     <div class="doc doc-contents ">
 
 
-        <p>Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.
-Attributes:
-    development_months (Sequence[int]): The sequence of development months for the claim.
-    cumulative_dev_paid (Sequence[float]): The cumulative paid amounts at each development month.
-    cumulative_dev_incurred (Sequence[float]): The cumulative incurred amounts at each development month.
-Properties:
-    cumulative_reserved_amount (list[float]): The list of reserved amounts (incurred minus paid) at each development month.
-    latest_paid (float): The latest cumulative paid amount, or 0.0 if no data.
-    latest_incurred (float): The latest cumulative incurred amount, or 0.0 if no data.
-    latest_reserved_amount (float): The latest reserved amount (incurred minus paid), or 0.0 if no data.
-    latest_development_month (int): The latest development month, or 0 if no data.
-    incremental_dev_incurred (List[float]): The incremental incurred amounts at each development month.
-    incremental_dev_paid (List[float]): The incremental paid amounts at each development month.
-    mean_payment_duration (Optional[float]): The mean payment duration, calculated as the time-weighted average of incremental paid amounts, or None if no payments.
-Methods:
-    incremental_dev(cumulative_dev: Sequence[float]) -&gt; List[float]:
-        Computes the incremental development amounts from a sequence of cumulative values.
-Raises:
-    ValueError: If the lengths of cumulative_dev_incurred and cumulative_dev_paid do not match when calculating reserved amounts.</p>
+        <p>Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimDevelopmentHistory.development_months">development_months</span></code></td>
+            <td>
+                  <code><span title="typing.Sequence">Sequence</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of development months corresponding to each data point.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimDevelopmentHistory.cumulative_dev_paid">cumulative_dev_paid</span></code></td>
+            <td>
+                  <code><span title="typing.Sequence">Sequence</span>[<span title="float">float</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cumulative paid amounts at each development month.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimDevelopmentHistory.cumulative_dev_incurred">cumulative_dev_incurred</span></code></td>
+            <td>
+                  <code><span title="typing.Sequence">Sequence</span>[<span title="float">float</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Cumulative incurred amounts at each development month.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="properties" open>
+  <summary>Properties</summary>
+  <p>cumulative_reserved_amount (list[float]): List of reserved amounts (incurred minus paid) at each development month.
+latest_paid (float): Most recent cumulative paid amount, or 0.0 if no data.
+latest_incurred (float): Most recent cumulative incurred amount, or 0.0 if no data.
+latest_reserved_amount (float): Most recent reserved amount (incurred minus paid), or 0.0 if no data.
+latest_development_month (int): Most recent development month, or 0 if no data.
+incremental_dev_incurred (List[float]): List of incremental incurred amounts at each development month.
+incremental_dev_paid (List[float]): List of incremental paid amounts at each development month.
+mean_payment_duration (Optional[float]): Weighted average development month of payments, or None if no payments.</p>
+</details>
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><span title="pyre.claims.claims.ClaimDevelopmentHistory.incremental_dev">incremental_dev</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Sequence[float]) -&gt; List[float]:
+Converts a sequence of cumulative values into incremental values.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
 
 
 
@@ -580,31 +770,29 @@ Raises:
 <span class="normal">87</span>
 <span class="normal">88</span>
 <span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ClaimDevelopmentHistory</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.</span>
+
 <span class="sd">    Attributes:</span>
-<span class="sd">        development_months (Sequence[int]): The sequence of development months for the claim.</span>
-<span class="sd">        cumulative_dev_paid (Sequence[float]): The cumulative paid amounts at each development month.</span>
-<span class="sd">        cumulative_dev_incurred (Sequence[float]): The cumulative incurred amounts at each development month.</span>
+<span class="sd">        development_months (Sequence[int]): List of development months corresponding to each data point.</span>
+<span class="sd">        cumulative_dev_paid (Sequence[float]): Cumulative paid amounts at each development month.</span>
+<span class="sd">        cumulative_dev_incurred (Sequence[float]): Cumulative incurred amounts at each development month.</span>
+
 <span class="sd">    Properties:</span>
-<span class="sd">        cumulative_reserved_amount (list[float]): The list of reserved amounts (incurred minus paid) at each development month.</span>
-<span class="sd">        latest_paid (float): The latest cumulative paid amount, or 0.0 if no data.</span>
-<span class="sd">        latest_incurred (float): The latest cumulative incurred amount, or 0.0 if no data.</span>
-<span class="sd">        latest_reserved_amount (float): The latest reserved amount (incurred minus paid), or 0.0 if no data.</span>
-<span class="sd">        latest_development_month (int): The latest development month, or 0 if no data.</span>
-<span class="sd">        incremental_dev_incurred (List[float]): The incremental incurred amounts at each development month.</span>
-<span class="sd">        incremental_dev_paid (List[float]): The incremental paid amounts at each development month.</span>
-<span class="sd">        mean_payment_duration (Optional[float]): The mean payment duration, calculated as the time-weighted average of incremental paid amounts, or None if no payments.</span>
+<span class="sd">        cumulative_reserved_amount (list[float]): List of reserved amounts (incurred minus paid) at each development month.</span>
+<span class="sd">        latest_paid (float): Most recent cumulative paid amount, or 0.0 if no data.</span>
+<span class="sd">        latest_incurred (float): Most recent cumulative incurred amount, or 0.0 if no data.</span>
+<span class="sd">        latest_reserved_amount (float): Most recent reserved amount (incurred minus paid), or 0.0 if no data.</span>
+<span class="sd">        latest_development_month (int): Most recent development month, or 0 if no data.</span>
+<span class="sd">        incremental_dev_incurred (List[float]): List of incremental incurred amounts at each development month.</span>
+<span class="sd">        incremental_dev_paid (List[float]): List of incremental paid amounts at each development month.</span>
+<span class="sd">        mean_payment_duration (Optional[float]): Weighted average development month of payments, or None if no payments.</span>
+
 <span class="sd">    Methods:</span>
 <span class="sd">        incremental_dev(cumulative_dev: Sequence[float]) -&gt; List[float]:</span>
-<span class="sd">            Computes the incremental development amounts from a sequence of cumulative values.</span>
-<span class="sd">    Raises:</span>
-<span class="sd">        ValueError: If the lengths of cumulative_dev_incurred and cumulative_dev_paid do not match when calculating reserved amounts.</span>
+<span class="sd">            Converts a sequence of cumulative values into incremental values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">development_months</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">cumulative_dev_paid</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
     <span class="n">cumulative_dev_incurred</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
@@ -691,11 +879,51 @@ Raises:
               Bases: <code><span title="enum.Enum">Enum</span></code></p>
 
 
-        <p>Enumeration of possible claim year bases used for actuarial analysis.
-Attributes:
-    ACCIDENT_YEAR: The year in which the loss event occurred.
-    UNDERWRITING_YEAR: The year in which the insurance policy incepted.
-    REPORTED_YEAR: The year in which the claim was reported.</p>
+        <p>Enumeration of claim year types used in insurance data analysis.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimYearType.ACCIDENT_YEAR">ACCIDENT_YEAR</span></code></td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Represents the year in which the insured event (accident) occurred.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimYearType.UNDERWRITING_YEAR">UNDERWRITING_YEAR</span></code></td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Represents the year in which the insurance policy was underwritten or issued.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimYearType.REPORTED_YEAR">REPORTED_YEAR</span></code></td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Represents the year in which the claim was reported to the insurer.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
 
 
@@ -716,12 +944,12 @@ Attributes:
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ClaimYearType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Enumeration of possible claim year bases used for actuarial analysis.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration of claim year types used in insurance data analysis.</span>
+
 <span class="sd">    Attributes:</span>
-<span class="sd">        ACCIDENT_YEAR: The year in which the loss event occurred.</span>
-<span class="sd">        UNDERWRITING_YEAR: The year in which the insurance policy incepted.</span>
-<span class="sd">        REPORTED_YEAR: The year in which the claim was reported.</span>
+<span class="sd">        ACCIDENT_YEAR: Represents the year in which the insured event (accident) occurred.</span>
+<span class="sd">        UNDERWRITING_YEAR: Represents the year in which the insurance policy was underwritten or issued.</span>
+<span class="sd">        REPORTED_YEAR: Represents the year in which the claim was reported to the insurer.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ACCIDENT_YEAR</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="n">UNDERWRITING_YEAR</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
@@ -763,22 +991,87 @@ Attributes:
     <div class="doc doc-contents ">
 
 
-        <p>A container class for managing a collection of Claim objects.
-The Claims class provides convenient accessors and utilities for handling
-multiple Claim instances, including properties for extracting modelling years,
-development periods, and currencies from the underlying claims. It also
-supports list-like behaviors such as indexing, slicing, appending, and iteration.
-Attributes:
-    claims (list[Claim]): The list of Claim objects managed by this container.
-Properties:
-    modelling_years (List): Sorted list of unique modelling years across all claims.
-    development_periods (List): Sorted list of unique development periods across all claims.
-    currencies (Set): Set of unique currencies across all claims.
-Methods:
-    append(claim: Claim): Appends a Claim object to the collection.
-    <strong>getitem</strong>(key): Supports indexing and slicing to access claims.
-    <strong>iter</strong>(): Returns an iterator over the claims.
-    <strong>len</strong>(): Returns the number of claims in the collection.</p>
+        <p>A container class for managing a collection of Claim objects.</p>
+<p>This class provides convenient accessors and methods for working with a list of claims,
+including retrieving modelling years, development periods, and currencies represented in the claims.
+It also supports list-like behaviors such as indexing, slicing, appending, and iteration.</p>
+
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.Claims.claims">claims</span></code></td>
+            <td>
+                  <code><span title="list">list</span>[<a class="autorefs autorefs-internal" title="Claim (pyre.claims.claims.Claim)" href="#pyre.claims.claims.Claim">Claim</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The list of Claim objects managed by this container.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="properties" open>
+  <summary>Properties</summary>
+  <p>modelling_years (List): Sorted list of unique modelling years across all claims.
+development_periods (List): Sorted list of unique development periods (in months) across all claims.
+currencies (Set): Set of unique currencies represented in the claims.</p>
+</details>
+
+<p><span class="doc-section-title">Methods:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+            <tr class="doc-section-item">
+              <td><code><span title="pyre.claims.claims.Claims.append">append</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Claim): Appends a Claim object to the collection.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="pyre.claims.claims.Claims.__getitem__">__getitem__</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Supports indexing and slicing to access claims.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="pyre.claims.claims.Claims.__iter__">__iter__</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Returns an iterator over the claims.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><span title="pyre.claims.claims.Claims.__len__">__len__</span></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>Returns the number of claims in the collection.</p>
+                </div>
+              </td>
+            </tr>
+      </tbody>
+    </table>
 
 
 
@@ -788,13 +1081,7 @@ Methods:
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\claims\claims.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
 <span class="normal">201</span>
@@ -856,26 +1143,34 @@ Methods:
 <span class="normal">257</span>
 <span class="normal">258</span>
 <span class="normal">259</span>
-<span class="normal">260</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Claims</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    A container class for managing a collection of Claim objects.</span>
-<span class="sd">    The Claims class provides convenient accessors and utilities for handling</span>
-<span class="sd">    multiple Claim instances, including properties for extracting modelling years,</span>
-<span class="sd">    development periods, and currencies from the underlying claims. It also</span>
-<span class="sd">    supports list-like behaviors such as indexing, slicing, appending, and iteration.</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Claims</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A container class for managing a collection of Claim objects.</span>
+
+<span class="sd">    This class provides convenient accessors and methods for working with a list of claims,</span>
+<span class="sd">    including retrieving modelling years, development periods, and currencies represented in the claims.</span>
+<span class="sd">    It also supports list-like behaviors such as indexing, slicing, appending, and iteration.</span>
+
 <span class="sd">    Attributes:</span>
 <span class="sd">        claims (list[Claim]): The list of Claim objects managed by this container.</span>
+
 <span class="sd">    Properties:</span>
 <span class="sd">        modelling_years (List): Sorted list of unique modelling years across all claims.</span>
-<span class="sd">        development_periods (List): Sorted list of unique development periods across all claims.</span>
-<span class="sd">        currencies (Set): Set of unique currencies across all claims.</span>
+<span class="sd">        development_periods (List): Sorted list of unique development periods (in months) across all claims.</span>
+<span class="sd">        currencies (Set): Set of unique currencies represented in the claims.</span>
+
 <span class="sd">    Methods:</span>
 <span class="sd">        append(claim: Claim): Appends a Claim object to the collection.</span>
 <span class="sd">        __getitem__(key): Supports indexing and slicing to access claims.</span>
 <span class="sd">        __iter__(): Returns an iterator over the claims.</span>
 <span class="sd">        __len__(): Returns the number of claims in the collection.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claims</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Claim</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_claims</span> <span class="o">=</span> <span class="n">claims</span>
 
@@ -1032,22 +1327,148 @@ Methods:
     <div class="doc doc-contents ">
 
 
-        <p>Represents metadata for an insurance claim, including key attributes such as claim ID, currency, contract terms, relevant dates, and status.
-Attributes:
-    claim_id (str): Unique identifier for the claim.
-    currency (str): Currency code for the claim amounts.
-    contract_limit (float): Maximum limit of the insurance contract. Defaults to 0.0.
-    contract_deductible (float): Deductible amount for the contract. Defaults to 0.0.
-    claim_in_xs_of_deductible (bool): Indicates if the claim is in excess of the deductible. Defaults to False.
-    claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, or reported year).
-    loss_date (date): Date of loss occurrence. Defaults to January 1, 1900.
-    policy_inception_date (date): Policy inception date. Defaults to January 1, 1900.
-    report_date (date): Date the claim was reported. Defaults to January 1, 1900.
-    line_of_business (Optional[str]): Line of business associated with the claim. Defaults to None.
-    status (Optional[str]): Status of the claim (e.g., "Open", "Closed"). Defaults to "Open".
-Properties:
-    modelling_year (int | ClaimsException): Returns the modelling year based on the claim_year_basis, or raises a ClaimsException if the required date is missing.</p>
+        <p>Metadata for an insurance claim, including key dates, financial limits, and classification details.</p>
 
+
+<p><span class="doc-section-title">Attributes:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.claim_id">claim_id</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique identifier for the claim.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.currency">currency</span></code></td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Currency code for the claim amounts.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.contract_limit">contract_limit</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Maximum limit of the insurance contract. Defaults to 0.0.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.contract_deductible">contract_deductible</span></code></td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Deductible amount for the contract. Defaults to 0.0.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.claim_in_xs_of_deductible">claim_in_xs_of_deductible</span></code></td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Indicates if the claim is in excess of the deductible. Defaults to False.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.claim_year_basis">claim_year_basis</span></code></td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ClaimYearType (pyre.claims.claims.ClaimYearType)" href="#pyre.claims.claims.ClaimYearType">ClaimYearType</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Basis for determining the claim year (e.g., accident, underwriting, reported). Defaults to ClaimYearType.ACCIDENT_YEAR.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.loss_date">loss_date</span></code></td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Date of loss occurrence. Defaults to 1900-01-01.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.policy_inception_date">policy_inception_date</span></code></td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Policy inception date. Defaults to 1900-01-01.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.report_date">report_date</span></code></td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Date the claim was reported. Defaults to 1900-01-01.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.line_of_business">line_of_business</span></code></td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Line of business associated with the claim. Defaults to None.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="pyre.claims.claims.ClaimsMetaData.status">status</span></code></td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Status of the claim (e.g., "Open", "Closed"). Defaults to "Open".</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="properties" open>
+  <summary>Properties</summary>
+  <p>modelling_year (ClaimsException | int): Returns the modelling year based on the claim_year_basis, or raises ClaimsException if required date is missing.</p>
+</details>
 
 
 
@@ -1056,7 +1477,8 @@ Properties:
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\claims\claims.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 92</span>
+<span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
 <span class="normal"> 96</span>
@@ -1100,27 +1522,26 @@ Properties:
 <span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ClaimsMetaData</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represents metadata for an insurance claim, including key attributes such as claim ID, currency, contract terms, relevant dates, and status.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metadata for an insurance claim, including key dates, financial limits, and classification details.</span>
+
 <span class="sd">    Attributes:</span>
 <span class="sd">        claim_id (str): Unique identifier for the claim.</span>
 <span class="sd">        currency (str): Currency code for the claim amounts.</span>
 <span class="sd">        contract_limit (float): Maximum limit of the insurance contract. Defaults to 0.0.</span>
 <span class="sd">        contract_deductible (float): Deductible amount for the contract. Defaults to 0.0.</span>
 <span class="sd">        claim_in_xs_of_deductible (bool): Indicates if the claim is in excess of the deductible. Defaults to False.</span>
-<span class="sd">        claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, or reported year).</span>
-<span class="sd">        loss_date (date): Date of loss occurrence. Defaults to January 1, 1900.</span>
-<span class="sd">        policy_inception_date (date): Policy inception date. Defaults to January 1, 1900.</span>
-<span class="sd">        report_date (date): Date the claim was reported. Defaults to January 1, 1900.</span>
+<span class="sd">        claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, reported). Defaults to ClaimYearType.ACCIDENT_YEAR.</span>
+<span class="sd">        loss_date (date): Date of loss occurrence. Defaults to 1900-01-01.</span>
+<span class="sd">        policy_inception_date (date): Policy inception date. Defaults to 1900-01-01.</span>
+<span class="sd">        report_date (date): Date the claim was reported. Defaults to 1900-01-01.</span>
 <span class="sd">        line_of_business (Optional[str]): Line of business associated with the claim. Defaults to None.</span>
 <span class="sd">        status (Optional[str]): Status of the claim (e.g., &quot;Open&quot;, &quot;Closed&quot;). Defaults to &quot;Open&quot;.</span>
-<span class="sd">    Properties:</span>
-<span class="sd">        modelling_year (int | ClaimsException): Returns the modelling year based on the claim_year_basis, or raises a ClaimsException if the required date is missing.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
+<span class="sd">    Properties:</span>
+<span class="sd">        modelling_year (ClaimsException | int): Returns the modelling year based on the claim_year_basis, or raises ClaimsException if required date is missing.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">claim_id</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">contract_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
