@@ -2,9 +2,8 @@
 
 # Reference
 
-::: pyre.claims.claim
-
 ::: pyre.claims.claims
+
 
 !!! note
 
