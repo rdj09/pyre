@@ -98,8 +98,6 @@ class RIContractMetadata:
                 message="Trigger basis missing in data"
                 )
 
-
-
 class RIContract:
 
     _layer_loss_calculation = {
@@ -114,10 +112,19 @@ class RIContract:
         self._contract_meta_data = contract_meta_data
         self._contract_layers = {layer.layer_id: layer for layer in layers}
     
-    def loss_to_layer_function(self, gross_amount:float):
-        for layer_if, layer in self._contract_layers.items():
-            pass
+    @property
+    def contract_meta_data(self):
+        return self._contract_meta_data
 
+    def loss_to_layer_function(self):
+        """
+        Returns a list of tuples: (RILayer, layer_function) for each layer in the contract.
+        """
+        layer_func_list = []
+        for layer in self._contract_layers.values():
+            func = self._layer_loss_calculation.get(layer.layer_type)
+            layer_func_list.append((layer, func))
+        return layer_func_list
 
 
 

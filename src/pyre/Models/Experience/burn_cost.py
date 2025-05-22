@@ -3,9 +3,17 @@ from ..models import Model
 from pyre.Models.Experience.experience_preparer import ExperienceModelData
 
 class ExperienceModel(Model):
-    def __init__(self, data):
-        self.data = data
 
+    def __init__(self, model_data:ExperienceModelData):
+        self._data = model_data
+
+    @property
+    def data(self):
+        return self._data
+    
+    @data.setter
+    def data(self, model_data:ExperienceModelData):
+        self._data = model_data
 
 
 def chainladder_method(data: float, development_factor: float) -> float:
