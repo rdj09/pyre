@@ -52,10 +52,8 @@ class Exposure:
     def earned_exposure_value(self, analysis_date: date) -> float:
         return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
-
-
 class Exposures:
-    def __init__(self, exposures: List[Exposure])
+    def __init__(self, exposures: List[Exposure])->None:
         self._exposures = exposures
 
     @property

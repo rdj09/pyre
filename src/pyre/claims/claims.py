@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date
 import operator
-from typing import Optional, List, Sequence
+from typing import Callable, Optional, List, Sequence, Set
 from enum import Enum, auto
 
 from pyre.exceptions.exceptions import ClaimsException
@@ -139,12 +139,8 @@ class Claims:
     def claims(self, list_of_claim_classes:list[Claim]):
         self._claims = list_of_claim_classes
 
-    
-    def append(self, claim: Claim):
-        self._claims.append(claim)
-
     @property
-    def modelling_years(self) -> Sequence:
+    def modelling_years(self) -> List:
         """
         Returns a list of modelling years for all claims.
         """
@@ -152,11 +148,14 @@ class Claims:
         return sorted(years)
     
     @property
-    def currencies(self) -> Sequence:
+    def currencies(self) -> Set:
         """
         Returns a list of currencies for all claims.
         """
         return {claim.claims_meta_data.currency for claim in self.claims}
+
+    def append(self, claim: Claim):
+        self._claims.append(claim)
     
     def __getitem__(self, key):
         if isinstance(key,slice):
