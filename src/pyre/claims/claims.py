@@ -1,20 +1,49 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Optional, List, Sequence
+import operator
+from typing import Any, Optional, List, Sequence, Set
 from enum import Enum, auto
 
 from pyre.exceptions.exceptions import ClaimsException
 
 class ClaimYearType(Enum):
+    """Enumeration of claim year types used in insurance data analysis.
+
+    Attributes:
+        ACCIDENT_YEAR: Represents the year in which the insured event (accident) occurred.
+        UNDERWRITING_YEAR: Represents the year in which the insurance policy was underwritten or issued.
+        REPORTED_YEAR: Represents the year in which the claim was reported to the insurer.
+    """
     ACCIDENT_YEAR = auto()
     UNDERWRITING_YEAR = auto()
     REPORTED_YEAR = auto()
 
 @dataclass
 class ClaimDevelopmentHistory:
-    development_months: Sequence[int] = field(default_factory=list)
-    cumulative_dev_paid: Sequence[float] = field(default_factory=list)
-    cumulative_dev_incurred: Sequence[float] = field(default_factory=list)
+    """Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.
+    
+    Attributes:
+        development_months (Sequence[int]): List of development months corresponding to each data point.
+        cumulative_dev_paid (Sequence[float]): Cumulative paid amounts at each development month.
+        cumulative_dev_incurred (Sequence[float]): Cumulative incurred amounts at each development month.
+    
+    Properties:
+        cumulative_reserved_amount (list[float]): List of reserved amounts (incurred minus paid) at each development month.
+        latest_paid (float): Most recent cumulative paid amount, or 0.0 if no data.
+        latest_incurred (float): Most recent cumulative incurred amount, or 0.0 if no data.
+        latest_reserved_amount (float): Most recent reserved amount (incurred minus paid), or 0.0 if no data.
+        latest_development_month (int): Most recent development month, or 0 if no data.
+        incremental_dev_incurred (List[float]): List of incremental incurred amounts at each development month.
+        incremental_dev_paid (List[float]): List of incremental paid amounts at each development month.
+        mean_payment_duration (Optional[float]): Weighted average development month of payments, or None if no payments.
+    
+    Methods:
+        incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
+            Converts a sequence of cumulative values into incremental values.
+    """
+    development_months: Any | Sequence[int] = field(default_factory=list)
+    cumulative_dev_paid: Any | Sequence[float] = field(default_factory=list)
+    cumulative_dev_incurred: Any |Sequence[float] = field(default_factory=list)
 
     @property
     def cumulative_reserved_amount(self) -> list[float]:
@@ -62,6 +91,24 @@ class ClaimDevelopmentHistory:
 
 @dataclass
 class ClaimsMetaData:
+    """Metadata for an insurance claim, including key dates, financial limits, and classification details.
+    
+    Attributes:
+        claim_id (str): Unique identifier for the claim.
+        currency (str): Currency code for the claim amounts.
+        contract_limit (float): Maximum limit of the insurance contract. Defaults to 0.0.
+        contract_deductible (float): Deductible amount for the contract. Defaults to 0.0.
+        claim_in_xs_of_deductible (bool): Indicates if the claim is in excess of the deductible. Defaults to False.
+        claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, reported). Defaults to ClaimYearType.ACCIDENT_YEAR.
+        loss_date (date): Date of loss occurrence. Defaults to 1900-01-01.
+        policy_inception_date (date): Policy inception date. Defaults to 1900-01-01.
+        report_date (date): Date the claim was reported. Defaults to 1900-01-01.
+        line_of_business (Optional[str]): Line of business associated with the claim. Defaults to None.
+        status (Optional[str]): Status of the claim (e.g., "Open", "Closed"). Defaults to "Open".
+    
+    Properties:
+        modelling_year (ClaimsException | int): Returns the modelling year based on the claim_year_basis, or raises ClaimsException if required date is missing.
+    """
     claim_id: str
     currency: str
     contract_limit: float = 0.0
@@ -91,11 +138,36 @@ class ClaimsMetaData:
 
 
 class Claim:
+    """Represents an insurance claim with associated metadata and development history.
+    
+    This class provides access to the claim's metadata, uncapped and capped development histories,
+    and a string representation for easy inspection. The uncapped and capped development histories
+    are calculated based on the contract deductible and limit specified in the claim's metadata.
+    
+    Attributes:
+        _claims_meta_data (ClaimsMetaData): Metadata associated with the claim, such as claim ID, deductible, and limit.
+        _claim_development_history (ClaimDevelopmentHistory): The development history of the claim, including paid and incurred amounts over time.
+    
+    Properties:
+        claims_meta_data: Returns the claim's metadata.
+        uncapped_claim_development_history: Returns the claim's development history after applying the deductible, but before applying the contract limit.
+        capped_claim_development_history: Returns the claim's development history after applying both the deductible and the contract limit.
+    
+    Args:
+        claims_meta_data (ClaimsMetaData): Metadata for the claim.
+        claims_development_history (ClaimDevelopmentHistory): Development history for the claim.
+    
+    Example:
+        >>> claim = Claim(meta_data, dev_history)
+        >>> print(claim.capped_claim_development_history)
+    """
     def __init__(self, claims_meta_data: ClaimsMetaData, claims_development_history: ClaimDevelopmentHistory) -> None:
         self._claims_meta_data = claims_meta_data
         self._claim_development_history = claims_development_history
-        self._uncapped_claim_development_history: Optional[ClaimDevelopmentHistory] = None
-        self._capped_claim_development_history: Optional[ClaimDevelopmentHistory] = None
+        
+    @property
+    def claims_meta_data(self):
+        return self._claims_meta_data
     
     @property
     def uncapped_claim_development_history(self) -> ClaimDevelopmentHistory:
@@ -113,64 +185,85 @@ class Claim:
         capped_paid = [min(paid, self._claims_meta_data.contract_limit) for paid in self.uncapped_claim_development_history.cumulative_dev_paid]
         capped_incurred = [min(incurred, self._claims_meta_data.contract_limit) for incurred in self.uncapped_claim_development_history.cumulative_dev_incurred]
         self._capped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, capped_paid, capped_incurred)
-        return self._capped_claim_development_history
-    
-    #TODO: exposed all underlying attributes of composing classes but need to review. Should be explicit about what's to be exposed.
-    def __getattr__(self, name: str) -> object:
-        return getattr(self._claims_meta_data, name) if hasattr(self._claims_meta_data, name) else getattr(self._claim_development_history, name) if hasattr(self._claim_development_history, name) else self.__getattribute__(name)
+        return self._capped_claim_development_history 
+
     
     def __repr__(self) -> str:
         return (
             f"claim_id={self._claims_meta_data.claim_id},modelling_year={self._claims_meta_data.modelling_year},latest_incurred={self._claim_development_history.latest_incurred},latest_capped_incurred={self.capped_claim_development_history.latest_incurred}"
         )
+    
 
 
+class Claims:
+    """A container class for managing a collection of Claim objects.
+    
+    This class provides convenient accessors and methods for working with a list of claims,
+    including retrieving modelling years, development periods, and currencies represented in the claims.
+    It also supports list-like behaviors such as indexing, slicing, appending, and iteration.
+    
+    Attributes:
+        claims (list[Claim]): The list of Claim objects managed by this container.
+    
+    Properties:
+        modelling_years (List): Sorted list of unique modelling years across all claims.
+        development_periods (List): Sorted list of unique development periods (in months) across all claims.
+        currencies (Set): Set of unique currencies represented in the claims.
+    
+    Methods:
+        append(claim: Claim): Appends a Claim object to the collection.
+        __getitem__(key): Supports indexing and slicing to access claims.
+        __iter__(): Returns an iterator over the claims.
+        __len__(): Returns the number of claims in the collection.
+    """
+    def __init__(self, claims: list[Claim]) -> None:
+        self._claims = claims
 
+    @property
+    def claims(self):
+        return self._claims
+    
+    @claims.setter
+    def claims(self, list_of_claim_classes:list[Claim]):
+        self._claims = list_of_claim_classes
 
+    @property
+    def modelling_years(self) -> List:
+        """
+        Returns a list of modelling years for all claims.
+        """
+        years = {claim.claims_meta_data.modelling_year for claim in self.claims}
+        return sorted(years)
 
-# claims_meta_data = ClaimsMetaData(
-#     claim_id="123",
-#     currency="USD",
-#     contract_limit=100000.0,
-#     contract_deductible=10000.0,
-#     claim_in_xs_of_deductible=True
-# )
+    @property
+    def development_periods(self) -> List:
+        """
+        Returns a list of modelling years for all claims.
+        """
+        dev_periods = {claim.capped_claim_development_history.development_months for claim in self.claims}
+        return sorted(dev_periods)
+    
+    @property
+    def currencies(self) -> Set:
+        """
+        Returns a list of currencies for all claims.
+        """
+        return {claim.claims_meta_data.currency for claim in self.claims}
 
-# # Create a ClaimDevelopmentHistory object
-# claim_development_history = ClaimDevelopmentHistory(
-#     development_months=[1, 2, 3],
-#     cumulative_dev_paid=[1000.0, 2000.0, 3000.0],
-#     cumulative_dev_incurred=[1500.0, 2500.0, 3500.0]
-# )
+    def append(self, claim: Claim):
+        self._claims.append(claim)
+    
+    def __getitem__(self, key):
+        if isinstance(key,slice):
+            cls = type(self)
+            return cls(self._claims[key])
+        index = operator.index(key)
+        return self._claims[index]
 
+    def __iter__(self):
+        return iter(self._claims)
+    
+    def __len__(self):
+        return len(self._claims)
 
-# # Create a Claim object
-# claim = Claim(claims_meta_data, claim_development_history)
-# print(claim)
-
-#print(claim.capped_claim_development_history.cumulative_reserved_amount)
-
-#print(claim.uncapped_claim_development_history.development_months) # Access development_months
-# Access uncapped_claim_development_history.latest_paid
-#print(claim.uncapped_claim_development_history.latest_incurred)  
-#print(claim.capped_claim_development_history.latest_incurred)  
-
-# claims_meta_data = ClaimsMetaData(
-#     claim_id="123",
-#     currency="USD",
-#     contract_limit=100.0,
-#     contract_deductible=5000.0,
-#     claim_in_xs_of_deductible=True
-# )
-
-# # Create a ClaimDevelopmentHistory object
-# claim_development_history = ClaimDevelopmentHistory(
-#     development_months=[1, 2, 3],
-#     cumulative_dev_paid=[1000.0, 2000.0, 3000.0],
-#     cumulative_dev_incurred=[1500.0, 2500.0, 3500.0]
-# )
-
-# claim = Claim(claims_meta_data, claim_development_history)
-
-
-
+    

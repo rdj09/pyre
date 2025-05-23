@@ -3,6 +3,8 @@ from ..models import Model
 from .mbbefd import mbbefd_curve
 from .riebesell import riebesell_curve
 from .mixed_exponential import mixed_exponential_curve
+from pyre.Models.Exposure.exposure_preparer import ExposureModelData
+
 
 class ExposureModel(Model):
     def __init__(self, data: Any):

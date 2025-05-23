@@ -5,4 +5,4 @@ src/pyre/claims/__pycache__/*
 src/pyre/exposures/__pycache__/*
 src/pyre/treaty/__pycache__/*   
 tests/__pycache__/*
-site/*
+site/

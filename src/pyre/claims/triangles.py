@@ -1,153 +1,108 @@
-from typing import List, Dict
-import pandas as pd
-from pyre.claims.claims_aggregator import ClaimAggregator 
+from typing import Dict, List, Optional
+from pyre.claims.claims import Claims
 
-class TriangleExporter:
-    """_summary_
-
-    Returns:
-        _type_: _description_
+class Triangle:
     """
-    @staticmethod
-    def export_paid(aggregates: List[AggregateClaims], cumulative: bool = False) -> pd.DataFrame:
-        """_summary_
+    Represents a triangle of claim values (e.g., paid or incurred) by origin (modelling) year and development period.
+    """
 
-        Args:
-            aggregates (List[AggregateClaims]): _description_
-            cumulative (bool, optional): _description_. Defaults to False.
-
-        Returns:
-            pd.DataFrame: _description_
+    def __init__(
+        self,
+        triangle: Optional[Dict[int, Dict[int, float]]] = None,
+        origin_years: Optional[List[int]] = None,
+        dev_periods: Optional[List[int]] = None,
+    ):
         """
-        data: Dict[int, Dict[int, float]] = {}
-
-        for agg in aggregates:
-            for month, paid in enumerate(agg.dev_paid):
-                if month not in data:
-                    data[month] = {}
-
-                if cumulative:
-                    cumulative_paid = sum(agg.dev_paid[:month + 1])
-                    data[month][agg.year] = cumulative_paid
-                else:
-                    data[month][agg.year] = paid
-
-        triangle_df = pd.DataFrame(data).fillna(0)
-
-        triangle_df = triangle_df.sort_index(axis=0)
-
-        return triangle_df
-
-    @staticmethod
-    def export_incurred(aggregates: List[AggregateClaims], cumulative: bool = False) -> pd.DataFrame:
-        """_summary_
-
-        Args:
-            aggregates (List[AggregateClaims]): _description_
-            cumulative (bool, optional): _description_. Defaults to False.
-
-        Returns:
-            pd.DataFrame: _description_
+        Initialize a Triangle directly or as an empty structure.
         """
-        data: Dict[int, Dict[int, float]] = {}
+        self.triangle = triangle if triangle is not None else {}
+        self.origin_years = origin_years if origin_years is not None else []
+        self.dev_periods = dev_periods if dev_periods is not None else []
 
-        for agg in aggregates:
-            for month, incurred in enumerate(agg.dev_incurred):
-                if month not in data:
-                    data[month] = {}
+    @classmethod
+    def from_claims(cls, claims: Claims, value_type: str = "incurred") -> "Triangle":
+        """
+        Construct a Triangle from a Claims object.
+        value_type: "incurred" or "paid"
+        """
+        # Collect all unique modelling years and max development length
+        origin_years = claims.modelling_years
+        dev_periods = claims.development_periods
 
-                if cumulative:
-                    cumulative_incurred = sum(agg.dev_incurred[:month + 1])
-                    data[month][agg.year] = cumulative_incurred
-                else:
-                    data[month][agg.year] = incurred
+        # Build the triangle
+        triangle = {year: {} for year in origin_years}
+        for claim in claims:
+            #TODO aggregation 
+            # claim.capped_claim_development_history.cumulative_dev_paid # paid
+            # claim.capped_claim_development_history.cumulative_dev_incurred # incurred
+            ... #TODO aggregation of claims data by modelling years
 
-        triangle_df = pd.DataFrame(data).fillna(0)
-
-        triangle_df = triangle_df.sort_index(axis=0)
-
-        return triangle_df
-
+        return cls(triangle=triangle, origin_years=origin_years, dev_periods=dev_periods)
+    
 
 #TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
-# need to review below
-
 class IBNERPatternExtractor:
-    def __init__(self, claim_aggregators: List[ClaimAggregator]):
-        """
-        Initialize with a list of ClaimAggregator objects.
+    """
+    Extracts IBNER patterns from either a Claims object or a Triangle object.
+    """
+    def __init__(self, triangle: Triangle):
+        self.triangle = triangle.triangle
+        self.origin_years = triangle.origin_years
+        self.dev_periods = triangle.dev_periods
 
-        Args:
-            claim_aggregators (List[ClaimAggregator]): List of ClaimAggregator instances containing cumulative claims data.
-        """
-        self.claim_aggregators = claim_aggregators
-        self.accident_years = sorted(set(agg.accident_year for agg in claim_aggregators))
-        self.development_years = sorted(set(dev for agg in claim_aggregators for dev in range(len(agg.cumulative_incurred))))
-        self.N = {ay: {} for ay in self.accident_years}
-        self.D = {ay: {} for ay in self.accident_years}
+        self.N = {oy: {} for oy in self.origin_years}
+        self.D = {oy: {} for oy in self.origin_years}
         self._compute_N_and_D()
 
     def _compute_N_and_D(self):
         """
-        Compute the N and D triangles from cumulative data in ClaimAggregator.
+        Compute the N and D triangles from cumulative data.
         """
-        for agg in self.claim_aggregators:
-            ay = agg.accident_year
-            cumulative_incurred = agg.cumulative_incurred
-
-            for idx, dy in enumerate(self.development_years):
-                if idx >= len(cumulative_incurred):
-                    self.N[ay][dy] = None
-                    self.D[ay][dy] = None
+        for oy in self.origin_years:
+            cumulative = [self.triangle[oy].get(d, None) for d in self.dev_periods]
+            for idx, d in enumerate(self.dev_periods):
+                if idx >= len(cumulative) or cumulative[idx] is None:
+                    self.N[oy][d] = None
+                    self.D[oy][d] = None
                     continue
 
-                current = cumulative_incurred[idx]
+                current = cumulative[idx]
                 if idx == 0:
-                    self.N[ay][dy] = current
-                    self.D[ay][dy] = None
+                    self.N[oy][d] = current
+                    self.D[oy][d] = None
                 else:
-                    prev = cumulative_incurred[idx - 1]
-
+                    prev = cumulative[idx - 1]
                     if current is None or prev is None:
-                        self.N[ay][dy] = None
-                        self.D[ay][dy] = None
+                        self.N[oy][d] = None
+                        self.D[oy][d] = None
                     else:
-                        self.D[ay][dy] = prev - current
-                        self.N[ay][dy] = current - prev + self.D[ay][dy]
+                        self.D[oy][d] = prev - current
+                        self.N[oy][d] = current - prev + self.D[oy][d]
 
     def get_N_triangle(self) -> Dict[int, Dict[int, float]]:
         """
         Returns the N triangle (new claims).
-
-        Returns:
-            Dict[int, Dict[int, float]]: N triangle with accident years as keys and development years as sub-keys.
         """
         return self.N
 
     def get_D_triangle(self) -> Dict[int, Dict[int, float]]:
         """
         Returns the D triangle (IBNER development).
-
-        Returns:
-            Dict[int, Dict[int, float]]: D triangle with accident years as keys and development years as sub-keys.
         """
         return self.D
 
     def get_IBNER_pattern(self) -> Dict[int, float]:
         """
         Returns the average D (IBNER) pattern per development year.
-
-        Returns:
-            Dict[int, float]: Dictionary with development year as key and average IBNER as value.
         """
-        sums = {dy: 0.0 for dy in self.development_years}
-        counts = {dy: 0 for dy in self.development_years}
+        sums = {d: 0.0 for d in self.dev_periods}
+        counts = {d: 0 for d in self.dev_periods}
 
-        for ay in self.accident_years:
-            for dy in self.development_years:
-                val = self.D.get(ay, {}).get(dy)
+        for oy in self.origin_years:
+            for d in self.dev_periods:
+                val = self.D.get(oy, {}).get(d)
                 if val is not None:
-                    sums[dy] += val
-                    counts[dy] += 1
+                    sums[d] += val
+                    counts[d] += 1
 
-        return {dy: (sums[dy] / counts[dy]) if counts[dy] > 0 else None for dy in self.development_years}
+        return {d: (sums[d] / counts[d]) if counts[d] > 0 else None for d in self.dev_periods}
