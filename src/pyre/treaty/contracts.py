@@ -1,30 +1,10 @@
 from datetime import date
 from enum import Enum
-from typing import List, Dict, Sequence
+from typing import Any, List, Dict, Sequence
 from dataclasses import dataclass, field
-
+from pyre.treaty.layer_loss_functions import layer_loss_calculation
 from pyre.claims.claims import ClaimYearType
 from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
-
-
-def xol_calculation(gross_amount: float, attachment: float, limit: float):
-    return max(min(gross_amount - attachment,limit),0)
-
-def qs_calculation(gross_amount:float, cession:float):
-    return max(gross_amount * cession,0)
-
-def franchise_calculation(    gross_amount: float, attachment: float, limit: float):
-    if gross_amount > attachment:
-        return min(gross_amount,limit)
-    else: 
-        return 0.0
-
-def surplus_share_calculation(gross_amount: float, sum_insured:float, attachment:float):
-    if sum_insured <= attachment:
-        return 0.0  # No ceded amount if the sum insured is within the retention
-    surplus = sum_insured - attachment
-    share = surplus / sum_insured
-    return share * gross_amount
 
 class ContractType(Enum):
     QUOTA_SHARE = "Quota Share"
@@ -42,6 +22,13 @@ class IndexationClauseType(Enum):
     FULL_INDEXATION = "Full Indexation"
     FIC = "Franchise - FIC"
     SIC = "Severe Inflation (also London Market) - SIC"
+
+claim_year_basis ={
+    ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,
+    ClaimTriggerBasis.CMB:ClaimYearType.REPORTED_YEAR,
+    ClaimTriggerBasis.LOD:ClaimYearType.ACCIDENT_YEAR
+    } # not sure this needs to be in the function as a generic mapping. Might be best placed outside as mapping to enums together.
+
 
 @dataclass
 class RILayer:
@@ -68,15 +55,23 @@ class RILayer:
         return self.cession * self.written_line * self.full_subject_premium
     
     @property
-    def signed_line_premium(self) -> float:
+    def signed_line_premium(self) -> float | Any:
         return self.cession * self.signed_line * self.full_subject_premium
+    
+    def loss_to_layer_fn(self, gross_amount:float):
+        func = layer_loss_calculation[self.layer_type]
+        if self.layer_type == ContractType.QUOTA_SHARE:
+            return lambda gross_amount : func(gross_amount, self.cession)
+        if self.layer_type == ContractType.SURPLUS_SHARE:
+            return NotImplementedError("Yet to be implemented")
+        else:
+            return lambda gross_amount : func(gross_amount, self.occurrence_attachment, self.occurrence_limit)
 
 @dataclass
 class RIContractMetadata:
     contract_id: str
     contract_description: str
     cedent_name: str 
-    contract_type: ContractType
     trigger_basis: ClaimTriggerBasis
     indexation_clause: IndexationClauseType
     indexation_margin: float
@@ -84,110 +79,20 @@ class RIContractMetadata:
     expiration_date: date
     fx_rates: Dict # {"GBP":1.0, "USD":1.25}
 
-    _claim_year_basis ={
-        ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,
-        ClaimTriggerBasis.CMB:ClaimYearType.REPORTED_YEAR,
-        ClaimTriggerBasis.LOD:ClaimYearType.ACCIDENT_YEAR
-        } # not sure this needs to be in the function as a generic mapping. Might be best placed outside as mapping to enums together.
-
     @property
     def claim_year_basis(self) -> ContractException | ClaimYearType:
-        if self.trigger_basis in self._claim_year_basis:
-            return self._claim_year_basis[self.trigger_basis]
+        if self.trigger_basis in claim_year_basis:
+            return claim_year_basis[self.trigger_basis]
         else:
             raise ContractException(
                 contract_id= self.contract_id, 
                 message="Trigger basis missing in data"
                 )
 
+@dataclass
 class RIContract:
-
-    def __init__(self, contract_meta_data: RIContractMetadata, layers:Sequence[RILayer]) -> None:
-        self._contract_meta_data = contract_meta_data
-        self._contract_layers = {layer.layer_id: layer for layer in layers}
-    
-    @property
-    def contract_meta_data(self):
-        return self._contract_meta_data
-
-    # def _xol_calculation(gross_amount: float, attachment: float, limit: float):
-    #     return max(min(gross_amount - attachment,limit),0)
-
-    # def _qs_calculation(gross_amount:float, cession:float):
-    #     return max(gross_amount * cession,0)
-
-    # def _franchise_calculation(    gross_amount: float, attachment: float, limit: float):
-    #     if gross_amount > attachment:
-    #         return min(gross_amount,limit)
-    #     else: 
-    #         return 0.0
-
-    # def _surplus_share_calculation(gross_amount: float, sum_insured:float, attachment:float):
-    #     if sum_insured <= attachment:
-    #         return 0.0  # No ceded amount if the sum insured is within the retention
-    #     surplus = sum_insured - attachment
-    #     share = surplus / sum_insured
-    #     return share * gross_amount
-
-    # _layer_loss_calculation = {
-    #     ContractType.QUOTA_SHARE: qs_calculation,
-    #     ContractType.FRANCHISE_DEDUCTIBLE: franchise_calculation,
-    #     ContractType.EXCESS_OF_LOSS: xol_calculation,
-    #     ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
-    #     ContractType.SURPLUS_SHARE: surplus_share_calculation
-    # }
-
-
-    # def loss_to_layer_function(self):
-    #     """
-    #     Returns a list of tuples: (RILayer, layer_function) for each layer in the contract.
-    #     """
-    #     layer_func_list = []
-    #     for layer in self._contract_layers.values():
-    #         func = self._layer_loss_calculation.get(layer.layer_type)
-    #         layer_func_list.append((layer, func))
-    #     return layer_func_list
+    contract_meta_data: RIContractMetadata 
+    layers: Sequence[RILayer]
 
 
 
-    
-
-
-
-# class QuotaShareContract:
-#     def __init__(self, share):
-#         self.share = share
-
-#     def ceded_amount(self, loss):
-#         return self.share * loss
-
-# class ExcessOfLossContract:
-#     def __init__(self, retention, limit):
-#         self.retention = retention
-#         self.limit = limit
-
-#     def ceded_amount(self, loss):
-#         if loss <= self.retention:
-#             return 0
-#         return min(loss - self.retention, self.limit)
-
-# class SurplusShareContract:
-#     def __init__(self, retention):
-#         self.retention = retention
-
-#     def ceded_amount(self, sum_insured, loss):
-#         if sum_insured <= self.retention:
-#             return 0
-#         surplus = sum_insured - self.retention
-#         share = surplus / sum_insured
-#         return share * loss
-
-# class AggregateStopLossContract:
-#     def __init__(self, attachment_point, limit):
-#         self.attachment_point = attachment_point
-#         self.limit = limit
-
-#     def ceded_amount(self, total_losses):
-#         if total_losses <= self.attachment_point:
-#             return 0
-#         return min(total_losses - self.attachment_point, self.limit)

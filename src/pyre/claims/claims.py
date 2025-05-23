@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date
 import operator
-from typing import Optional, List, Sequence, Set
+from typing import Any, Optional, List, Sequence, Set
 from enum import Enum, auto
 
 from pyre.exceptions.exceptions import ClaimsException
@@ -41,9 +41,9 @@ class ClaimDevelopmentHistory:
         incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
             Converts a sequence of cumulative values into incremental values.
     """
-    development_months: Sequence[int] = field(default_factory=list)
-    cumulative_dev_paid: Sequence[float] = field(default_factory=list)
-    cumulative_dev_incurred: Sequence[float] = field(default_factory=list)
+    development_months: Any | Sequence[int] = field(default_factory=list)
+    cumulative_dev_paid: Any | Sequence[float] = field(default_factory=list)
+    cumulative_dev_incurred: Any |Sequence[float] = field(default_factory=list)
 
     @property
     def cumulative_reserved_amount(self) -> list[float]:
