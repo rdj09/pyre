@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, Optional
+from pyre import claims
 from pyre.Models.models import ModelData
 from pyre.Models.trending import trend_claims
 from pyre.claims.claims import Claims
@@ -10,6 +11,7 @@ from pyre.treaty.contracts import RIContract
 class ExperienceModelData(ModelData):
     claims: Claims
     ri_contract: RIContract
+    development_patter: Dict #TODO Consider development class
     ibner_pattern: Optional[IBNERPatternExtractor]
     #TODO refactor down reduce coupling on full classes
     
@@ -19,11 +21,21 @@ class ExperienceModelData(ModelData):
         return trend_claims(self.claims, base_year=base_year, trend_factors={blah:blah})
     
     @property
-    def subject_contract_claims(self):
+    def subject_contract_claims(self)-> Claims:
+        subject_loss_fns = self.ri_contract.loss_to_layer_function()
+
+        for claim in self.trended_claims.claims:
+            for layer, func in self.ri_contract.loss_to_layer_function():
+
+
+
         # TODO ricontract class should carry the details of loss to layer functions. 
-        return None
+        return claims(...)
 
     @property
-    def data_for_model(self):
-        #counts, totals, averages
-        return None
+    def aggregate_exposures(self):
+        pass
+
+    @property
+    def aggregate_claims(self):
+        pass

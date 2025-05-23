@@ -102,14 +102,6 @@ class RIContractMetadata:
 
 class RIContract:
 
-    _layer_loss_calculation = {
-        ContractType.QUOTA_SHARE: qs_calculation,
-        ContractType.FRANCHISE_DEDUCTIBLE: franchise_calculation,
-        ContractType.EXCESS_OF_LOSS: xol_calculation,
-        ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
-        ContractType.SURPLUS_SHARE: surplus_share_calculation
-    }
-
     def __init__(self, contract_meta_data: RIContractMetadata, layers:Sequence[RILayer]) -> None:
         self._contract_meta_data = contract_meta_data
         self._contract_layers = {layer.layer_id: layer for layer in layers}
@@ -118,15 +110,43 @@ class RIContract:
     def contract_meta_data(self):
         return self._contract_meta_data
 
-    def loss_to_layer_function(self):
-        """
-        Returns a list of tuples: (RILayer, layer_function) for each layer in the contract.
-        """
-        layer_func_list = []
-        for layer in self._contract_layers.values():
-            func = self._layer_loss_calculation.get(layer.layer_type)
-            layer_func_list.append((layer, func))
-        return layer_func_list
+    # def _xol_calculation(gross_amount: float, attachment: float, limit: float):
+    #     return max(min(gross_amount - attachment,limit),0)
+
+    # def _qs_calculation(gross_amount:float, cession:float):
+    #     return max(gross_amount * cession,0)
+
+    # def _franchise_calculation(    gross_amount: float, attachment: float, limit: float):
+    #     if gross_amount > attachment:
+    #         return min(gross_amount,limit)
+    #     else: 
+    #         return 0.0
+
+    # def _surplus_share_calculation(gross_amount: float, sum_insured:float, attachment:float):
+    #     if sum_insured <= attachment:
+    #         return 0.0  # No ceded amount if the sum insured is within the retention
+    #     surplus = sum_insured - attachment
+    #     share = surplus / sum_insured
+    #     return share * gross_amount
+
+    # _layer_loss_calculation = {
+    #     ContractType.QUOTA_SHARE: qs_calculation,
+    #     ContractType.FRANCHISE_DEDUCTIBLE: franchise_calculation,
+    #     ContractType.EXCESS_OF_LOSS: xol_calculation,
+    #     ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
+    #     ContractType.SURPLUS_SHARE: surplus_share_calculation
+    # }
+
+
+    # def loss_to_layer_function(self):
+    #     """
+    #     Returns a list of tuples: (RILayer, layer_function) for each layer in the contract.
+    #     """
+    #     layer_func_list = []
+    #     for layer in self._contract_layers.values():
+    #         func = self._layer_loss_calculation.get(layer.layer_type)
+    #         layer_func_list.append((layer, func))
+    #     return layer_func_list
 
 
 
