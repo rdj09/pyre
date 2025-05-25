@@ -41,10 +41,9 @@ def cape_cod_prior_algo(trend_factors: List[float],losses: List[float], developm
                         exposures: List[float], decay_factor: float = 0.0,generalised:bool = False) -> float:
 
     if generalised:
-        return decay_factor
+        # decay_factor
+        return NotImplementedError("Generalised Cape Cod method is not implemented yet.")
     else:
         psuedo_claims = sum(trend_factors[i] * losses[i] * (development_factors[i] / exposures[i]) for i in range(len(trend_factors)))
         psuedo_exposures = sum(exposures[i] / development_factors[i] for i in range(len(exposures)))
         return psuedo_claims / psuedo_exposures
-    #if generalised:
-        #decay_factor 
