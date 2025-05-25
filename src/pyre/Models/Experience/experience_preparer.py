@@ -1,14 +1,16 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 from pyre.Models.models import ModelData
-from pyre.Models.trending import trend_claims
+from pyre.Models.trending import trend_claims, trend_exposures
 from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims
 from pyre.claims.triangles import IBNERPatternExtractor
+from pyre.exposures.exposures import Exposures
 from pyre.treaty.contracts import RIContract
 
 @dataclass
 class ExperienceModelData(ModelData):
     claims: Claims
+    expousres : Exposures 
     ri_contract: RIContract
     development_patter: Optional[Dict] #TODO Consider development class
     ibner_pattern: Optional[IBNERPatternExtractor] #TODO refactor down reduce coupling on full classes
@@ -16,7 +18,7 @@ class ExperienceModelData(ModelData):
     @property
     def trended_claims(self):
         base_year = self.ri_contract.contract_meta_data.inception_date.year
-        return trend_claims(self.claims, base_year=base_year, trend_factors={blah:blah})
+        return trend_claims(self.claims, base_year=base_year, trend_factors={blah:blah}) #TODO Trend factors Dict[int, float]
     
     @property
     def subject_contract_claims(self)-> Dict[int, Claims]:
@@ -50,14 +52,50 @@ class ExperienceModelData(ModelData):
         return ceded_claims # returns dictioanry of claims and layer id that can be used to create aggregate numbers
 
     @property
-    def aggregate_exposures(self):
-
-        pass
+    def trended_exposures(self):
+        base_year = self.ri_contract.contract_meta_data.inception_date.year
+        return trend_exposures(self.expousres, base_year=base_year, trend_factors={blah:blah}) #TODO trend factors Dict[int, float]
 
     @property
-    def aggregate_claims(self):
-        #TODO iterate of each key in dictionary (layer id) and aggreagte up the latest capped values from claims by year
-        #self.subject_contract_claims
-        #aggregate total, and claim count by year
-        # consider status of claim also.
-        pass
+    def aggregate_exposures(self) -> Dict[int, float]:
+        """
+        Returns a dictionary mapping modelling year to the sum of trended exposure values for that year.
+        """
+        exposures_by_year = {}
+        for exposure in self.trended_exposures:
+            year = getattr(exposure, "modelling_year", None)
+            value = getattr(exposure, "value", None)
+            if year is not None and value is not None:
+                exposures_by_year.setdefault(year, 0.0)
+                exposures_by_year[year] += value
+        return exposures_by_year
+
+    @property
+    def aggregate_subject_contract_claims(self) -> Dict[int, Dict[int, Dict[str, float]]]:
+        """Aggregates the output of subject_contract_claims by modelling year and layer.
+
+        Returns:
+            Dict[layer_id, Dict[modelling_year, Dict[str, float]]]:
+                {
+                    layer_id: {
+                        modelling_year: {
+                            "latest_paid": float,
+                            "latest_incurred": float
+                        }, ...
+                    }, ...
+                }
+        """
+        subjct_claims_by_layer_by_year = {}
+        for layer_id, claims_list in self.subject_contract_claims.items():
+            years = {}
+            # claims_list is a list of Claim objects (see Claims class)
+            for claim in claims_list:
+                year = claim.claims_meta_data.modelling_year
+                latest_paid = claim.capped_claim_development_history.latest_paid
+                latest_incurred = claim.capped_claim_development_history.latest_incurred
+                if year not in years:
+                    years[year] = {"latest_paid": 0.0, "latest_incurred": 0.0}
+                years[year]["latest_paid"] += latest_paid
+                years[year]["latest_incurred"] += latest_incurred
+            subjct_claims_by_layer_by_year[layer_id] = years
+        return subjct_claims_by_layer_by_year

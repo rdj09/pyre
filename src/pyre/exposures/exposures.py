@@ -134,6 +134,14 @@ class Exposures:
     @exposures.setter
     def exposures(self, list_of_exposure_classes:list[Exposure]):
         self._exposures = list_of_exposure_classes
+    
+    @property
+    def modelling_years(self) -> List:
+        """
+        Returns a list of modelling years for all claims.
+        """
+        years = {exposure.modelling_year for exposure in self.exposures}
+        return sorted(years)
 
     def append(self, exposure:Exposure):
         self._exposures.append(exposure)
