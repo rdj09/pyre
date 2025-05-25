@@ -117,12 +117,8 @@ class ExperienceModelData():
         for exposure in self.trended_exposures:
             # Use Exposure class properties
             year = getattr(exposure, "modelling_year", None)
-            written = getattr(exposure, "written_exposure_value", None)
-            earned = getattr(exposure, "earned_exposure_value", None)
-
-            # If written/earned are methods, call them
-            written_val = written() if callable(written) else (written if written is not None else 0.0)
-            earned_val = earned() if callable(earned) else (earned if earned is not None else 0.0)
+            written_val = getattr(exposure, "written_exposure_value", None)
+            earned_val = getattr(exposure, "earned_exposure_value", None)
 
             if year is not None:
                 if year not in exposures_by_year:
