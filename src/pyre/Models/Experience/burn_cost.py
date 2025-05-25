@@ -1,8 +1,7 @@
-from typing import List
-from ..models import Model
+from typing import Any, List
 from pyre.Models.Experience.experience_preparer import ExperienceModelData
 
-class ExperienceModel(Model):
+class ExperienceModel():
 
     def __init__(self, model_data:ExperienceModelData):
         self._data = model_data
@@ -38,7 +37,7 @@ def generalised_cape_cod_method():
 
 
 def cape_cod_prior_algo(trend_factors: List[float],losses: List[float], development_factors: List[float],
-                        exposures: List[float], decay_factor: float = 0.0,generalised:bool = False) -> float:
+                        exposures: List[float], decay_factor: float = 0.0,generalised:bool = False) -> Any | float:
 
     if generalised:
         # decay_factor

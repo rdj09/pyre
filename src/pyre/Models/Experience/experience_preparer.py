@@ -1,19 +1,15 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
-from pyre.Models.models import ModelData
 from pyre.Models.trending import trend_claims, trend_exposures
 from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims
-from pyre.claims.triangles import IBNERPatternExtractor
 from pyre.exposures.exposures import Exposures
 from pyre.treaty.contracts import RIContract
 
 @dataclass
-class ExperienceModelData(ModelData):
+class ExperienceModelData():
     claims: Claims
     expousres : Exposures 
     ri_contract: RIContract
-    development_patter: Optional[Dict] #TODO Consider development class
-    ibner_pattern: Optional[IBNERPatternExtractor] #TODO refactor down reduce coupling on full classes
     
     @property
     def trended_claims(self):
