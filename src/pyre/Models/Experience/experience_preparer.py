@@ -52,3 +52,81 @@ class ExperienceModelData():
     def trended_exposures(self):
         base_year = self.ri_contract.contract_meta_data.inception_date.year
         return trend_exposures(self.exposures, base_year=base_year, trend_factors={blah:blah}) #TODO trend factors Dict[int, float]
+    
+    @property
+    def aggregate_subject_contract_claims(self) -> Dict[int, Dict[int, Dict[str, float]]]:
+        """
+        Aggregates the output of subject_contract_claims by modelling year and layer, and also returns claim counts by layer, modelling year, claim status, and total count.
+
+        Returns:
+            Dict[layer_id, Dict[modelling_year, Dict[str, Any]]]:
+                {
+                    layer_id: {
+                        modelling_year: {
+                            "latest_paid": float,
+                            "latest_incurred": float,
+                            "claim_counts": {
+                                status: count,
+                                ...
+                            },
+                            "total_count": int
+                        }, ...
+                    }, ...
+                }
+        """
+        subject_claims_by_year = {}
+        for layer_id, claims_list in self.subject_contract_claims.items():
+            year_agg = {}
+            for claim in claims_list:
+                year = claim.claims_meta_data.modelling_year
+                status = getattr(claim.claims_meta_data, "status", "Unknown")
+                latest_paid = claim.capped_claim_development_history.latest_paid
+                latest_incurred = claim.capped_claim_development_history.latest_incurred
+                if year not in year_agg:
+                    year_agg[year] = {
+                        "latest_paid": 0.0,
+                        "latest_incurred": 0.0,
+                        "claim_counts": {},
+                        "total_count": 0
+                    }
+                year_agg[year]["latest_paid"] += latest_paid
+                year_agg[year]["latest_incurred"] += latest_incurred
+                if status not in year_agg[year]["claim_counts"]:
+                    year_agg[year]["claim_counts"][status] = 0
+                year_agg[year]["claim_counts"][status] += 1
+                year_agg[year]["total_count"] += 1
+            subject_claims_by_year[layer_id] = year_agg
+        return subject_claims_by_year
+    
+    @property
+    def aggregate_exposures(self) -> Dict[int, Dict[str, float]]:
+        """
+        Returns a dictionary mapping modelling year to the sum of trended written and earned exposure values for that year,
+        using the properties and methods of the Exposure class.
+
+        Returns:
+            Dict[int, Dict[str, float]]:
+                {
+                    modelling_year: {
+                        "written": total_written,
+                        "earned": total_earned
+                    }, ...
+                }
+        """
+        exposures_by_year = {}
+        for exposure in self.trended_exposures:
+            # Use Exposure class properties
+            year = getattr(exposure, "modelling_year", None)
+            written = getattr(exposure, "written_exposure_value", None)
+            earned = getattr(exposure, "earned_exposure_value", None)
+
+            # If written/earned are methods, call them
+            written_val = written() if callable(written) else (written if written is not None else 0.0)
+            earned_val = earned() if callable(earned) else (earned if earned is not None else 0.0)
+
+            if year is not None:
+                if year not in exposures_by_year:
+                    exposures_by_year[year] = {"written": 0.0, "earned": 0.0}
+                exposures_by_year[year]["written"] += written_val
+                exposures_by_year[year]["earned"] += earned_val
+        return exposures_by_year
