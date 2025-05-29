@@ -61,7 +61,7 @@ class RILayer:
     def loss_to_layer_fn(self, gross_amount:float):
         func = layer_loss_calculation[self.layer_type]
         if self.layer_type == ContractType.QUOTA_SHARE:
-            return lambda gross_amount : func(gross_amount, self.cession)
+            return gross_amount  # TODO analysis typically easier to do at 100% - inuring and profitability at share consider elsewhere !!!!!!
         if self.layer_type == ContractType.SURPLUS_SHARE:
             return NotImplementedError("Yet to be implemented")
         else:
@@ -94,5 +94,7 @@ class RIContract:
     contract_meta_data: RIContractMetadata 
     layers: Sequence[RILayer]
 
-
+    @property
+    def layer_ids(self) -> List:
+        return [layer.layer_id for layer in self.layers]
 

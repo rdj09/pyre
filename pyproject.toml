@@ -39,10 +39,7 @@ extra-dependencies = [
 ]
 
 [tool.hatch.envs.default]
-dependencies = [
-  "pandas",
-  "openpyxl"
-]
+dependencies = []
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive {args:src/pyre tests}"

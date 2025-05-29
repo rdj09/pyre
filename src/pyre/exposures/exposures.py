@@ -102,7 +102,16 @@ class Exposure:
         return min((analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days, 1.0)
     
     def earned_exposure_value(self, analysis_date: date) -> float:
-        return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
+        if self._exposure_meta.exposure_type == ExposureBasis.EARNED:
+            return self._exposure_values.exposure_value
+        else:
+            return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
+    
+    def written_exposure_value(self, analysis_date: date) -> float:
+        if self._exposure_meta.exposure_type == ExposureBasis.EARNED:
+            return self._exposure_values.exposure_value / self._earned_pct(analysis_date)
+        else:
+            return self._exposure_values.exposure_value
 
 class Exposures:
     """A container class for managing a collection of Exposure objects.
@@ -134,6 +143,14 @@ class Exposures:
     @exposures.setter
     def exposures(self, list_of_exposure_classes:list[Exposure]):
         self._exposures = list_of_exposure_classes
+    
+    @property
+    def modelling_years(self) -> List: 
+        """
+        Returns a list of modelling years for all claims.
+        """
+        years = {exposure.modelling_year for exposure in self.exposures}
+        return sorted(years)
 
     def append(self, exposure:Exposure):
         self._exposures.append(exposure)
