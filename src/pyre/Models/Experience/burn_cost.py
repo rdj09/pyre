@@ -1,6 +1,5 @@
 from enum import Enum, auto
 from typing import Any, Dict, List
-from pyre import claims
 from pyre.Models.Experience.experience_preparer import ExperienceModelData
 
 def chainladder_method(data: float, development_factor: float) -> float:
@@ -45,13 +44,13 @@ projection_methods_fn = {
     ProjectionMethods.GENERALISED_CAPE_COD: generalised_cape_cod_method
     }
 
-class LayerBurnCostExperienceModel():
-    def __init__(self, 
-                 model_data: ExperienceModelData, 
-                 layer_id: Any, 
-                 years_weighting: Dict[int , float] = None, 
-                 projection_methods = Dict[int , ProjectionMethods] = None,
-                 development_pattern = Dict[int, float] = None) -> None:
+class BurnCostModel():
+    def __init__(self,
+                model_data: ExperienceModelData, 
+                layer_id: Any, 
+                years_weighting: None | Dict[int , float] = None, 
+                projection_methods : None | Dict[int , ProjectionMethods] = None,
+                development_pattern: None | Dict[int, float] = None) -> None:
         
         self._modelling_years = model_data.exposures.modelling_years
         self._years_weighting = years_weighting if years_weighting else {year: 1.0 for year in model_data.exposures.modelling_years}
@@ -60,17 +59,58 @@ class LayerBurnCostExperienceModel():
         self._data = model_data
         self._layer_id = layer_id
     
-    def calculate_burn_cost(self) -> Dict[int, float]:  
-        """
-        Calculate the burn cost for each modelling year based on the provided data and projection methods.
-        
-        Returns:
-            Dict[int, float]: A dictionary mapping each modelling year to its calculated burn cost.
-        """
-        burn_costs = {}
-        for year in self._modelling_years:
-            projection_fc = self._projection_methods[year] # need to do the mapping to prjection function 
-            claims = self._data.aggregate_subject_contract_claims[self._layer_id][year]
-            exposures = self._data.aggregate_exposures[year]
+    @property
+    def modelling_years(self):
+        return self._modelling_years
 
-        return  {2010:0.0}
+    @modelling_years.setter
+    def modelling_years(self, years):
+        self._modelling_years = years
+
+    @property
+    def years_weighting(self):
+        return self._years_weighting
+
+    @years_weighting.setter
+    def years_weighting(self, weighting):
+        self._years_weighting = weighting
+
+    @property
+    def projection_methods(self):
+        return self._projection_methods
+
+    @projection_methods.setter
+    def projection_methods(self, methods):
+        self._projection_methods = methods
+
+    @property
+    def development_pattern(self):
+        return self._development_pattern
+
+    @development_pattern.setter
+    def development_pattern(self, pattern):
+        self._development_pattern = pattern
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, model_data):
+        self._data = model_data
+
+    @property
+    def layer_id(self):
+        return self._layer_id
+
+    @layer_id.setter
+    def layer_id(self, lid):
+        self._layer_id = lid
+
+    # def calculate_burn_cost(self) -> Dict[int, float]:  
+    #     burn_costs = {}
+    #     for year in self._modelling_years:
+    #         claims = self._data.aggregate_subject_contract_claims[self._layer_id][year]
+    #         exposures = self._data.aggregate_exposures[year]
+
+    #     return  {2010:0.0}
