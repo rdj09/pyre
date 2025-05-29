@@ -6,3 +6,9 @@ src/pyre/exposures/__pycache__/*
 src/pyre/treaty/__pycache__/*   
 tests/__pycache__/*
 site/
+.idea/.gitignore
+.idea/misc.xml
+.idea/modules.xml
+.idea/pyre.iml
+.idea/vcs.xml
+.idea/inspectionProfiles/profiles_settings.xml
