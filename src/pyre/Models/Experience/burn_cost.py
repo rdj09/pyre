@@ -1,21 +1,7 @@
-from typing import Any, List
+from enum import Enum, auto
+from typing import Any, Dict, List
+from pyre import claims
 from pyre.Models.Experience.experience_preparer import ExperienceModelData
-
-class ExperienceModel():
-
-    def __init__(self, model_data:ExperienceModelData):
-        self._data = model_data
-
-    @property
-    def data(self):
-        return self._data
-    
-    @data.setter
-    def data(self, model_data:ExperienceModelData):
-        self._data = model_data
-
-
-
 
 def chainladder_method(data: float, development_factor: float) -> float:
     return data*development_factor
@@ -30,13 +16,10 @@ def cape_cod_method():
     #bf_method(derived_expected)
     return NotImplementedError
 
-#citation source Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
-# https://www.actuaries.org.uk/documents/claims-reserving-working-party-paper
 def generalised_cape_cod_method():
     # determine expected loss ratio with decay factor
     #bf_method(derived_expected)
     return NotImplementedError
-
 
 def cape_cod_prior_algo(trend_factors: List[float],losses: List[float], development_factors: List[float],
                         exposures: List[float], decay_factor: float = 0.0,generalised:bool = False) -> Any | float:
@@ -48,3 +31,46 @@ def cape_cod_prior_algo(trend_factors: List[float],losses: List[float], developm
         psuedo_claims = sum(trend_factors[i] * losses[i] * (development_factors[i] / exposures[i]) for i in range(len(trend_factors)))
         psuedo_exposures = sum(exposures[i] / development_factors[i] for i in range(len(exposures)))
         return psuedo_claims / psuedo_exposures
+
+class ProjectionMethods(Enum):
+    CHAINLADDER = auto()
+    BF = auto()
+    SIMPLE_CAPE_COD = auto()
+    GENERALISED_CAPE_COD = auto()
+
+projection_methods_fn = {
+    ProjectionMethods.CHAINLADDER: chainladder_method,
+    ProjectionMethods.BF: bf_method,
+    ProjectionMethods.SIMPLE_CAPE_COD: cape_cod_method,
+    ProjectionMethods.GENERALISED_CAPE_COD: generalised_cape_cod_method
+    }
+
+class LayerBurnCostExperienceModel():
+    def __init__(self, 
+                 model_data: ExperienceModelData, 
+                 layer_id: Any, 
+                 years_weighting: Dict[int , float] = None, 
+                 projection_methods = Dict[int , ProjectionMethods] = None,
+                 development_pattern = Dict[int, float] = None) -> None:
+        
+        self._modelling_years = model_data.exposures.modelling_years
+        self._years_weighting = years_weighting if years_weighting else {year: 1.0 for year in model_data.exposures.modelling_years}
+        self._projection_methods = projection_methods if projection_methods else {year : ProjectionMethods.SIMPLE_CAPE_COD for year in model_data.exposures.modelling_years} # Default to simple cape cod method
+        self._development_pattern = development_pattern if development_pattern else {year: 1.0 for year in model_data.exposures.modelling_years} # Default to no development pattern
+        self._data = model_data
+        self._layer_id = layer_id
+    
+    def calculate_burn_cost(self) -> Dict[int, float]:  
+        """
+        Calculate the burn cost for each modelling year based on the provided data and projection methods.
+        
+        Returns:
+            Dict[int, float]: A dictionary mapping each modelling year to its calculated burn cost.
+        """
+        burn_costs = {}
+        for year in self._modelling_years:
+            projection_fc = self._projection_methods[year] # need to do the mapping to prjection function 
+            claims = self._data.aggregate_subject_contract_claims[self._layer_id][year]
+            exposures = self._data.aggregate_exposures[year]
+
+        return  {2010:0.0}

@@ -94,5 +94,7 @@ class RIContract:
     contract_meta_data: RIContractMetadata 
     layers: Sequence[RILayer]
 
-
+    @property
+    def layer_ids(self) -> List:
+        return [layer.layer_id for layer in self.layers]
 
