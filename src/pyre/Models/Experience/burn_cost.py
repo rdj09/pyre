@@ -50,12 +50,14 @@ class BurnCostModel():
                 layer_id: Any, 
                 years_weighting: None | Dict[int , float] = None, 
                 projection_methods : None | Dict[int , ProjectionMethods] = None,
-                development_pattern: None | Dict[int, float] = None) -> None:
+                development_pattern: None | Dict[int, float] = None,
+                a_priori_assumption : None | Dict[int, float] = None) -> None:
         
         self._modelling_years = model_data.exposures.modelling_years
         self._years_weighting = years_weighting if years_weighting else {year: 1.0 for year in model_data.exposures.modelling_years}
         self._projection_methods = projection_methods if projection_methods else {year : ProjectionMethods.SIMPLE_CAPE_COD for year in model_data.exposures.modelling_years} # Default to simple cape cod method
         self._development_pattern = development_pattern if development_pattern else {year: 1.0 for year in model_data.exposures.modelling_years} # Default to no development pattern
+        self._a_priori = a_priori_assumption if a_priori_assumption else {year: 0.0 for year in model_data.exposures.modelling_years} . # Default to no a priori assumption
         self._data = model_data
         self._layer_id = layer_id
     
@@ -107,10 +109,18 @@ class BurnCostModel():
     def layer_id(self, lid):
         self._layer_id = lid
 
+    @property
+    def a_priori(self):
+        return self._a_priori
+
+    @a_priori.setter
+    def a_priori(self, prior):
+        self._a_priori = prior
+
     # def calculate_burn_cost(self) -> Dict[int, float]:  
     #     burn_costs = {}
     #     for year in self._modelling_years:
-    #         claims = self._data.aggregate_subject_contract_claims[self._layer_id][year]
+    #         claims = self._data.aggregate_subject_contract_claims[self._layer_id][year] # Further details as class carries many data items
     #         exposures = self._data.aggregate_exposures[year]
 
     #     return  {2010:0.0}
