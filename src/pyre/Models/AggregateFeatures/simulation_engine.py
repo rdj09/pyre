@@ -1,6 +1,4 @@
 
-
-
 class Simulation:
     def __init__(self) -> None:
         pass
@@ -14,6 +12,13 @@ class Simulation:
     def save(self) -> None:
         pass
 
+    def profit_commsission():
+        pass
+
+    def cashflows():
+        #premium and claims
+        pass
+
     def loss_cost():
         pass
 
@@ -21,7 +26,7 @@ class Simulation:
         # risk adjusted capital 
         pass
 
-    def investment_return():
+    def investment_return() : #/ discounting:
         # pattern and yeild assumptions from all cashflows
         pass
 
