@@ -126,9 +126,10 @@ class TestClaimsMetaData(unittest.TestCase):
         class DummyYearType:
             pass
         self.meta_data.claim_year_basis = DummyYearType()
-        result = self.meta_data.modelling_year
-        self.assertIsInstance(result, ClaimsException)
-        self.assertEqual(result.claim_id, self.meta_data.claim_id)
+        with self.assertRaises(ClaimsException) as context:
+            _ = self.meta_data.modelling_year
+        self.assertEqual(context.exception.claim_id, self.meta_data.claim_id)
+        self.assertEqual(context.exception.message, "Required date missing from data")
 
 class TestClaim(unittest.TestCase):
     def setUp(self):
