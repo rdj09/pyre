@@ -1,6 +1,6 @@
 from datetime import date
 from enum import Enum
-from typing import Any, List, Dict, Sequence
+from typing import Any, Dict, Sequence
 from pyre.treaty.layer_loss_functions import layer_loss_calculation
 from pyre.claims.claims import ClaimYearType
 from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
