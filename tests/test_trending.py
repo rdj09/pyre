@@ -167,13 +167,13 @@ class TestTrending(unittest.TestCase):
         self.assertIsInstance(factors, dict)
         
         # Check that the dictionary contains the expected keys
-        self.assertIn('exposure_trend_factors', factors)
-        self.assertIn('claim_trend_factors', factors)
+        self.assertIn('exposure', factors)
+        self.assertIn('claim', factors)
         self.assertIn('base_year', factors)
         
         # Check that the values are correct
-        self.assertEqual(factors['exposure_trend_factors'], self.exposure_trend_factors)
-        self.assertEqual(factors['claim_trend_factors'], self.claim_trend_factors)
+        self.assertEqual(factors['exposure'], self.exposure_trend_factors)
+        self.assertEqual(factors['claim'], self.claim_trend_factors)
         self.assertEqual(factors['base_year'], 2020)
 
 class TestStandaloneFunctions(unittest.TestCase):

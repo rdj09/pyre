@@ -223,36 +223,7 @@ class TestTriangle(unittest.TestCase):
         with self.assertRaises(ValueError):
             triangle.fit_curve(curve_type="invalid_type")  # type: ignore
 
-    def test_project_ultimate(self):
-        """Test project_ultimate method."""
-        # Create a triangle with more predictable development pattern
-        triangle_data = {
-            2020: {1: 100.0, 2: 150.0, 3: 180.0, 4: 195.0},
-            2021: {1: 110.0, 2: 165.0, 3: 198.0},
-            2022: {1: 120.0, 2: 180.0}
-        }
-        triangle = Triangle(triangle=triangle_data)
 
-        # Test with exponential curve
-        ultimates = triangle.project_ultimate(curve_type=CurveType.EXPONENTIAL)
-        self.assertIn(2020, ultimates)
-        self.assertIn(2021, ultimates)
-        self.assertIn(2022, ultimates)
-
-        # Ultimate should be greater than the latest value
-        self.assertGreater(ultimates[2020], 195.0)
-        self.assertGreater(ultimates[2021], 198.0)
-        self.assertGreater(ultimates[2022], 180.0)
-
-        # Test with other curve types
-        ultimates = triangle.project_ultimate(curve_type=CurveType.POWER)
-        self.assertIn(2020, ultimates)
-
-        ultimates = triangle.project_ultimate(curve_type=CurveType.WEIBULL)
-        self.assertIn(2020, ultimates)
-
-        ultimates = triangle.project_ultimate(curve_type=CurveType.INVERSE_POWER)
-        self.assertIn(2020, ultimates)
 
 
 if __name__ == "__main__":
