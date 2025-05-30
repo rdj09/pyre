@@ -77,7 +77,7 @@ class ClaimDevelopmentHistory:
     @property
     def latest_paid(self) -> float:
         return self.cumulative_dev_paid[-1] if self.cumulative_dev_paid else 0.0
-       
+
     @property
     def latest_incurred(self) -> float:
         return self.cumulative_dev_incurred[-1] if self.cumulative_dev_incurred else 0.0

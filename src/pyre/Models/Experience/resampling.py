@@ -1,11 +1,10 @@
-from pyre.Models.models import Model
 from pyre.Models.Experience.experience_preparer import ExperienceModelData 
 from random import choice
 
 
-class resampling(Model)
+class resampling()
     def __init__(self, claims: ExperienceModelData) -> None:
-        self._claims = ExperienceModelData.claims
+        self._claims = ExperienceModelData.trended_claims #trended loss prior to subject losses
         
     
     def resample(self) -> None:

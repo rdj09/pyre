@@ -57,7 +57,7 @@ class BurnCostModel():
         self._years_weighting = years_weighting if years_weighting else {year: 1.0 for year in model_data.exposures.modelling_years}
         self._projection_methods = projection_methods if projection_methods else {year : ProjectionMethods.SIMPLE_CAPE_COD for year in model_data.exposures.modelling_years} # Default to simple cape cod method
         self._development_pattern = development_pattern if development_pattern else {year: 1.0 for year in model_data.exposures.modelling_years} # Default to no development pattern
-        self._a_priori = a_priori_assumption if a_priori_assumption else {year: 0.0 for year in model_data.exposures.modelling_years} . # Default to no a priori assumption
+        self._a_priori = a_priori_assumption if a_priori_assumption else {year: 0.0 for year in model_data.exposures.modelling_years} # Default to no a priori assumption
         self._data = model_data
         self._layer_id = layer_id
     
