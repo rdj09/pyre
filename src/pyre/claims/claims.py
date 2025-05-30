@@ -1,7 +1,6 @@
-from dataclasses import dataclass, field
 from datetime import date
 import operator
-from typing import Any, Optional, List, Sequence, Set
+from typing import Optional, List, Sequence, Set
 from enum import Enum, auto
 
 from pyre.exceptions.exceptions import ClaimsException
@@ -18,7 +17,6 @@ class ClaimYearType(Enum):
     UNDERWRITING_YEAR = auto()
     REPORTED_YEAR = auto()
 
-@dataclass
 class ClaimDevelopmentHistory:
     """Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.
     
@@ -41,9 +39,34 @@ class ClaimDevelopmentHistory:
         incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
             Converts a sequence of cumulative values into incremental values.
     """
-    development_months: Any | Sequence[int] = field(default_factory=list)
-    cumulative_dev_paid: Any | Sequence[float] = field(default_factory=list)
-    cumulative_dev_incurred: Any |Sequence[float] = field(default_factory=list)
+    def __init__(self, development_months=None, cumulative_dev_paid=None, cumulative_dev_incurred=None):
+        self._development_months = development_months if development_months is not None else []
+        self._cumulative_dev_paid = cumulative_dev_paid if cumulative_dev_paid is not None else []
+        self._cumulative_dev_incurred = cumulative_dev_incurred if cumulative_dev_incurred is not None else []
+
+    @property
+    def development_months(self):
+        return self._development_months
+
+    @development_months.setter
+    def development_months(self, value:list[int]):
+        self._development_months = value
+
+    @property
+    def cumulative_dev_paid(self):
+        return self._cumulative_dev_paid
+
+    @cumulative_dev_paid.setter
+    def cumulative_dev_paid(self, value:list[float]):
+        self._cumulative_dev_paid = value
+
+    @property
+    def cumulative_dev_incurred(self):
+        return self._cumulative_dev_incurred
+
+    @cumulative_dev_incurred.setter
+    def cumulative_dev_incurred(self, value:List[float]):
+        self._cumulative_dev_incurred = value
 
     @property
     def cumulative_reserved_amount(self) -> list[float]:
@@ -89,7 +112,6 @@ class ClaimDevelopmentHistory:
             return time_weighted_payments / self.latest_paid
         return None
 
-@dataclass
 class ClaimsMetaData:
     """Metadata for an insurance claim, including key dates, financial limits, and classification details.
     
@@ -109,17 +131,119 @@ class ClaimsMetaData:
     Properties:
         modelling_year (ClaimsException | int): Returns the modelling year based on the claim_year_basis, or raises ClaimsException if required date is missing.
     """
-    claim_id: str
-    currency: str
-    contract_limit: float = 0.0
-    contract_deductible: float = 0.0
-    claim_in_xs_of_deductible: bool = False
-    claim_year_basis: ClaimYearType = ClaimYearType.ACCIDENT_YEAR
-    loss_date: date = date(day=1,month=1,year= 1900)
-    policy_inception_date: date = date(day=1,month=1,year= 1900)
-    report_date: date = date(day=1,month=1,year= 1900)
-    line_of_business: Optional[str] = None
-    status: Optional[str] = "Open"
+    def __init__(
+        self,
+        claim_id: str,
+        currency: str,
+        contract_limit: float = 0.0,
+        contract_deductible: float = 0.0,
+        claim_in_xs_of_deductible: bool = False,
+        claim_year_basis: ClaimYearType = ClaimYearType.ACCIDENT_YEAR,
+        loss_date: date = date(day=1, month=1, year=1900),
+        policy_inception_date: date = date(day=1, month=1, year=1900),
+        report_date: date = date(day=1, month=1, year=1900),
+        line_of_business: Optional[str] = None,
+        status: Optional[str] = "Open"
+    ):
+        self._claim_id = claim_id
+        self._currency = currency
+        self._contract_limit = contract_limit
+        self._contract_deductible = contract_deductible
+        self._claim_in_xs_of_deductible = claim_in_xs_of_deductible
+        self._claim_year_basis = claim_year_basis
+        self._loss_date = loss_date
+        self._policy_inception_date = policy_inception_date
+        self._report_date = report_date
+        self._line_of_business = line_of_business
+        self._status = status
+
+    @property
+    def claim_id(self):
+        return self._claim_id
+
+    @claim_id.setter
+    def claim_id(self, value):
+        self._claim_id = value
+
+    @property
+    def currency(self):
+        return self._currency
+
+    @currency.setter
+    def currency(self, value):
+        self._currency = value
+
+    @property
+    def contract_limit(self):
+        return self._contract_limit
+
+    @contract_limit.setter
+    def contract_limit(self, value):
+        self._contract_limit = value
+
+    @property
+    def contract_deductible(self):
+        return self._contract_deductible
+
+    @contract_deductible.setter
+    def contract_deductible(self, value):
+        self._contract_deductible = value
+
+    @property
+    def claim_in_xs_of_deductible(self):
+        return self._claim_in_xs_of_deductible
+
+    @claim_in_xs_of_deductible.setter
+    def claim_in_xs_of_deductible(self, value):
+        self._claim_in_xs_of_deductible = value
+
+    @property
+    def claim_year_basis(self):
+        return self._claim_year_basis
+
+    @claim_year_basis.setter
+    def claim_year_basis(self, value):
+        self._claim_year_basis = value
+
+    @property
+    def loss_date(self):
+        return self._loss_date
+
+    @loss_date.setter
+    def loss_date(self, value):
+        self._loss_date = value
+
+    @property
+    def policy_inception_date(self):
+        return self._policy_inception_date
+
+    @policy_inception_date.setter
+    def policy_inception_date(self, value):
+        self._policy_inception_date = value
+
+    @property
+    def report_date(self):
+        return self._report_date
+
+    @report_date.setter
+    def report_date(self, value):
+        self._report_date = value
+
+    @property
+    def line_of_business(self):
+        return self._line_of_business
+
+    @line_of_business.setter
+    def line_of_business(self, value):
+        self._line_of_business = value
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        self._status = value
 
     @property
     def modelling_year (self) -> ClaimsException | int:

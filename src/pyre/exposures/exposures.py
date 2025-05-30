@@ -1,4 +1,3 @@
-from dataclasses import dataclass 
 import operator
 from typing import List, Optional
 from datetime import date
@@ -15,7 +14,6 @@ class ExposureBasis(Enum):
     EARNED = auto()
     WRITTEN = auto()
 
-@dataclass
 class ExposureMetaData():
     """Represents metadata for an insurance exposure, including identification, period, and classification details.
     
@@ -36,25 +34,133 @@ class ExposureMetaData():
     Properties:
         exposure_term_length_days (int): Number of days in the exposure period.
     """
+    def __init__(
+        self,
+        exposure_id: str,
+        exposure_name: str,
+        exposure_period_start: date,
+        exposure_period_end: date,
+        currency: str,
+        aggregate: bool = False,
+        line_of_business: Optional[str] = None,
+        stacking_id: Optional[str] = None,
+        exposure_type: Optional[ExposureBasis] = ExposureBasis.EARNED,
+        location: Optional[str] = None,
+        peril: Optional[str] = None,
+        occupancy: Optional[str] = None
+    ):
+        self._exposure_id = exposure_id
+        self._exposure_name = exposure_name
+        self._exposure_period_start = exposure_period_start
+        self._exposure_period_end = exposure_period_end
+        self._currency = currency
+        self._aggregate = aggregate
+        self._line_of_business = line_of_business
+        self._stacking_id = stacking_id
+        self._exposure_type = exposure_type
+        self._location = location
+        self._peril = peril
+        self._occupancy = occupancy
 
-    exposure_id: str
-    exposure_name: str
-    exposure_period_start: date
-    exposure_period_end: date
-    currency: str
-    aggregate: bool = False
-    line_of_business: Optional[str] = None
-    stacking_id: Optional[str] = None
-    exposure_type: Optional[ExposureBasis] = ExposureBasis.EARNED
-    location: Optional[str] = None
-    peril: Optional[str] = None
-    occupancy: Optional[str] = None
-    
+    @property
+    def exposure_id(self):
+        return self._exposure_id
+
+    @exposure_id.setter
+    def exposure_id(self, value):
+        self._exposure_id = value
+
+    @property
+    def exposure_name(self):
+        return self._exposure_name
+
+    @exposure_name.setter
+    def exposure_name(self, value):
+        self._exposure_name = value
+
+    @property
+    def exposure_period_start(self):
+        return self._exposure_period_start
+
+    @exposure_period_start.setter
+    def exposure_period_start(self, value):
+        self._exposure_period_start = value
+
+    @property
+    def exposure_period_end(self):
+        return self._exposure_period_end
+
+    @exposure_period_end.setter
+    def exposure_period_end(self, value):
+        self._exposure_period_end = value
+
+    @property
+    def currency(self):
+        return self._currency
+
+    @currency.setter
+    def currency(self, value):
+        self._currency = value
+
+    @property
+    def aggregate(self):
+        return self._aggregate
+
+    @aggregate.setter
+    def aggregate(self, value):
+        self._aggregate = value
+
+    @property
+    def line_of_business(self):
+        return self._line_of_business
+
+    @line_of_business.setter
+    def line_of_business(self, value):
+        self._line_of_business = value
+
+    @property
+    def stacking_id(self):
+        return self._stacking_id
+
+    @stacking_id.setter
+    def stacking_id(self, value):
+        self._stacking_id = value
+
+    @property
+    def exposure_type(self):
+        return self._exposure_type
+
+    @exposure_type.setter
+    def exposure_type(self, value):
+        self._exposure_type = value
+
+    @property
+    def location(self):
+        return self._location
+
+    @location.setter
+    def location(self, value):
+        self._location = value
+
+    @property
+    def peril(self):
+        return self._peril
+
+    @peril.setter
+    def peril(self, value):
+        self._peril = value
+
+    @property
+    def occupancy(self):
+        return self._occupancy
+
+    @occupancy.setter
+    def occupancy(self, value):
+        self._occupancy = value
     @property
     def exposure_term_length_days(self) -> int:
         return (self.exposure_period_end - self.exposure_period_start).days
     
-@dataclass
 class ExposureValues: #TODO consider fleshing out identifiers etc (differing class/coverage values BI/PD ...)
     """Represents the key financial values associated with an insurance exposure.
     
@@ -63,10 +169,34 @@ class ExposureValues: #TODO consider fleshing out identifiers etc (differing cla
         attachment_point (float): The threshold amount at which coverage begins to apply.
         limit (float): The maximum amount payable under the coverage.
     """
+    def __init__(self, exposure_value: float, attachment_point: float, limit: float):
+        self._exposure_value = exposure_value
+        self._attachment_point = attachment_point
+        self._limit = limit
 
-    exposure_value: float
-    attachment_point: float
-    limit: float
+    @property
+    def exposure_value(self):
+        return self._exposure_value
+
+    @exposure_value.setter
+    def exposure_value(self, value:float):
+        self._exposure_value = value
+
+    @property
+    def attachment_point(self):
+        return self._attachment_point
+
+    @attachment_point.setter
+    def attachment_point(self, value:float):
+        self._attachment_point = value
+
+    @property
+    def limit(self):
+        return self._limit
+
+    @limit.setter
+    def limit(self, value:float):
+        self._limit = value
 
 class Exposure:
     """Represents an insurance exposure with associated metadata and values.

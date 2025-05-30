@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Dict
 from pyre.Models.trending import trend_claims, trend_exposures
 from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims
@@ -6,11 +5,39 @@ from pyre.exposures.exposures import Exposures
 from pyre.treaty.contracts import RIContract
 
 
-@dataclass
 class ExperienceModelData():
-    claims: Claims
-    exposures : Exposures 
-    ri_contract: RIContract
+    """
+    ExperienceModelData is a data class that holds the claims and exposures data for a reinsurance contract.    
+    It provides methods to trend claims and exposures, apply reinsurance contract layers, and aggregate results by modelling year and layer.
+    """
+    def __init__(self, claims:Claims, exposures:Exposures, ri_contract:RIContract):
+        self._claims = claims
+        self._exposures = exposures
+        self._ri_contract = ri_contract
+
+    @property
+    def claims(self):
+        return self._claims
+
+    @claims.setter
+    def claims(self, value:Claims):
+        self._claims = value
+
+    @property
+    def exposures(self):
+        return self._exposures
+
+    @exposures.setter
+    def exposures(self, value:Exposures):
+        self._exposures = value
+
+    @property
+    def ri_contract(self):
+        return self._ri_contract
+
+    @ri_contract.setter
+    def ri_contract(self, value:RIContract):
+        self._ri_contract = value
     
     @property
     def trended_claims(self):
