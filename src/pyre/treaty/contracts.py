@@ -4,13 +4,7 @@ from typing import Any, Dict, Sequence
 from pyre.treaty.layer_loss_functions import layer_loss_calculation
 from pyre.claims.claims import ClaimYearType
 from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
-
-class ContractType(Enum):
-    QUOTA_SHARE = "Quota Share"
-    EXCESS_OF_LOSS = "Excess of Loss"
-    FRANCHISE_DEDUCTIBLE = "Franchise Deductible"
-    SURPLUS_SHARE = "Surplus Share"
-    AGGREGATE_STOP_LOSS = "Aggregate Stop Loss"
+from pyre.treaty.contract_types import ContractType
 
 class ClaimTriggerBasis(Enum):
     LOD = "Losses Occurrence" #Accident Year
@@ -67,7 +61,7 @@ class RILayer:
         self._cession = cession
         self._inures_to_benefit_of = inures_to_benefit_of if inures_to_benefit_of is not None else []
         self._interlocking_classes = interlocking_classes if interlocking_classes is not None else []
-    
+
 
     @property
     def layer_id(self):
@@ -208,11 +202,11 @@ class RILayer:
     @property
     def written_line_premium(self) -> float:
         return self.cession * self.written_line * self.full_subject_premium
-    
+
     @property
     def signed_line_premium(self) -> float | Any:
         return self.cession * self.signed_line * self.full_subject_premium
-    
+
     def loss_to_layer_fn(self, gross_amount:float):
         func = layer_loss_calculation[self.layer_type]
         if self.layer_type == ContractType.QUOTA_SHARE:
@@ -351,4 +345,3 @@ class RIContract:
     @property
     def layer_ids(self) -> list:
         return [layer.layer_id for layer in self._layers]
-
