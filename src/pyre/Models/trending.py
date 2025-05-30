@@ -1,6 +1,6 @@
 from typing import Dict
 from pyre.claims.claims import Claims, Claim, ClaimDevelopmentHistory
-from pyre.exposures.exposures import Exposures
+from pyre.exposures.exposures import Exposure, Exposures
 
 def calculate_trend_factor(origin_year: int, base_year:int, trend_factors: Dict[int, float]) -> float:
     if origin_year == base_year:
@@ -23,7 +23,7 @@ def trend_exposures(exposures: Exposures,trend_factors: Dict[int, float], base_y
         origin_year = getattr(exposure, "exposure_year", None)
         value = getattr(exposure, "value", None)
         if origin_year is not None and value is not None:
-            trend_factor = calculate_trend_factor(origin_year)
+            trend_factor = calculate_trend_factor(origin_year=origin_year, trend_factors=trend_factors, base_year=base_year)
             trended_value = value * trend_factor
             # Create a new Exposure object with the trended value, copying other attributes
             new_exposure = Exposure(
@@ -51,7 +51,7 @@ def trend_claims(claims: Claims,trend_factors: Dict[int, float],base_year: int) 
     for claim in claims.claims:
         # Get the modelling year for trending
         origin_year = claim._claims_meta_data.modelling_year
-        trend_factor = calculate_trend_factor(origin_year, base_year, trend_factors)
+        trend_factor = calculate_trend_factor(origin_year=origin_year, trend_factors=trend_factors, base_year=base_year)
 
         # Trend all paid and incurred values in the development history
         dev_hist = claim._claim_development_history
