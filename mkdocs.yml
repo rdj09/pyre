@@ -1,4 +1,5 @@
 site_name: pyRE - python package for non-life reinsurance pricing
+site_url: https://rdj09.github.io/pyre/
 theme:
   name: material
   palette:
