@@ -12,6 +12,8 @@
         <link rel="prev" href="../claims/">
       
       
+        <link rel="next" href="../models/">
+      
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
@@ -70,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#exposures" class="md-skip">
+        <a href="#exposures-module" class="md-skip">
           Skip to content
         </a>
       
@@ -207,29 +209,7 @@
   
   
   <span class="md-ellipsis">
-    pyRE
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../about/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Boilerplate
+    Home
     
   </span>
   
@@ -318,6 +298,72 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#core-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exposures-data-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exposures Data Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-and-working-with-exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Working with Exposures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-multiple-exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Multiple Exposures
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pyre.exposures.exposures" class="md-nav__link">
     <span class="md-ellipsis">
       exposures
@@ -332,6 +378,66 @@
       Exposure
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Exposure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.exposure_meta" class="md-nav__link">
+    <span class="md-ellipsis">
+      exposure_meta
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.exposure_values" class="md-nav__link">
+    <span class="md-ellipsis">
+      exposure_values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.modelling_year" class="md-nav__link">
+    <span class="md-ellipsis">
+      modelling_year
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.earned_exposure_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      earned_exposure_value
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.written_exposure_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      written_exposure_value
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -351,6 +457,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ExposureMetaData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.ExposureMetaData.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -359,6 +480,21 @@
       ExposureValues
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="ExposureValues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.ExposureValues.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -369,12 +505,160 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Exposures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      exposures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.modelling_years" class="md-nav__link">
+    <span class="md-ellipsis">
+      modelling_years
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.__getitem__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __getitem__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.__iter__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __iter__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.__len__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __len__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.append" class="md-nav__link">
+    <span class="md-ellipsis">
+      append
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../treaty/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Treaty
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rate_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rate Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -406,6 +690,72 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#core-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#exposures-data-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Exposures Data Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-and-working-with-exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Working with Exposures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-multiple-exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Multiple Exposures
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#pyre.exposures.exposures" class="md-nav__link">
     <span class="md-ellipsis">
       exposures
@@ -420,6 +770,66 @@
       Exposure
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Exposure">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.exposure_meta" class="md-nav__link">
+    <span class="md-ellipsis">
+      exposure_meta
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.exposure_values" class="md-nav__link">
+    <span class="md-ellipsis">
+      exposure_values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.modelling_year" class="md-nav__link">
+    <span class="md-ellipsis">
+      modelling_year
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.earned_exposure_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      earned_exposure_value
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposure.written_exposure_value" class="md-nav__link">
+    <span class="md-ellipsis">
+      written_exposure_value
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -439,6 +849,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ExposureMetaData">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.ExposureMetaData.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -448,6 +873,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="ExposureValues">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.ExposureValues.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -456,6 +896,66 @@
       Exposures
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Exposures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      exposures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.modelling_years" class="md-nav__link">
+    <span class="md-ellipsis">
+      modelling_years
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.__getitem__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __getitem__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.__iter__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __iter__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.__len__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __len__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pyre.exposures.exposures.Exposures.append" class="md-nav__link">
+    <span class="md-ellipsis">
+      append
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -475,7 +975,133 @@
 
 
 
-<h1 id="exposures">Exposures</h1>
+<h1 id="exposures-module">Exposures Module</h1>
+<p>The Exposures module provides tools for managing and analyzing exposure data in reinsurance contexts. It includes classes for representing individual exposures, collections of exposures, and methods for calculating earned and written exposure values.</p>
+<h2 id="core-classes">Core Classes</h2>
+<h3 id="exposures-data-structure">Exposures Data Structure</h3>
+<p>The module provides a hierarchical structure for representing exposures:</p>
+<ul>
+<li><code>ExposureBasis</code>: An enumeration defining different exposure bases (Earned, Written, etc.)</li>
+<li><code>ExposureMetaData</code>: Contains metadata about an exposure (ID, name, dates, currency, etc.)</li>
+<li><code>ExposureValues</code>: Contains financial values related to exposures (value, attachment point, limit)</li>
+<li><code>Exposure</code>: Combines metadata and values for a single exposure</li>
+<li><code>Exposures</code>: A collection of Exposure objects with methods to access and manipulate them</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h3 id="creating-and-working-with-exposures">Creating and Working with Exposures</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyre.exposures.exposures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Exposure</span><span class="p">,</span> <span class="n">Exposures</span><span class="p">,</span> <span class="n">ExposureMetaData</span><span class="p">,</span> <span class="n">ExposureValues</span><span class="p">,</span> <span class="n">ExposureBasis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+
+<span class="c1"># Create exposure metadata</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">ExposureMetaData</span><span class="p">(</span>
+    <span class="n">exposure_id</span><span class="o">=</span><span class="s2">&quot;EXP001&quot;</span><span class="p">,</span>
+    <span class="n">exposure_name</span><span class="o">=</span><span class="s2">&quot;Property Portfolio A&quot;</span><span class="p">,</span>
+    <span class="n">exposure_period_start</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">exposure_period_end</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
+    <span class="n">aggregate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">line_of_business</span><span class="o">=</span><span class="s2">&quot;Property&quot;</span><span class="p">,</span>
+    <span class="n">exposure_type</span><span class="o">=</span><span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">,</span>
+    <span class="n">location</span><span class="o">=</span><span class="s2">&quot;US East Coast&quot;</span><span class="p">,</span>
+    <span class="n">peril</span><span class="o">=</span><span class="s2">&quot;Hurricane&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># Create exposure values</span>
+<span class="n">values</span> <span class="o">=</span> <span class="n">ExposureValues</span><span class="p">(</span>
+    <span class="n">exposure_value</span><span class="o">=</span><span class="mi">10000000</span><span class="p">,</span>
+    <span class="n">attachment_point</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span>
+    <span class="n">limit</span><span class="o">=</span><span class="mi">5000000</span>
+<span class="p">)</span>
+
+<span class="c1"># Create an exposure</span>
+<span class="n">exposure</span> <span class="o">=</span> <span class="n">Exposure</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+<span class="c1"># Access exposure properties</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exposure ID: </span><span class="si">{</span><span class="n">exposure</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exposure Name: </span><span class="si">{</span><span class="n">exposure</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exposure Value: </span><span class="si">{</span><span class="n">exposure</span><span class="o">.</span><span class="n">exposure_values</span><span class="o">.</span><span class="n">exposure_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Term Length (days): </span><span class="si">{</span><span class="n">exposure</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_term_length_days</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Calculate earned exposure as of a specific date</span>
+<span class="n">analysis_date</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>  <span class="c1"># Mid-year</span>
+<span class="n">earned_value</span> <span class="o">=</span> <span class="n">exposure</span><span class="o">.</span><span class="n">earned_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Earned exposure as of </span><span class="si">{</span><span class="n">analysis_date</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">earned_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Calculate written exposure</span>
+<span class="n">written_value</span> <span class="o">=</span> <span class="n">exposure</span><span class="o">.</span><span class="n">written_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Written exposure as of </span><span class="si">{</span><span class="n">analysis_date</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">written_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create a collection of exposures</span>
+<span class="n">exposures_collection</span> <span class="o">=</span> <span class="n">Exposures</span><span class="p">([</span><span class="n">exposure</span><span class="p">])</span>
+
+<span class="c1"># Add another exposure</span>
+<span class="n">second_exposure</span> <span class="o">=</span> <span class="n">Exposure</span><span class="p">(</span>
+    <span class="n">ExposureMetaData</span><span class="p">(</span>
+        <span class="s2">&quot;EXP002&quot;</span><span class="p">,</span> 
+        <span class="s2">&quot;Property Portfolio B&quot;</span><span class="p">,</span>
+        <span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">date</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+        <span class="s2">&quot;EUR&quot;</span><span class="p">,</span>
+        <span class="n">exposure_type</span><span class="o">=</span><span class="n">ExposureBasis</span><span class="o">.</span><span class="n">WRITTEN</span>
+    <span class="p">),</span>
+    <span class="n">ExposureValues</span><span class="p">(</span><span class="mi">5000000</span><span class="p">,</span> <span class="mi">500000</span><span class="p">,</span> <span class="mi">2000000</span><span class="p">)</span>
+<span class="p">)</span>
+<span class="n">exposures_collection</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">second_exposure</span><span class="p">)</span>
+
+<span class="c1"># Access exposures in the collection</span>
+<span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exposures_collection</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exposure </span><span class="si">{</span><span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_id</span><span class="si">}</span><span class="s2"> - &quot;</span>
+          <span class="sa">f</span><span class="s2">&quot;Period: </span><span class="si">{</span><span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_period_start</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_period_end</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Get unique modelling years</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Modelling years: </span><span class="si">{</span><span class="n">exposures_collection</span><span class="o">.</span><span class="n">modelling_years</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="working-with-multiple-exposures">Working with Multiple Exposures</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyre.exposures.exposures</span><span class="w"> </span><span class="kn">import</span> <span class="n">Exposures</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+
+<span class="c1"># Assuming we have an Exposures collection called &#39;exposures_data&#39;</span>
+
+<span class="c1"># Calculate total earned exposure as of a specific date</span>
+<span class="n">analysis_date</span> <span class="o">=</span> <span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+<span class="n">total_earned</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">earned_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exposures_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total earned exposure as of </span><span class="si">{</span><span class="n">analysis_date</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">total_earned</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Group exposures by line of business</span>
+<span class="n">lob_exposures</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exposures_data</span><span class="p">:</span>
+    <span class="n">lob</span> <span class="o">=</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">line_of_business</span>
+    <span class="k">if</span> <span class="n">lob</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lob_exposures</span><span class="p">:</span>
+        <span class="n">lob_exposures</span><span class="p">[</span><span class="n">lob</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lob_exposures</span><span class="p">[</span><span class="n">lob</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exp</span><span class="p">)</span>
+
+<span class="c1"># Calculate earned exposure by line of business</span>
+<span class="k">for</span> <span class="n">lob</span><span class="p">,</span> <span class="n">exps</span> <span class="ow">in</span> <span class="n">lob_exposures</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">lob_earned</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exp</span><span class="o">.</span><span class="n">earned_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span> <span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exps</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Earned exposure for </span><span class="si">{</span><span class="n">lob</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">lob_earned</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Convert exposures to a pandas DataFrame for analysis</span>
+<span class="n">exposure_data</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">exp</span> <span class="ow">in</span> <span class="n">exposures_data</span><span class="p">:</span>
+    <span class="n">exposure_data</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_id</span><span class="p">,</span>
+        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_name</span><span class="p">,</span>
+        <span class="s1">&#39;lob&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">line_of_business</span><span class="p">,</span>
+        <span class="s1">&#39;start_date&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_period_start</span><span class="p">,</span>
+        <span class="s1">&#39;end_date&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_meta</span><span class="o">.</span><span class="n">exposure_period_end</span><span class="p">,</span>
+        <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">exposure_values</span><span class="o">.</span><span class="n">exposure_value</span><span class="p">,</span>
+        <span class="s1">&#39;earned_value&#39;</span><span class="p">:</span> <span class="n">exp</span><span class="o">.</span><span class="n">earned_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+    <span class="p">})</span>
+
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">exposure_data</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+
+<span class="c1"># Analyze exposures by various dimensions</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total exposure by LOB:</span><span class="se">\n</span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;lob&#39;</span><span class="p">)[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average exposure by LOB:</span><span class="se">\n</span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;lob&#39;</span><span class="p">)[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="api-reference">API Reference</h2>
 
 
 <div class="doc doc-object doc-module">
@@ -534,12 +1160,7 @@ methods to calculate earned exposure based on an analysis date.</p>
           <tr class="doc-section-item">
             <td><code><span title="pyre.exposures.exposures.Exposure._exposure_meta">_exposure_meta</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="ExposureMetaData
-
-
-  
-      dataclass
-   (pyre.exposures.exposures.ExposureMetaData)" href="#pyre.exposures.exposures.ExposureMetaData">ExposureMetaData</a></code>
+                  <code><a class="autorefs autorefs-internal" title="ExposureMetaData (pyre.exposures.exposures.ExposureMetaData)" href="#pyre.exposures.exposures.ExposureMetaData">ExposureMetaData</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -550,12 +1171,7 @@ methods to calculate earned exposure based on an analysis date.</p>
           <tr class="doc-section-item">
             <td><code><span title="pyre.exposures.exposures.Exposure._exposure_values">_exposure_values</span></code></td>
             <td>
-                  <code><a class="autorefs autorefs-internal" title="ExposureValues
-
-
-  
-      dataclass
-   (pyre.exposures.exposures.ExposureValues)" href="#pyre.exposures.exposures.ExposureValues">ExposureValues</a></code>
+                  <code><a class="autorefs autorefs-internal" title="ExposureValues (pyre.exposures.exposures.ExposureValues)" href="#pyre.exposures.exposures.ExposureValues">ExposureValues</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -569,7 +1185,9 @@ methods to calculate earned exposure based on an analysis date.</p>
 
 <details class="properties" open>
   <summary>Properties</summary>
-  <p>modelling_year (int): The calendar year in which the exposure period starts.</p>
+  <p>exposure_meta (ExposureMetaData): The metadata associated with this exposure.
+exposure_values (ExposureValues): The values associated with this exposure.
+modelling_year (int): The calendar year in which the exposure period starts.</p>
 </details>
 
 <p><span class="doc-section-title">Methods:</span></p>
@@ -582,11 +1200,20 @@ methods to calculate earned exposure based on an analysis date.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><span title="pyre.exposures.exposures.Exposure.earned_exposure_value">earned_exposure_value</span></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="earned_exposure_value(analysis_date) (pyre.exposures.exposures.Exposure.earned_exposure_value)" href="#pyre.exposures.exposures.Exposure.earned_exposure_value">earned_exposure_value</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>date) -&gt; float:
 Calculates the earned portion of the exposure value as of the given analysis date.</p>
+                </div>
+              </td>
+            </tr>
+            <tr class="doc-section-item">
+              <td><code><a class="autorefs autorefs-internal" title="written_exposure_value(analysis_date) (pyre.exposures.exposures.Exposure.written_exposure_value)" href="#pyre.exposures.exposures.Exposure.written_exposure_value">written_exposure_value</a></code></td>
+              <td>
+                <div class="doc-md-description">
+                  <p>date) -&gt; float:
+Calculates the written exposure value as of the given analysis date.</p>
                 </div>
               </td>
             </tr>
@@ -601,41 +1228,114 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exposure</span><span class="p">:</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exposure</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents an insurance exposure with associated metadata and values.</span>
 
 <span class="sd">    This class encapsulates the metadata and values for a single exposure, providing</span>
@@ -646,30 +1346,103 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 <span class="sd">        _exposure_values (ExposureValues): Values associated with the exposure.</span>
 
 <span class="sd">    Properties:</span>
+<span class="sd">        exposure_meta (ExposureMetaData): The metadata associated with this exposure.</span>
+<span class="sd">        exposure_values (ExposureValues): The values associated with this exposure.</span>
 <span class="sd">        modelling_year (int): The calendar year in which the exposure period starts.</span>
 
 <span class="sd">    Methods:</span>
 <span class="sd">        earned_exposure_value(analysis_date: date) -&gt; float:</span>
 <span class="sd">            Calculates the earned portion of the exposure value as of the given analysis date.</span>
+<span class="sd">        written_exposure_value(analysis_date: date) -&gt; float:</span>
+<span class="sd">            Calculates the written exposure value as of the given analysis date.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure_meta</span><span class="p">:</span> <span class="n">ExposureMetaData</span><span class="p">,</span> <span class="n">exposure_values</span><span class="p">:</span> <span class="n">ExposureValues</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an Exposure instance.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exposure_meta (ExposureMetaData): Metadata describing the exposure period and characteristics.</span>
+<span class="sd">            exposure_values (ExposureValues): Values associated with the exposure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span> <span class="o">=</span> <span class="n">exposure_meta</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span> <span class="o">=</span> <span class="n">exposure_values</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_meta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExposureMetaData</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the metadata associated with this exposure.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ExposureMetaData: The metadata object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExposureValues</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the values associated with this exposure.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ExposureValues: The values object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">modelling_year</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the modelling year for this exposure.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The calendar year in which the exposure period starts.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_period_start</span><span class="o">.</span><span class="n">year</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_earned_pct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the earned percentage of the exposure as of the given analysis date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            analysis_date (date): The date for which to calculate the earned percentage.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The earned percentage (0.0 to 1.0). Returns 0.0 if the exposure term length is 0</span>
+<span class="sd">                  or if the exposure is aggregate.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_term_length_days</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="mf">0.0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">aggregate</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mf">0.0</span> <span class="c1">#TODO parallelogram method when handling aggreagte exposures</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">aggregate</span><span class="p">:</span>  <span class="c1"># No need for == True</span>
+            <span class="k">return</span> <span class="mf">0.0</span>  <span class="c1"># TODO: Implement parallelogram method when handling aggregate exposures</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">((</span><span class="n">analysis_date</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_period_start</span><span class="p">)</span><span class="o">.</span><span class="n">days</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_term_length_days</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">earned_exposure_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_earned_pct</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the earned exposure value as of the given analysis date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            analysis_date (date): The date for which to calculate the earned exposure value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The earned exposure value. If the exposure type is EARNED, this is the full</span>
+<span class="sd">                  exposure value. Otherwise, it&#39;s the exposure value multiplied by the earned percentage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_type</span> <span class="o">==</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_earned_pct</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">written_exposure_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the written exposure value as of the given analysis date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            analysis_date (date): The date for which to calculate the written exposure value.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: The written exposure value. If the exposure type is EARNED, this is calculated</span>
+<span class="sd">                  by dividing the exposure value by the earned percentage. If the earned percentage</span>
+<span class="sd">                  is zero, returns the exposure value directly to avoid division by zero.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_type</span> <span class="o">==</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">:</span>
+            <span class="n">earned_pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_earned_pct</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">earned_pct</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span> <span class="o">/</span> <span class="n">earned_pct</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span>  <span class="c1"># Avoid division by zero</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -683,7 +1456,445 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
 
 
+<div class="doc doc-object doc-attribute">
 
+
+
+<h3 id="pyre.exposures.exposures.Exposure.exposure_meta" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">exposure_meta</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the metadata associated with this exposure.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>ExposureMetaData</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="ExposureMetaData (pyre.exposures.exposures.ExposureMetaData)" href="#pyre.exposures.exposures.ExposureMetaData">ExposureMetaData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The metadata object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="pyre.exposures.exposures.Exposure.exposure_values" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">exposure_values</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the values associated with this exposure.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>ExposureValues</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="ExposureValues (pyre.exposures.exposures.ExposureValues)" href="#pyre.exposures.exposures.ExposureValues">ExposureValues</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The values object.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="pyre.exposures.exposures.Exposure.modelling_year" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">modelling_year</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the modelling year for this exposure.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The calendar year in which the exposure period starts.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposure.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">exposure_meta</span><span class="p">,</span> <span class="n">exposure_values</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize an Exposure instance.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_meta</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ExposureMetaData (pyre.exposures.exposures.ExposureMetaData)" href="#pyre.exposures.exposures.ExposureMetaData">ExposureMetaData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Metadata describing the exposure period and characteristics.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_values</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="ExposureValues (pyre.exposures.exposures.ExposureValues)" href="#pyre.exposures.exposures.ExposureValues">ExposureValues</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Values associated with the exposure.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure_meta</span><span class="p">:</span> <span class="n">ExposureMetaData</span><span class="p">,</span> <span class="n">exposure_values</span><span class="p">:</span> <span class="n">ExposureValues</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an Exposure instance.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exposure_meta (ExposureMetaData): Metadata describing the exposure period and characteristics.</span>
+<span class="sd">        exposure_values (ExposureValues): Values associated with the exposure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span> <span class="o">=</span> <span class="n">exposure_meta</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span> <span class="o">=</span> <span class="n">exposure_values</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposure.earned_exposure_value" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">earned_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Calculate the earned exposure value as of the given analysis date.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>analysis_date</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The date for which to calculate the earned exposure value.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>float</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The earned exposure value. If the exposure type is EARNED, this is the full
+  exposure value. Otherwise, it's the exposure value multiplied by the earned percentage.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">earned_exposure_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the earned exposure value as of the given analysis date.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        analysis_date (date): The date for which to calculate the earned exposure value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The earned exposure value. If the exposure type is EARNED, this is the full</span>
+<span class="sd">              exposure value. Otherwise, it&#39;s the exposure value multiplied by the earned percentage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_type</span> <span class="o">==</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_earned_pct</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposure.written_exposure_value" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">written_exposure_value</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Calculate the written exposure value as of the given analysis date.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>analysis_date</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The date for which to calculate the written exposure value.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>float</code></td>            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The written exposure value. If the exposure type is EARNED, this is calculated
+  by dividing the exposure value by the earned percentage. If the earned percentage
+  is zero, returns the exposure value directly to avoid division by zero.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">written_exposure_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the written exposure value as of the given analysis date.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        analysis_date (date): The date for which to calculate the written exposure value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: The written exposure value. If the exposure type is EARNED, this is calculated</span>
+<span class="sd">              by dividing the exposure value by the earned percentage. If the earned percentage</span>
+<span class="sd">              is zero, returns the exposure value directly to avoid division by zero.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_type</span> <span class="o">==</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">:</span>
+        <span class="n">earned_pct</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_earned_pct</span><span class="p">(</span><span class="n">analysis_date</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">earned_pct</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span> <span class="o">/</span> <span class="n">earned_pct</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span>  <span class="c1"># Avoid division by zero</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_values</span><span class="o">.</span><span class="n">exposure_value</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
@@ -753,7 +1964,8 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 6</span>
+<span class="normal"> 7</span>
 <span class="normal"> 8</span>
 <span class="normal"> 9</span>
 <span class="normal">10</span>
@@ -761,8 +1973,7 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 <span class="normal">12</span>
 <span class="normal">13</span>
 <span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExposureBasis</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExposureBasis</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration of exposure bases used in insurance calculations.</span>
 
 <span class="sd">    Attributes:</span>
@@ -802,10 +2013,6 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 <h2 id="pyre.exposures.exposures.ExposureMetaData" class="doc doc-heading">
             <code>ExposureMetaData</code>
 
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
-  </span>
 
 </h2>
 
@@ -974,45 +2181,194 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExposureMetaData</span><span class="p">():</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExposureMetaData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents metadata for an insurance exposure, including identification, period, and classification details.</span>
 
 <span class="sd">    Attributes:</span>
@@ -1032,20 +2388,171 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 <span class="sd">    Properties:</span>
 <span class="sd">        exposure_term_length_days (int): Number of days in the exposure period.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">exposure_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exposure_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">exposure_period_start</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+        <span class="n">exposure_period_end</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+        <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">aggregate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">line_of_business</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stacking_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exposure_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ExposureBasis</span><span class="p">]</span> <span class="o">=</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">,</span>
+        <span class="n">location</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">peril</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">occupancy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an ExposureMetaData instance.</span>
 
-    <span class="n">exposure_id</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">exposure_name</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">exposure_period_start</span><span class="p">:</span> <span class="n">date</span>
-    <span class="n">exposure_period_end</span><span class="p">:</span> <span class="n">date</span>
-    <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">aggregate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">line_of_business</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">stacking_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">exposure_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ExposureBasis</span><span class="p">]</span> <span class="o">=</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span>
-    <span class="n">location</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">peril</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">occupancy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="sd">        Args:</span>
+<span class="sd">            exposure_id (str): Unique identifier for the exposure.</span>
+<span class="sd">            exposure_name (str): Human-readable name for the exposure.</span>
+<span class="sd">            exposure_period_start (date): Start date of the exposure period.</span>
+<span class="sd">            exposure_period_end (date): End date of the exposure period.</span>
+<span class="sd">            currency (str): Currency code associated with the exposure.</span>
+<span class="sd">            aggregate (bool, optional): Indicates if the exposure is aggregated. Defaults to False.</span>
+<span class="sd">            line_of_business (Optional[str], optional): Line of business. Defaults to None.</span>
+<span class="sd">            stacking_id (Optional[str], optional): Identifier for stacking exposures. Defaults to None.</span>
+<span class="sd">            exposure_type (Optional[ExposureBasis], optional): Type of exposure. Defaults to ExposureBasis.EARNED.</span>
+<span class="sd">            location (Optional[str], optional): Location associated with the exposure. Defaults to None.</span>
+<span class="sd">            peril (Optional[str], optional): Peril associated with the exposure. Defaults to None.</span>
+<span class="sd">            occupancy (Optional[str], optional): Occupancy type for the exposure. Defaults to None.</span>
 
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If exposure_period_end is before exposure_period_start.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">exposure_period_end</span> <span class="o">&lt;</span> <span class="n">exposure_period_start</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Exposure period end date cannot be before start date&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_id</span> <span class="o">=</span> <span class="n">exposure_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_name</span> <span class="o">=</span> <span class="n">exposure_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_start</span> <span class="o">=</span> <span class="n">exposure_period_start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_end</span> <span class="o">=</span> <span class="n">exposure_period_end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span> <span class="o">=</span> <span class="n">currency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aggregate</span> <span class="o">=</span> <span class="n">aggregate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line_of_business</span> <span class="o">=</span> <span class="n">line_of_business</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stacking_id</span> <span class="o">=</span> <span class="n">stacking_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_type</span> <span class="o">=</span> <span class="n">exposure_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_location</span> <span class="o">=</span> <span class="n">location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_peril</span> <span class="o">=</span> <span class="n">peril</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_occupancy</span> <span class="o">=</span> <span class="n">occupancy</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_id</span>
+
+    <span class="nd">@exposure_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_id</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_name</span>
+
+    <span class="nd">@exposure_name</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_name</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_period_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_start</span>
+
+    <span class="nd">@exposure_period_start</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_period_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the exposure period start date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (date): The new start date.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the new start date is after the current end date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_exposure_period_end&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_end</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Exposure period start date cannot be after end date&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_start</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_period_end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">date</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_end</span>
+
+    <span class="nd">@exposure_period_end</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_period_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the exposure period end date.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (date): The new end date.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the new end date is before the current start date.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_exposure_period_start&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_start</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Exposure period end date cannot be before start date&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_end</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span>
+
+    <span class="nd">@currency</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">currency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_aggregate</span>
+
+    <span class="nd">@aggregate</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_aggregate</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_of_business</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_line_of_business</span>
+
+    <span class="nd">@line_of_business</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">line_of_business</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line_of_business</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stacking_id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stacking_id</span>
+
+    <span class="nd">@stacking_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">stacking_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stacking_id</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExposureBasis</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_type</span>
+
+    <span class="nd">@exposure_type</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">ExposureBasis</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_type</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">location</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_location</span>
+
+    <span class="nd">@location</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_location</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">peril</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_peril</span>
+
+    <span class="nd">@peril</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">peril</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_peril</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">occupancy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occupancy</span>
+
+    <span class="nd">@occupancy</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">occupancy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_occupancy</span> <span class="o">=</span> <span class="n">value</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">exposure_term_length_days</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exposure_period_end</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">exposure_period_start</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
@@ -1064,6 +2571,355 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
 
 
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.ExposureMetaData.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">exposure_id</span><span class="p">,</span> <span class="n">exposure_name</span><span class="p">,</span> <span class="n">exposure_period_start</span><span class="p">,</span> <span class="n">exposure_period_end</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">aggregate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">line_of_business</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stacking_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exposure_type</span><span class="o">=</span><span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">peril</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">occupancy</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize an ExposureMetaData instance.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_id</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Unique identifier for the exposure.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Human-readable name for the exposure.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_period_start</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Start date of the exposure period.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_period_end</code>
+            </td>
+            <td>
+                  <code><span title="datetime.date">date</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>End date of the exposure period.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>currency</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Currency code associated with the exposure.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>aggregate</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Indicates if the exposure is aggregated. Defaults to False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>line_of_business</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Line of business. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>stacking_id</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Identifier for stacking exposures. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_type</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<a class="autorefs autorefs-internal" title="ExposureBasis (pyre.exposures.exposures.ExposureBasis)" href="#pyre.exposures.exposures.ExposureBasis">ExposureBasis</a>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Type of exposure. Defaults to ExposureBasis.EARNED.</p>
+              </div>
+            </td>
+            <td>
+                  <code><span title="pyre.exposures.exposures.ExposureBasis.EARNED">EARNED</span></code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>location</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Location associated with the exposure. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>peril</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Peril associated with the exposure. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>occupancy</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="str">str</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Occupancy type for the exposure. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If exposure_period_end is before exposure_period_start.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">exposure_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">exposure_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">exposure_period_start</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+    <span class="n">exposure_period_end</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+    <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">aggregate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">line_of_business</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">stacking_id</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exposure_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ExposureBasis</span><span class="p">]</span> <span class="o">=</span> <span class="n">ExposureBasis</span><span class="o">.</span><span class="n">EARNED</span><span class="p">,</span>
+    <span class="n">location</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">peril</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">occupancy</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an ExposureMetaData instance.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exposure_id (str): Unique identifier for the exposure.</span>
+<span class="sd">        exposure_name (str): Human-readable name for the exposure.</span>
+<span class="sd">        exposure_period_start (date): Start date of the exposure period.</span>
+<span class="sd">        exposure_period_end (date): End date of the exposure period.</span>
+<span class="sd">        currency (str): Currency code associated with the exposure.</span>
+<span class="sd">        aggregate (bool, optional): Indicates if the exposure is aggregated. Defaults to False.</span>
+<span class="sd">        line_of_business (Optional[str], optional): Line of business. Defaults to None.</span>
+<span class="sd">        stacking_id (Optional[str], optional): Identifier for stacking exposures. Defaults to None.</span>
+<span class="sd">        exposure_type (Optional[ExposureBasis], optional): Type of exposure. Defaults to ExposureBasis.EARNED.</span>
+<span class="sd">        location (Optional[str], optional): Location associated with the exposure. Defaults to None.</span>
+<span class="sd">        peril (Optional[str], optional): Peril associated with the exposure. Defaults to None.</span>
+<span class="sd">        occupancy (Optional[str], optional): Occupancy type for the exposure. Defaults to None.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If exposure_period_end is before exposure_period_start.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">exposure_period_end</span> <span class="o">&lt;</span> <span class="n">exposure_period_start</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Exposure period end date cannot be before start date&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_id</span> <span class="o">=</span> <span class="n">exposure_id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_name</span> <span class="o">=</span> <span class="n">exposure_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_start</span> <span class="o">=</span> <span class="n">exposure_period_start</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_period_end</span> <span class="o">=</span> <span class="n">exposure_period_end</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_currency</span> <span class="o">=</span> <span class="n">currency</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_aggregate</span> <span class="o">=</span> <span class="n">aggregate</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_line_of_business</span> <span class="o">=</span> <span class="n">line_of_business</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_stacking_id</span> <span class="o">=</span> <span class="n">stacking_id</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_type</span> <span class="o">=</span> <span class="n">exposure_type</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_location</span> <span class="o">=</span> <span class="n">location</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_peril</span> <span class="o">=</span> <span class="n">peril</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_occupancy</span> <span class="o">=</span> <span class="n">occupancy</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
 
 
   </div>
@@ -1079,10 +2935,6 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 <h2 id="pyre.exposures.exposures.ExposureValues" class="doc doc-heading">
             <code>ExposureValues</code>
 
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
-  </span>
 
 </h2>
 
@@ -1147,20 +2999,77 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ExposureValues</span><span class="p">:</span> <span class="c1">#TODO consider fleshing out identifiers etc (differing class/coverage values BI/PD ...)</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ExposureValues</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Represents the key financial values associated with an insurance exposure.</span>
 
 <span class="sd">    Attributes:</span>
@@ -1168,10 +3077,69 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 <span class="sd">        attachment_point (float): The threshold amount at which coverage begins to apply.</span>
 <span class="sd">        limit (float): The maximum amount payable under the coverage.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">attachment_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize an ExposureValues instance.</span>
 
-    <span class="n">exposure_value</span><span class="p">:</span> <span class="nb">float</span>
-    <span class="n">attachment_point</span><span class="p">:</span> <span class="nb">float</span>
-    <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span>
+<span class="sd">        Args:</span>
+<span class="sd">            exposure_value (float): The total value of the exposure.</span>
+<span class="sd">            attachment_point (float): The threshold amount at which coverage begins to apply.</span>
+<span class="sd">            limit (float): The maximum amount payable under the coverage.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If attachment_point or limit is negative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">attachment_point</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attachment point cannot be negative&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Limit cannot be negative&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_value</span> <span class="o">=</span> <span class="n">exposure_value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_point</span> <span class="o">=</span> <span class="n">attachment_point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="n">limit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_value</span>
+
+    <span class="nd">@exposure_value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposure_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attachment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_point</span>
+
+    <span class="nd">@attachment_point</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">attachment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the attachment point.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (float): The new attachment point.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the new attachment point is negative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attachment point cannot be negative&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_point</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">limit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span>
+
+    <span class="nd">@limit</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the limit.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (float): The new limit.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If the new limit is negative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Limit cannot be negative&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="n">value</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -1186,6 +3154,151 @@ Calculates the earned portion of the exposure value as of the given analysis dat
 
 
 
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.ExposureValues.__init__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">exposure_value</span><span class="p">,</span> <span class="n">attachment_point</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize an ExposureValues instance.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure_value</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The total value of the exposure.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>attachment_point</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The threshold amount at which coverage begins to apply.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>limit</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The maximum amount payable under the coverage.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="ValueError">ValueError</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If attachment_point or limit is negative.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">attachment_point</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize an ExposureValues instance.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exposure_value (float): The total value of the exposure.</span>
+<span class="sd">        attachment_point (float): The threshold amount at which coverage begins to apply.</span>
+<span class="sd">        limit (float): The maximum amount payable under the coverage.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If attachment_point or limit is negative.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">attachment_point</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attachment point cannot be negative&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">limit</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Limit cannot be negative&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_value</span> <span class="o">=</span> <span class="n">exposure_value</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_attachment_point</span> <span class="o">=</span> <span class="n">attachment_point</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_limit</span> <span class="o">=</span> <span class="n">limit</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 
@@ -1226,7 +3339,12 @@ new exposures.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td><code><span title="pyre.exposures.exposures.Exposures.exposures">exposures</span></code></td>
+            <td><code><a class="autorefs autorefs-internal" title="exposures
+
+  
+      property
+      writable
+   (pyre.exposures.exposures.Exposures.exposures)" href="#pyre.exposures.exposures.Exposures.exposures">exposures</a></code></td>
             <td>
                   <code><span title="typing.List">List</span>[<a class="autorefs autorefs-internal" title="Exposure (pyre.exposures.exposures.Exposure)" href="#pyre.exposures.exposures.Exposure">Exposure</a>]</code>
             </td>
@@ -1281,7 +3399,7 @@ new exposures.</p>
       </thead>
       <tbody>
             <tr class="doc-section-item">
-              <td><code><span title="pyre.exposures.exposures.Exposures.append">append</span></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="append(exposure) (pyre.exposures.exposures.Exposures.append)" href="#pyre.exposures.exposures.Exposures.append">append</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Exposure): Appends an Exposure object to the collection.</p>
@@ -1289,7 +3407,7 @@ new exposures.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><span title="pyre.exposures.exposures.Exposures.__getitem__">__getitem__</span></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="__getitem__(key) (pyre.exposures.exposures.Exposures.__getitem__)" href="#pyre.exposures.exposures.Exposures.__getitem__">__getitem__</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Returns an Exposure or a new Exposures instance for slices.</p>
@@ -1297,7 +3415,7 @@ new exposures.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><span title="pyre.exposures.exposures.Exposures.__iter__">__iter__</span></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="__iter__() (pyre.exposures.exposures.Exposures.__iter__)" href="#pyre.exposures.exposures.Exposures.__iter__">__iter__</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Returns an iterator over the exposures.</p>
@@ -1305,7 +3423,7 @@ new exposures.</p>
               </td>
             </tr>
             <tr class="doc-section-item">
-              <td><code><span title="pyre.exposures.exposures.Exposures.__len__">__len__</span></code></td>
+              <td><code><a class="autorefs autorefs-internal" title="__len__() (pyre.exposures.exposures.Exposures.__len__)" href="#pyre.exposures.exposures.Exposures.__len__">__len__</a></code></td>
               <td>
                 <div class="doc-md-description">
                   <p>Returns the number of exposures in the collection.</p>
@@ -1323,52 +3441,89 @@ new exposures.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span>
-<span class="normal">116</span>
-<span class="normal">117</span>
-<span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
-<span class="normal">130</span>
-<span class="normal">131</span>
-<span class="normal">132</span>
-<span class="normal">133</span>
-<span class="normal">134</span>
-<span class="normal">135</span>
-<span class="normal">136</span>
-<span class="normal">137</span>
-<span class="normal">138</span>
-<span class="normal">139</span>
-<span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exposures</span><span class="p">:</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span>
+<span class="normal">412</span>
+<span class="normal">413</span>
+<span class="normal">414</span>
+<span class="normal">415</span>
+<span class="normal">416</span>
+<span class="normal">417</span>
+<span class="normal">418</span>
+<span class="normal">419</span>
+<span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Exposures</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A container class for managing a collection of Exposure objects.</span>
 
 <span class="sd">    This class provides list-like behavior for storing and manipulating multiple</span>
@@ -1392,27 +3547,64 @@ new exposures.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span> <span class="o">=</span> <span class="n">exposures</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">exposures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Exposure</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the list of Exposure objects managed by this container.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span>
 
     <span class="nd">@exposures</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">exposures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_exposure_classes</span><span class="p">:</span><span class="nb">list</span><span class="p">[</span><span class="n">Exposure</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">exposures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_exposure_classes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Exposure</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sets the list of Exposure objects managed by this container.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span> <span class="o">=</span> <span class="n">list_of_exposure_classes</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure</span><span class="p">:</span><span class="n">Exposure</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">modelling_years</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span> 
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a sorted list of unique modelling years for all exposures.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: A sorted list of unique modelling years.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">years</span> <span class="o">=</span> <span class="p">{</span><span class="n">exposure</span><span class="o">.</span><span class="n">modelling_year</span> <span class="k">for</span> <span class="n">exposure</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exposures</span><span class="p">}</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">years</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure</span><span class="p">:</span> <span class="n">Exposure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Append an Exposure object to the collection.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exposure (Exposure): The Exposure object to append.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exposure</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="nb">slice</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get an Exposure object by index or a slice of Exposures.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: An integer index or a slice object.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[Exposure, &#39;Exposures&#39;]: An Exposure object if key is an integer,</span>
+<span class="sd">                                         or a new Exposures instance if key is a slice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an iterator over the exposures.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Iterator[Exposure]: An iterator over the Exposure objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the number of exposures in the collection.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The number of Exposure objects.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -1427,7 +3619,360 @@ new exposures.</p>
 
 
 
+<div class="doc doc-object doc-attribute">
 
+
+
+<h3 id="pyre.exposures.exposures.Exposures.exposures" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">exposures</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns the list of Exposure objects managed by this container.</p>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h3 id="pyre.exposures.exposures.Exposures.modelling_years" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">modelling_years</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Returns a sorted list of unique modelling years for all exposures.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="int">int</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List[int]: A sorted list of unique modelling years.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+    </div>
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposures.__getitem__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get an Exposure object by index or a slice of Exposures.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>key</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>An integer index or a slice object.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Union[Exposure, 'Exposures']: An Exposure object if key is an integer,
+                         or a new Exposures instance if key is a slice.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get an Exposure object by index or a slice of Exposures.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        key: An integer index or a slice object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[Exposure, &#39;Exposures&#39;]: An Exposure object if key is an integer,</span>
+<span class="sd">                                     or a new Exposures instance if key is a slice.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposures.__iter__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__iter__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return an iterator over the exposures.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Iterator[Exposure]: An iterator over the Exposure objects.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return an iterator over the exposures.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Iterator[Exposure]: An iterator over the Exposure objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposures.__len__" class="doc doc-heading">
+            <code class="highlight language-python"><span class="fm">__len__</span><span class="p">()</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Return the number of exposures in the collection.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>int</code></td>            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The number of Exposure objects.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the number of exposures in the collection.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        int: The number of Exposure objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="pyre.exposures.exposures.Exposures.append" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">append</span><span class="p">(</span><span class="n">exposure</span><span class="p">)</span></code>
+
+</h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Append an Exposure object to the collection.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>exposure</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Exposure (pyre.exposures.exposures.Exposure)" href="#pyre.exposures.exposures.Exposure">Exposure</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The Exposure object to append.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+            <details class="quote">
+              <summary>Source code in <code>src\pyre\exposures\exposures.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exposure</span><span class="p">:</span> <span class="n">Exposure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append an Exposure object to the collection.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        exposure (Exposure): The Exposure object to append.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_exposures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exposure</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
 
 
 

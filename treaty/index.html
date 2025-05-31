@@ -1,0 +1,927 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../models/">
+      
+      
+        <link rel="next" href="../rate_monitoring/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.12">
+    
+    
+      
+        <title>Treaty - pyRE - python package for non-life reinsurance pricing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.2afb09e1.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#treaty-module" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="pyRE - python package for non-life reinsurance pricing" class="md-header__button md-logo" aria-label="pyRE - python package for non-life reinsurance pricing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pyRE - python package for non-life reinsurance pricing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Treaty
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="pyRE - python package for non-life reinsurance pricing" class="md-nav__button md-logo" aria-label="pyRE - python package for non-life reinsurance pricing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    pyRE - python package for non-life reinsurance pricing
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../claims/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Claims
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../exposures/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Exposures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Treaty
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Treaty
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#treaty-data-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Treaty Data Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-and-working-with-reinsurance-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Working with Reinsurance Contracts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-multiple-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Multiple Layers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyre.treaty.contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      contracts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyre.treaty.contract_types" class="md-nav__link">
+    <span class="md-ellipsis">
+      contract_types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyre.treaty.layer_loss_functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      layer_loss_functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rate_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rate Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Classes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#treaty-data-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Treaty Data Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#creating-and-working-with-reinsurance-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating and Working with Reinsurance Contracts
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-multiple-layers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with Multiple Layers
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyre.treaty.contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      contracts
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyre.treaty.contract_types" class="md-nav__link">
+    <span class="md-ellipsis">
+      contract_types
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pyre.treaty.layer_loss_functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      layer_loss_functions
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="treaty-module">Treaty Module</h1>
+<p>The Treaty module provides tools for modeling reinsurance contracts and layers. It includes classes for representing different types of reinsurance contracts, their metadata, and methods for calculating recoveries.</p>
+<h2 id="core-classes">Core Classes</h2>
+<h3 id="treaty-data-structure">Treaty Data Structure</h3>
+<p>The module provides a hierarchical structure for representing reinsurance contracts:</p>
+<ul>
+<li><code>ContractType</code>: An enumeration defining different types of reinsurance contracts (Quota Share, Excess of Loss, etc.)</li>
+<li><code>ClaimTriggerBasis</code>: An enumeration defining different claim trigger bases</li>
+<li><code>IndexationClauseType</code>: An enumeration defining different types of indexation clauses</li>
+<li><code>RILayer</code>: Represents a reinsurance layer with properties like attachment points, limits, etc.</li>
+<li><code>RIContractMetadata</code>: Contains metadata about reinsurance contracts</li>
+<li><code>RIContract</code>: Combines metadata and layers to represent a complete reinsurance contract</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<h3 id="creating-and-working-with-reinsurance-contracts">Creating and Working with Reinsurance Contracts</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyre.treaty.contracts</span><span class="w"> </span><span class="kn">import</span> <span class="n">RIContract</span><span class="p">,</span> <span class="n">RIContractMetadata</span><span class="p">,</span> <span class="n">RILayer</span><span class="p">,</span> <span class="n">ClaimTriggerBasis</span><span class="p">,</span> <span class="n">IndexationClauseType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyre.treaty.contract_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContractType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
+
+<span class="c1"># Create contract metadata</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">RIContractMetadata</span><span class="p">(</span>
+    <span class="n">contract_id</span><span class="o">=</span><span class="s2">&quot;XL001&quot;</span><span class="p">,</span>
+    <span class="n">contract_description</span><span class="o">=</span><span class="s2">&quot;Property Cat XL&quot;</span><span class="p">,</span>
+    <span class="n">cedent_name</span><span class="o">=</span><span class="s2">&quot;ABC Insurance&quot;</span><span class="p">,</span>
+    <span class="n">trigger_basis</span><span class="o">=</span><span class="n">ClaimTriggerBasis</span><span class="o">.</span><span class="n">LOSSES_OCCURRING</span><span class="p">,</span>
+    <span class="n">indexation_clause</span><span class="o">=</span><span class="n">IndexationClauseType</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+    <span class="n">indexation_margin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">inception_date</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">expiration_date</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">31</span><span class="p">),</span>
+    <span class="n">fx_rates</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;USD&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s2">&quot;EUR&quot;</span><span class="p">:</span> <span class="mf">1.1</span><span class="p">,</span> <span class="s2">&quot;GBP&quot;</span><span class="p">:</span> <span class="mf">1.3</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Create a reinsurance layer</span>
+<span class="n">layer</span> <span class="o">=</span> <span class="n">RILayer</span><span class="p">(</span>
+    <span class="n">layer_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;First Layer&quot;</span><span class="p">,</span>
+    <span class="n">layer_type</span><span class="o">=</span><span class="n">ContractType</span><span class="o">.</span><span class="n">EXCESS_OF_LOSS</span><span class="p">,</span>
+    <span class="n">occurrence_attachment</span><span class="o">=</span><span class="mi">10000000</span><span class="p">,</span>
+    <span class="n">occurrence_limit</span><span class="o">=</span><span class="mi">20000000</span><span class="p">,</span>
+    <span class="n">aggregate_attachment</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">aggregate_limit</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>  <span class="c1"># Unlimited</span>
+    <span class="n">subject_lines_of_business</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Property&quot;</span><span class="p">],</span>
+    <span class="n">subject_lob_exposure_amounts</span><span class="o">=</span><span class="p">[</span><span class="mi">100000000</span><span class="p">],</span>
+    <span class="n">full_subject_premium</span><span class="o">=</span><span class="mi">5000000</span><span class="p">,</span>
+    <span class="n">written_line</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">signed_line</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># 10% share</span>
+    <span class="n">number_of_reinstatements</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">reinstatement_cost</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>  <span class="c1"># 100% of premium for first reinstatement</span>
+<span class="p">)</span>
+
+<span class="c1"># Create a reinsurance contract</span>
+<span class="n">contract</span> <span class="o">=</span> <span class="n">RIContract</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="p">[</span><span class="n">layer</span><span class="p">])</span>
+
+<span class="c1"># Access contract properties</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Contract ID: </span><span class="si">{</span><span class="n">contract</span><span class="o">.</span><span class="n">contract_meta_data</span><span class="o">.</span><span class="n">contract_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Contract Description: </span><span class="si">{</span><span class="n">contract</span><span class="o">.</span><span class="n">contract_meta_data</span><span class="o">.</span><span class="n">contract_description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Contract Period: </span><span class="si">{</span><span class="n">contract</span><span class="o">.</span><span class="n">contract_meta_data</span><span class="o">.</span><span class="n">inception_date</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">contract</span><span class="o">.</span><span class="n">contract_meta_data</span><span class="o">.</span><span class="n">expiration_date</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Access layer properties</span>
+<span class="k">for</span> <span class="n">layer_id</span> <span class="ow">in</span> <span class="n">contract</span><span class="o">.</span><span class="n">layer_ids</span><span class="p">():</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">contract</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="n">layer_id</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>  <span class="c1"># Layer IDs are 1-based</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">layer_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">layer_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Attachment: </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">occurrence_attachment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Limit: </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">occurrence_limit</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Written Line Premium: </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">written_line_premium</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Signed Line Premium: </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">signed_line_premium</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Calculate recovery for a loss</span>
+<span class="n">loss_amount</span> <span class="o">=</span> <span class="mi">25000000</span>
+<span class="n">layer_recovery</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">loss_to_layer_fn</span><span class="p">(</span><span class="n">loss_amount</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Recovery for loss of </span><span class="si">{</span><span class="n">loss_amount</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">layer_recovery</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="working-with-multiple-layers">Working with Multiple Layers</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">pyre.treaty.contracts</span><span class="w"> </span><span class="kn">import</span> <span class="n">RIContract</span><span class="p">,</span> <span class="n">RILayer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyre.treaty.contract_types</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContractType</span>
+
+<span class="c1"># Assuming we have a contract metadata object called &#39;contract_metadata&#39;</span>
+
+<span class="c1"># Create multiple layers for a property cat program</span>
+<span class="n">layers</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">RILayer</span><span class="p">(</span>
+        <span class="n">layer_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;Layer 1: 10m xs 10m&quot;</span><span class="p">,</span>
+        <span class="n">layer_type</span><span class="o">=</span><span class="n">ContractType</span><span class="o">.</span><span class="n">EXCESS_OF_LOSS</span><span class="p">,</span>
+        <span class="n">occurrence_attachment</span><span class="o">=</span><span class="mi">10000000</span><span class="p">,</span>
+        <span class="n">occurrence_limit</span><span class="o">=</span><span class="mi">10000000</span><span class="p">,</span>
+        <span class="n">aggregate_attachment</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">aggregate_limit</span><span class="o">=</span><span class="mi">20000000</span><span class="p">,</span>  <span class="c1"># 2 full limit losses</span>
+        <span class="n">subject_lines_of_business</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Property&quot;</span><span class="p">],</span>
+        <span class="n">subject_lob_exposure_amounts</span><span class="o">=</span><span class="p">[</span><span class="mi">100000000</span><span class="p">],</span>
+        <span class="n">full_subject_premium</span><span class="o">=</span><span class="mi">2000000</span><span class="p">,</span>
+        <span class="n">written_line</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">signed_line</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span>  <span class="c1"># 15% share</span>
+        <span class="n">number_of_reinstatements</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">reinstatement_cost</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="p">),</span>
+    <span class="n">RILayer</span><span class="p">(</span>
+        <span class="n">layer_id</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;Layer 2: 30m xs 20m&quot;</span><span class="p">,</span>
+        <span class="n">layer_type</span><span class="o">=</span><span class="n">ContractType</span><span class="o">.</span><span class="n">EXCESS_OF_LOSS</span><span class="p">,</span>
+        <span class="n">occurrence_attachment</span><span class="o">=</span><span class="mi">20000000</span><span class="p">,</span>
+        <span class="n">occurrence_limit</span><span class="o">=</span><span class="mi">30000000</span><span class="p">,</span>
+        <span class="n">aggregate_attachment</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">aggregate_limit</span><span class="o">=</span><span class="mi">60000000</span><span class="p">,</span>  <span class="c1"># 2 full limit losses</span>
+        <span class="n">subject_lines_of_business</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Property&quot;</span><span class="p">],</span>
+        <span class="n">subject_lob_exposure_amounts</span><span class="o">=</span><span class="p">[</span><span class="mi">100000000</span><span class="p">],</span>
+        <span class="n">full_subject_premium</span><span class="o">=</span><span class="mi">3000000</span><span class="p">,</span>
+        <span class="n">written_line</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">signed_line</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>  <span class="c1"># 10% share</span>
+        <span class="n">number_of_reinstatements</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">reinstatement_cost</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="p">),</span>
+    <span class="n">RILayer</span><span class="p">(</span>
+        <span class="n">layer_id</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">layer_name</span><span class="o">=</span><span class="s2">&quot;Layer 3: 50m xs 50m&quot;</span><span class="p">,</span>
+        <span class="n">layer_type</span><span class="o">=</span><span class="n">ContractType</span><span class="o">.</span><span class="n">EXCESS_OF_LOSS</span><span class="p">,</span>
+        <span class="n">occurrence_attachment</span><span class="o">=</span><span class="mi">50000000</span><span class="p">,</span>
+        <span class="n">occurrence_limit</span><span class="o">=</span><span class="mi">50000000</span><span class="p">,</span>
+        <span class="n">aggregate_attachment</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">aggregate_limit</span><span class="o">=</span><span class="mi">100000000</span><span class="p">,</span>  <span class="c1"># 2 full limit losses</span>
+        <span class="n">subject_lines_of_business</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Property&quot;</span><span class="p">],</span>
+        <span class="n">subject_lob_exposure_amounts</span><span class="o">=</span><span class="p">[</span><span class="mi">100000000</span><span class="p">],</span>
+        <span class="n">full_subject_premium</span><span class="o">=</span><span class="mi">1500000</span><span class="p">,</span>
+        <span class="n">written_line</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">signed_line</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>  <span class="c1"># 5% share</span>
+        <span class="n">number_of_reinstatements</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">reinstatement_cost</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;1&quot;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+
+<span class="c1"># Create a reinsurance contract with multiple layers</span>
+<span class="n">contract</span> <span class="o">=</span> <span class="n">RIContract</span><span class="p">(</span><span class="n">contract_metadata</span><span class="p">,</span> <span class="n">layers</span><span class="p">)</span>
+
+<span class="c1"># Calculate total premium</span>
+<span class="n">total_premium</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">signed_line_premium</span><span class="p">()</span> <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">contract</span><span class="o">.</span><span class="n">layers</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total premium for all layers: </span><span class="si">{</span><span class="n">total_premium</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Calculate recovery for a large loss across multiple layers</span>
+<span class="n">loss_amount</span> <span class="o">=</span> <span class="mi">75000000</span>
+<span class="n">total_recovery</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">contract</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+    <span class="n">layer_recovery</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">loss_to_layer_fn</span><span class="p">(</span><span class="n">loss_amount</span><span class="p">)</span>
+    <span class="n">total_recovery</span> <span class="o">+=</span> <span class="n">layer_recovery</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layer</span><span class="o">.</span><span class="n">layer_id</span><span class="si">}</span><span class="s2"> recovery: </span><span class="si">{</span><span class="n">layer_recovery</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total recovery for loss of </span><span class="si">{</span><span class="n">loss_amount</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">total_recovery</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="api-reference">API Reference</h2>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="pyre.treaty.contracts"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="pyre.treaty.contract_types"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="pyre.treaty.layer_loss_functions"></a>
+    <div class="doc doc-contents first">
+
+
+
+
+
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -10,7 +10,7 @@
       
       
       
-        <link rel="next" href="about/">
+        <link rel="next" href="claims/">
       
       
       <link rel="icon" href="assets/images/favicon.png">
@@ -70,7 +70,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#pyre" class="md-skip">
+        <a href="#pyre-python-reinsurance" class="md-skip">
           Skip to content
         </a>
       
@@ -106,7 +106,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              pyRE
+              Home
             
           </span>
         </div>
@@ -216,7 +216,7 @@
   
   
   <span class="md-ellipsis">
-    pyRE
+    Home
     
   </span>
   
@@ -229,7 +229,7 @@
   
   
   <span class="md-ellipsis">
-    pyRE
+    Home
     
   </span>
   
@@ -279,9 +279,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
-      Usage
+      Quick Start
     </span>
   </a>
   
@@ -329,28 +329,6 @@
   
   
     <li class="md-nav__item">
-      <a href="about/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Boilerplate
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="claims/" class="md-nav__link">
         
   
@@ -379,6 +357,94 @@
   
   <span class="md-ellipsis">
     Exposures
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="models/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="treaty/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Treaty
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="rate_monitoring/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rate Monitoring
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="about/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    About
     
   </span>
   
@@ -442,9 +508,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#usage" class="md-nav__link">
+  <a href="#quick-start" class="md-nav__link">
     <span class="md-ellipsis">
-      Usage
+      Quick Start
     </span>
   </a>
   
@@ -493,28 +559,69 @@
 
 
 
-<h1 id="pyre">pyRE</h1>
+<h1 id="pyre-python-reinsurance">pyRE - Python Reinsurance</h1>
 <h2 id="overview">Overview</h2>
-<p><code>pyre</code> goal is to provide pricing tools and utilities for reinsurnace users. </p>
+<p><code>pyre</code> is a comprehensive Python package designed to provide pricing tools and utilities for non-life reinsurance professionals. It offers a wide range of actuarial and statistical methods for analyzing claims data, managing exposures, and pricing reinsurance contracts.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><strong>Pricing Calculations</strong>: Core functionality for actuarial pricing models.</li>
+<li><strong>Claims Analysis</strong>: Tools for managing and analyzing claims data, including development triangles and IBNER pattern extraction</li>
+<li><strong>Exposure Management</strong>: Classes for handling exposure data with various bases (earned, written)</li>
+<li><strong>Treaty Modeling</strong>: Functionality for modeling reinsurance contracts and layers</li>
+<li><strong>Experience Rating</strong>: Methods for burn cost analysis, frequency-severity modeling, and curve fitting</li>
+<li><strong>Rate Monitoring</strong>: Tools for tracking rate adequacy and rate changes</li>
 </ul>
 <h2 id="installation">Installation</h2>
 <p>To install the package, clone the repository and install the dependencies:</p>
-<pre><code class="language-bash">git clone https://github.com/rdj09/pyre.git
-</code></pre>
-<h2 id="usage">Usage</h2>
-<p>Here’s a quick example of how to use the package:</p>
-<pre><code class="language-python"># Import the main module
-from pyre 
+<div class="highlight"><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/rdj09/pyre.git
+<span class="nb">cd</span><span class="w"> </span>pyre
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</code></pre></div>
+<h2 id="quick-start">Quick Start</h2>
+<p>Here's a simple example of how to use the package to analyze claims data:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Import the claims module</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyre.claims.claims</span><span class="w"> </span><span class="kn">import</span> <span class="n">Claim</span><span class="p">,</span> <span class="n">Claims</span><span class="p">,</span> <span class="n">ClaimsMetaData</span><span class="p">,</span> <span class="n">ClaimDevelopmentHistory</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyre.claims.triangles</span><span class="w"> </span><span class="kn">import</span> <span class="n">Triangle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">date</span>
 
-# Example usage
+<span class="c1"># Create a claim with metadata and development history</span>
+<span class="n">metadata</span> <span class="o">=</span> <span class="n">ClaimsMetaData</span><span class="p">(</span>
+    <span class="n">claim_id</span><span class="o">=</span><span class="s2">&quot;CL001&quot;</span><span class="p">,</span>
+    <span class="n">currency</span><span class="o">=</span><span class="s2">&quot;USD&quot;</span><span class="p">,</span>
+    <span class="n">loss_date</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+    <span class="n">report_date</span><span class="o">=</span><span class="n">date</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="n">line_of_business</span><span class="o">=</span><span class="s2">&quot;Property&quot;</span>
+<span class="p">)</span>
 
-</code></pre>
+<span class="n">development</span> <span class="o">=</span> <span class="n">ClaimDevelopmentHistory</span><span class="p">(</span>
+    <span class="n">development_months</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">],</span>
+    <span class="n">cumulative_dev_paid</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10000</span><span class="p">,</span> <span class="mi">25000</span><span class="p">,</span> <span class="mi">40000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">],</span>
+    <span class="n">cumulative_dev_incurred</span><span class="o">=</span><span class="p">[</span><span class="mi">100000</span><span class="p">,</span> <span class="mi">90000</span><span class="p">,</span> <span class="mi">75000</span><span class="p">,</span> <span class="mi">60000</span><span class="p">,</span> <span class="mi">50000</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">claim</span> <span class="o">=</span> <span class="n">Claim</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">development</span><span class="p">)</span>
+
+<span class="c1"># Create a collection of claims</span>
+<span class="n">claims_collection</span> <span class="o">=</span> <span class="n">Claims</span><span class="p">([</span><span class="n">claim</span><span class="p">])</span>
+
+<span class="c1"># Create a triangle from claims data</span>
+<span class="n">triangle</span> <span class="o">=</span> <span class="n">Triangle</span><span class="o">.</span><span class="n">from_claims</span><span class="p">(</span><span class="n">claims_collection</span><span class="p">,</span> <span class="n">value_type</span><span class="o">=</span><span class="s2">&quot;incurred&quot;</span><span class="p">)</span>
+
+<span class="c1"># Calculate age-to-age factors</span>
+<span class="n">factors</span> <span class="o">=</span> <span class="n">triangle</span><span class="o">.</span><span class="n">calculate_age_to_age_factors</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">factors</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="directory-structure">Directory Structure</h2>
-<pre><code>
-</code></pre>
+<div class="highlight"><pre><span></span><code>pyre/
+├── docs/               # Documentation
+├── src/                # Source code
+│   └── pyre/
+│       ├── claims/     # Claims analysis tools
+│       ├── exposures/  # Exposure management
+│       ├── Models/     # Pricing models
+│       ├── treaty/     # Reinsurance contract modeling
+│       └── rate_monitoring/ # Rate monitoring tools
+└── tests/              # Test suite
+</code></pre></div>
 <h2 id="contributing">Contributing</h2>
 <p>Contributions are welcome! Please follow these steps:
 1. Fork the repository.
