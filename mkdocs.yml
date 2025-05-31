@@ -9,3 +9,17 @@ plugins:
   - mkdocstrings
 markdown_extensions:
   - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.arithmatex
+  - pymdownx.tasklist:
+      custom_checkbox: true
+nav:
+  - Home: index.md
+  - Claims: claims.md
+  - Exposures: exposures.md
+  - Models: models.md
+  - Treaty: treaty.md
+  - Rate Monitoring: rate_monitoring.md
+  - About: about.md
