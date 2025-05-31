@@ -12,3 +12,4 @@ site/
 .idea/pyre.iml
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
+/.cache/plugin/social/
