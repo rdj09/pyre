@@ -7,7 +7,7 @@ theme:
 plugins:
   - search
   - mkdocstrings
-  - -social
+  - social
 markdown_extensions:
   - admonition
   - pymdownx.highlight
