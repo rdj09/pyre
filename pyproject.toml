@@ -67,6 +67,7 @@ exclude_lines = [
 dependencies = [
   "mkdocs",
   "mkdocstrings[python]",
+  "mkdocs-material[imaging]",
   "mkdocs-material",
   "markdown",
   "pymdown-extensions"
