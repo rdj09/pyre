@@ -1,10 +1,10 @@
 import unittest
 from datetime import date
-from src.pyre.treaty.contracts import (
+from pyre.treaty import (
+    ContractType,
     RILayer,
     RIContractMetadata,
     RIContract,
-    ContractType,
     ClaimTriggerBasis,
     IndexationClauseType,
 )
@@ -43,7 +43,6 @@ class TestRIContractMetadata(unittest.TestCase):
             contract_id=101,
             contract_description="Test Contract",
             cedent_name="Test Cedent",
-            contract_type=ContractType.EXCESS_OF_LOSS,
             trigger_basis=ClaimTriggerBasis.RAD,
             indexation_clause=IndexationClauseType.FULL_INDEXATION,
             indexation_margin=0.05,
@@ -65,7 +64,6 @@ class TestRIContract(unittest.TestCase):
             contract_id=101,
             contract_description="Test Contract",
             cedent_name="Test Cedent",
-            contract_type=ContractType.EXCESS_OF_LOSS,
             trigger_basis=ClaimTriggerBasis.RAD,
             indexation_clause=IndexationClauseType.FULL_INDEXATION,
             indexation_margin=0.05,
@@ -98,9 +96,9 @@ class TestRIContract(unittest.TestCase):
         self.assertEqual(self.contract._contract_meta_data.contract_id, 101)
 
     def test_contract_layers(self):
-        self.assertEqual(len(self.contract._contract_layers), 1)
-        self.assertIn(1, self.contract._contract_layers)
-        self.assertEqual(self.contract._contract_layers[1].layer_name, "Layer 1")
+        self.assertEqual(len(self.contract._layers), 1)
+        self.assertEqual(self.contract._layers[0].layer_id, 1)
+        self.assertEqual(self.contract._layers[0].layer_name, "Layer 1")
 
 
 if __name__ == "__main__":

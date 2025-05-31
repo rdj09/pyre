@@ -1,17 +1,17 @@
 from typing import Any, Dict, List
-from enum import Enum
+from enum import Enum, auto
 from pyre.Models.Experience.experience_preparer import ExperienceModelData
 
 
 class SeverityDistribution(Enum):
-    LOGNORMAL = "lognormal"
-    PARETO = "pareto"
-    OTHER = "OTHER"
+    LOGNORMAL = auto()
+    PARETO = auto()
+    OTHER = auto()
 
 class FrequencyDistribution(Enum):
-    POISSON = "poisson"
-    NEGATIVE_BINOMIAL = "negative_binomial"
-    OTHER = "OTHER"
+    POISSON = auto()
+    NEGATIVE_BINOMIAL = auto()
+    OTHER = auto()
 
 class severity_fit:
     def __init__(self, distributions: List[SeverityDistribution], data : ExperienceModelData, ibner_dev_pattern: Dict[int, float], ground_up:bool = True):

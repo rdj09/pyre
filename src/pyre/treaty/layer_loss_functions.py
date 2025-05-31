@@ -1,4 +1,4 @@
-from pyre.treaty.contracts import ContractType
+from pyre.treaty.contract_types import ContractType
 
 
 def xol_calculation(gross_amount: float, attachment: float, limit: float):
@@ -27,4 +27,3 @@ layer_loss_calculation = {
     ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
     ContractType.SURPLUS_SHARE: surplus_share_calculation
     }
-
