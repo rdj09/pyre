@@ -3,7 +3,7 @@ import operator
 from typing import Optional, List, Sequence, Set
 from enum import Enum, auto
 
-from pyre.exceptions.exceptions import ClaimsException
+from ..exceptions.exceptions import ClaimsException
 
 class ClaimYearType(Enum):
     """Enumeration of claim year types used in insurance data analysis.

@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Union, List
-from pyre.claims.claims import Claims, Claim, ClaimDevelopmentHistory
-from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues
+from ..claims.claims import Claims, Claim, ClaimDevelopmentHistory
+from ..exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues
 
 
 class Trending:

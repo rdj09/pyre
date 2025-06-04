@@ -1,4 +1,4 @@
-from pyre.Models.Experience.experience_preparer import ExperienceModelData 
+from ...Models.Experience.experience_preparer import ExperienceModelData
 from random import choice
 
 
