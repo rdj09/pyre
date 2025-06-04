@@ -1,14 +1,13 @@
-from typing import Any
-from ..models import Model
-from .mbbefd import mbbefd_curve
-from .riebesell import riebesell_curve
-from .mixed_exponential import mixed_exponential_curve
-from pyre.Models.Exposure.exposure_preparer import ExposureModelData
+from typing import Any, Callable, Dict, Union, List, Optional
+from enum import Enum, auto
+from .exposure_preparer import ExposureModelData
+from .exposure_rating_functions import * #worry about next
 
 
-class ExposureModel(Model):
-    def __init__(self, data: Any):
-        self.data = data
+
+class ExposureModel():
+    def __init__(self, exposure_model_data: ExposureModelData):
+        self._exposure_model_data = exposure_model_data
 
 
 
@@ -40,7 +39,7 @@ def share_of_risk(curve_parameter:Any, band_mid_point: float, policy_lower_bound
         seleceted_treaty_top = selected_policy_attachment + treaty_layer_limit + treaty_layer_attachment
     else:
         seleceted_treaty_top = selected_total_insured_value
-    
+
     policy_bottom_pct = selected_policy_attachment / selected_total_insured_value
     policy_top_pct = (selected_policy_limit + selected_policy_attachment) / selected_total_insured_value
     treaty_policy_bottom_pct = seleceted_treaty_bottom / selected_total_insured_value

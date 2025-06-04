@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import Enum, auto
 
 class ContractType(Enum):
-    QUOTA_SHARE = "Quota Share"
-    EXCESS_OF_LOSS = "Excess of Loss"
-    FRANCHISE_DEDUCTIBLE = "Franchise Deductible"
-    SURPLUS_SHARE = "Surplus Share"
-    AGGREGATE_STOP_LOSS = "Aggregate Stop Loss"
+    QUOTA_SHARE = auto()
+    EXCESS_OF_LOSS = auto()
+    FRANCHISE_DEDUCTIBLE = auto()
+    SURPLUS_SHARE = auto()
+    AGGREGATE_STOP_LOSS = auto()
