@@ -1,8 +1,8 @@
 from typing import Dict, List, Optional, Union, Tuple, Any, Iterator
 from enum import Enum, auto
 from math import exp
-from pyre.claims.claims import Claims
-from pyre.Models.Experience.curve_fitting import (
+from ..claims.claims import Claims
+from ..Models.Experience.curve_fitting import (
     linear_regression, exponential_fit, power_fit,
     weibull_fit, inverse_power_fit, r_squared,
     assess_error_assumptions, residuals_standardised

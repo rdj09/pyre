@@ -1,10 +1,10 @@
 from datetime import date
 from enum import Enum
 from typing import Any, Dict, Sequence
-from pyre.treaty.layer_loss_functions import layer_loss_calculation
-from pyre.claims.claims import ClaimYearType
-from pyre.exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
-from pyre.treaty.contract_types import ContractType
+from ..treaty.layer_loss_functions import layer_loss_calculation
+from ..claims.claims import ClaimYearType
+from ..exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
+from ..treaty.contract_types import ContractType
 
 class ClaimTriggerBasis(Enum):
     LOD = "Losses Occurrence" #Accident Year

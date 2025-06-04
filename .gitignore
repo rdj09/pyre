@@ -12,4 +12,8 @@ site/
 .idea/pyre.iml
 .idea/vcs.xml
 .idea/inspectionProfiles/profiles_settings.xml
-/.cache/plugin/social/
+/.cache/plugin/social/*
+src/pyre/exceptions/__pycache__/*
+src/pyre/Models/__pycache__/*
+src/pyre/Models/__pycache__/*
+src/pyre/Models/Experience/*

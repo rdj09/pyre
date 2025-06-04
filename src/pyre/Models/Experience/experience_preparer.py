@@ -1,8 +1,8 @@
 from typing import Dict, List, Any, Optional
-from pyre.Models.trending import Trending
-from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims
-from pyre.exposures.exposures import Exposure, Exposures
-from pyre.treaty.contracts import RIContract
+from ...Models.trending import Trending
+from ...claims.claims import Claim, ClaimDevelopmentHistory, Claims
+from ...exposures.exposures import Exposure, Exposures
+from ...treaty.contracts import RIContract
 
 
 class ExperienceModelData:
