@@ -167,44 +167,111 @@ plt.show()
 ### Trending
 
 ```python
-from pyre.Models.trending import apply_trend, compound_trend
-import numpy as np
+from pyre.Models.trending import Trending
+from pyre.claims.claims import Claims, Claim, ClaimsMetaData, ClaimDevelopmentHistory
+from pyre.exposures.exposures import Exposures, Exposure, ExposureMetaData, ExposureValues
+from datetime import date
 import pandas as pd
 
-# Create sample data
-years = [2018, 2019, 2020, 2021, 2022]
-values = [100, 110, 125, 135, 150]
+# Create sample trend factors
+exposure_trend_factors = {
+    2018: 1.05,
+    2019: 1.04,
+    2020: 1.03,
+    2021: 1.02,
+    2022: 1.01
+}
 
-# Apply trend to project future values
-annual_trend = 0.08  # 8% annual trend
-projected_years = [2023, 2024, 2025]
-projected_values = apply_trend(values[-1], annual_trend, len(projected_years))
+claim_trend_factors = {
+    2018: 1.06,
+    2019: 1.05,
+    2020: 1.04,
+    2021: 1.03,
+    2022: 1.02
+}
 
-all_years = years + projected_years
-all_values = values + projected_values
+# Create a Trending instance
+base_year = 2023
+trending = Trending(
+    exposure_trend_factors=exposure_trend_factors,
+    claim_trend_factors=claim_trend_factors,
+    base_year=base_year
+)
 
-print("Historical and Projected Values:")
-for year, value in zip(all_years, all_values):
-    print(f"  {year}: {value:.2f}")
+# Create sample exposures
+exposures_list = [
+    Exposure(
+        ExposureMetaData(
+            exposure_id=f"EXP{year}",
+            exposure_name=f"Exposure {year}",
+            exposure_period_start=date(year, 1, 1),
+            exposure_period_end=date(year, 12, 31),
+            currency="USD"
+        ),
+        ExposureValues(
+            exposure_value=1000 * (1 + 0.1 * (year - 2018)),
+            attachment_point=0,
+            limit=0
+        )
+    )
+    for year in range(2018, 2023)
+]
 
-# Calculate compound trend between two periods
-start_value = values[0]
-end_value = values[-1]
-num_periods = len(years) - 1
-implied_trend = compound_trend(start_value, end_value, num_periods)
-print(f"Implied annual trend: {implied_trend:.2%}")
+# Create sample claims
+claims_list = [
+    Claim(
+        ClaimsMetaData(
+            claim_id=f"CL{year}",
+            currency="USD",
+            loss_date=date(year, 6, 15)
+        ),
+        ClaimDevelopmentHistory(
+            development_months=[0, 12],
+            cumulative_dev_paid=[0, 500 * (1 + 0.1 * (year - 2018))],
+            cumulative_dev_incurred=[1000 * (1 + 0.1 * (year - 2018)), 800 * (1 + 0.1 * (year - 2018))]
+        )
+    )
+    for year in range(2018, 2023)
+]
 
-# Create a DataFrame for analysis
-df = pd.DataFrame({
-    'Year': all_years,
-    'Value': all_values
-})
+# Create collections
+exposures = Exposures(exposures_list)
+claims = Claims(claims_list)
 
-# Calculate year-over-year trends
-df['YoY_Trend'] = df['Value'].pct_change()
+# Trend the exposures and claims to the base year
+trended_exposures = trending.trend_exposures(exposures)
+trended_claims = trending.trend_claims(claims)
 
-print("\nYear-over-Year Trends:")
-print(df[['Year', 'Value', 'YoY_Trend']])
+# Print original and trended values
+print("Original vs. Trended Exposures:")
+for i, (orig, trended) in enumerate(zip(exposures, trended_exposures)):
+    year = 2018 + i
+    orig_value = orig.exposure_values.exposure_value
+    trended_value = trended.exposure_values.exposure_value
+    trend_factor = trending.calculate_trend_factor(year, for_claims=False)
+    print(f"  {year}: Original=${orig_value:.2f}, Trended=${trended_value:.2f}, Factor={trend_factor:.4f}")
+
+print("\nOriginal vs. Trended Claims (Latest Incurred):")
+for i, (orig, trended) in enumerate(zip(claims, trended_claims)):
+    year = 2018 + i
+    orig_value = orig.uncapped_claim_development_history.latest_incurred()
+    trended_value = trended.uncapped_claim_development_history.latest_incurred()
+    trend_factor = trending.calculate_trend_factor(year, for_claims=True)
+    print(f"  {year}: Original=${orig_value:.2f}, Trended=${trended_value:.2f}, Factor={trend_factor:.4f}")
+
+# Get the trend factors
+trend_factors = trending.get_trend_factors()
+print("\nTrend Factors:")
+print("  Exposure Trend Factors:", trend_factors['exposure'])
+print("  Claim Trend Factors:", trend_factors['claim'])
+
+# For backward compatibility, you can also use standalone functions
+from pyre.Models.trending import calculate_trend_factor, trend_exposures, trend_claims
+
+# Calculate a trend factor directly
+origin_year = 2020
+direct_trend_factor = calculate_trend_factor(origin_year, base_year, exposure_trend_factors)
+print(f"\nDirect trend factor from {origin_year} to {base_year}: {direct_trend_factor:.4f}")
 ```
 
 ## API Reference
@@ -219,13 +286,9 @@ print(df[['Year', 'Value', 'YoY_Trend']])
 
 ::: pyre.Models.Experience.resampling
 
-::: pyre.Models.Exposure.mbbefd
+::: pyre.Models.Exposure.exposure_curve_functions
 
-::: pyre.Models.Exposure.mixed_exponential
-
-::: pyre.Models.Exposure.pareto_ilf
-
-::: pyre.Models.Exposure.riebesell
+::: pyre.Models.Exposure.exposure_rating_cost
 
 ::: pyre.Models.AggregateFeatures.aggregate_features
 
