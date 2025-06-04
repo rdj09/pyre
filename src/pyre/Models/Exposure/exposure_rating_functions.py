@@ -1,6 +1,11 @@
 from enum import Enum, auto
 from math import log, exp
+from typing import Union, Dict, Any
 
+class ExposureCurveType(Enum):
+    RIEBESELL = auto()
+    MIXED_EXPONENTIAL = auto()
+    MBBEFD = auto()
 
 class mixed_expo_curves(Enum):
     CURVE_ONE = {
@@ -25,7 +30,6 @@ class swissRe_c_values(Enum):
     INDUSTRIAL_LARGE_COMMERCIAL = 4.0
     LLOYDS_INDUSTRY = 5.0
 
-
 def mixed_exponential_curve(paramaters_mus:list[float], parameter_weights:list[float], curve_position_value:float) -> float:
     """_summary_
 
@@ -44,22 +48,24 @@ def mixed_exponential_curve(paramaters_mus:list[float], parameter_weights:list[f
             total_limited_severity += contributing_limiting_severity * weight
     return total_limited_severity
 
-def mbbefd_curve(swissRe_c_values: swissRe_c_values, curve_position: float) -> float:
-    """_summary_
+
+def mbbefd_curve(curve: Union[swissRe_c_values, float], curve_position: float) -> float:
+    """Calculate the MBBEFD curve value.
 
     Args:
-        swissRe_c_values (swissRe_c_values): _description_
-        curve_position (float): _description_
+        curve (Union[swissRe_c_values, float]): Either a swissRe_c_values enum or a manual c-value as float
+        curve_position (float): Position on the curve
 
     Returns:
-        float: _description_
+        float: The calculated curve value
     """
-    b = exp(3.1 - 0.15 * (1 + swissRe_c_values.value) * swissRe_c_values.value)
-    g = exp((0.78 + 0.12 * swissRe_c_values.value) * swissRe_c_values.value)
+    # Extract the c-value - either from enum or use the float directly
+    c_value = curve.value if isinstance(curve, swissRe_c_values) else curve
+
+    # Calculate using the c-value
+    b = exp(3.1 - 0.15 * (1 + c_value) * c_value)
+    g = exp((0.78 + 0.12 * c_value) * c_value)
     return log(((g - 1) * b + (1 - b * g) * b ** curve_position) / (1 - b)) / log(b * g)
-
-# print(mbbefd_curve(swissRe_c_values.LLOYDS_INDUSTRY,0.5))
-
 
 def riebesell_curve(attachment: float, limit: float, z_value: float, base_limit: float):
     """_summary_
@@ -78,23 +84,31 @@ def riebesell_curve(attachment: float, limit: float, z_value: float, base_limit:
     else:
         return ((attachment + limit) / base_limit) ** log(1 + z_value, 2)
 
-
 def power_ilf(limit: float, basic_limit: float, power_parameter: float) -> float:
     if limit is None:
         return 0.0
     else:
         return (limit / basic_limit) ** power_parameter
 
-
-
-
-class ExposureCurveType(Enum):
-    RIEBESELL = auto()
-    MIXED_EXPONENTIAL = auto()
-    MBBEFD = auto()
-
 exposure_curve_calculation = {
     ExposureCurveType.RIEBESELL: riebesell_curve,
     ExposureCurveType.MIXED_EXPONENTIAL: mixed_exponential_curve,
     ExposureCurveType.MBBEFD: mbbefd_curve
 }
+
+def calculate_curve(curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
+    """Calculate curve value based on curve type and parameters.
+
+    Args:
+        curve_type: Type of curve to use
+        parameters: Dictionary containing curve-specific parameters
+        position: Position on the curve
+
+    Returns:
+        float: Calculated curve value
+    """
+    if curve_type not in exposure_curve_calculation:
+        raise ValueError(f"Unsupported curve type: {curve_type}")
+
+    func = exposure_curve_calculation[curve_type]
+    return func(**parameters, curve_position=position)

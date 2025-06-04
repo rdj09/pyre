@@ -27,3 +27,4 @@ class ExposureModelData:
     def trended_exposurer(self):
         # You may want to use the actual base_year and trend_factors logic here
         return trend_exposures(self._exposures, base_year=0, trend_factors={blah: blah})
+
