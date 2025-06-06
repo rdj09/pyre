@@ -3,7 +3,6 @@ from .exposure_curve_functions import ExposureCurveType
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
 
-
 class ExposureModel():
     def __init__(self, exposures: Exposures, ri_contract: RIContract, selected_curve: ExposureCurveType, curve_parameters: Dict):
         self._exposures = exposures
@@ -82,22 +81,22 @@ def _calculate_single_exposure_share(self, exposure):
             ##TODO: below is not general for all function very much mbbefd curve input expectations.
 
             # Use the general calculate_curve function for other curve types
-            curve_position_policy_lower = calculate_curve(
+            curve_position_policy_lower = self.calculate_exposure_curve(
                 self._selected_curve,
                 self._curve_parameters,
                 policy_attachment / total_insured_value
             )
-            curve_position_policy_higher = calculate_curve(
+            curve_position_policy_higher = self.calculate_exposure_curve(
                 self._selected_curve,
                 self._curve_parameters,
                 total_insured_value / total_insured_value  # This equals 1.0
             )
-            curve_position_treaty_lower = calculate_curve(
+            curve_position_treaty_lower = self.calculate_exposure_curve(
                 self._selected_curve,
                 self._curve_parameters,
                 treaty_bottom / total_insured_value
             )
-            curve_position_treaty_higher = calculate_curve(
+            curve_position_treaty_higher = self.calculate_exposure_curve(
                 self._selected_curve,
                 self._curve_parameters,
                 treaty_top / total_insured_value
