@@ -93,19 +93,19 @@ exposure_curve_calculation = {
     ExposureCurveType.MBBEFD: mbbefd_curve
 }
 
-def calculate_curve(curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
-    """Calculate curve value based on curve type and parameters.
-
-    Args:
-        curve_type: Type of curve to use
-        parameters: Dictionary containing curve-specific parameters
-        position: Position on the curve
-
-    Returns:
-        float: Calculated curve value
-    """
-    if curve_type not in exposure_curve_calculation:
-        raise ValueError(f"Unsupported curve type: {curve_type}")
-
-    func = exposure_curve_calculation[curve_type]
-    return func(**parameters, curve_position=position)
+# def calculate_curve(curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
+#     """Calculate curve value based on curve type and parameters.
+#
+#     Args:
+#         curve_type: Type of curve to use
+#         parameters: Dictionary containing curve-specific parameters
+#         position: Position on the curve
+#
+#     Returns:
+#         float: Calculated curve value
+#     """
+#     if curve_type not in exposure_curve_calculation:
+#         raise ValueError(f"Unsupported curve type: {curve_type}")
+#
+#     func = exposure_curve_calculation[curve_type]
+#     return func(**parameters, curve_position=position)

@@ -29,8 +29,8 @@ class ExposureModel():
 #       curve_position_treaty_higher = mbbefd_curve(curve_parameter,seleceted_treaty_top / selected_total_insured_value)
 #       return (curve_position_treaty_higher - curve_position_treaty_lower) / (curve_position_policy_higher - curve_position_policy_lower)
 
-# TODO should attach to this class.
-def calculate_curve(self, curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
+# TODO should attach to this class. Think about ILF option nad adjustment to calculation
+def calculate_exposure_curve(self, curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
     """Calculate curve value based on curve type and parameters.
 
     Args:
