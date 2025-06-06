@@ -1,5 +1,5 @@
 from typing import Dict
-from .exposure_curve_functions import ExposureCurveType, calculate_curve
+from .exposure_curve_functions import ExposureCurveType
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
 
@@ -28,6 +28,25 @@ class ExposureModel():
 #       curve_position_treaty_lower = mbbefd_curve(curve_parameter,seleceted_treaty_bottom / selected_total_insured_value)
 #       curve_position_treaty_higher = mbbefd_curve(curve_parameter,seleceted_treaty_top / selected_total_insured_value)
 #       return (curve_position_treaty_higher - curve_position_treaty_lower) / (curve_position_policy_higher - curve_position_policy_lower)
+
+# TODO should attach to this class.
+def calculate_curve(self, curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
+    """Calculate curve value based on curve type and parameters.
+
+    Args:
+        curve_type: Type of curve to use
+        parameters: Dictionary containing curve-specific parameters
+        position: Position on the curve
+
+    Returns:
+        float: Calculated curve value
+    """
+    if curve_type not in self.exposure_curve_calculation:
+        raise ValueError(f"Unsupported curve type: {curve_type}")
+
+    func = self.exposure_curve_calculation[curve_type]
+    return func(**parameters, curve_position=position)
+
 
 
 def _calculate_single_exposure_share(self, exposure):

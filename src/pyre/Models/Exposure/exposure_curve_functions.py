@@ -33,6 +33,7 @@ class swissRe_c_values(Enum):
 def mixed_exponential_curve(paramaters_mus:list[float], parameter_weights:list[float], curve_position_value:float) -> float:
     """_summary_
 
+        citation: https://www.casact.org/sites/default/files/database/proceed_proceed99_99578.pdf
     Args:
         paramaters_mus (list[float]): _description_
         parameter_weights (list[float]): _description_
@@ -51,6 +52,8 @@ def mixed_exponential_curve(paramaters_mus:list[float], parameter_weights:list[f
 
 def mbbefd_curve(curve: Union[swissRe_c_values, float], curve_position: float) -> float:
     """Calculate the MBBEFD curve value.
+
+    citation: https://www.casact.org/sites/default/files/2021-03/8_Bernegger.pdf
 
     Args:
         curve (Union[swissRe_c_values, float]): Either a swissRe_c_values enum or a manual c-value as float
