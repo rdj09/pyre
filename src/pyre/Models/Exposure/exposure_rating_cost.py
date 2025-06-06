@@ -3,6 +3,10 @@ from .exposure_curve_functions import ExposureCurveType, exposure_curve_calculat
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
 
+# citation https://www.casact.org/sites/default/files/presentation/reinsure_2009_handouts_cs1-rosin.pdf "STACKING"
+
+
+
 class ExposureModel():
     def __init__(self, exposures: Exposures, ri_contract: RIContract, selected_curve: ExposureCurveType, curve_parameters: Dict):
         self._exposures = exposures
