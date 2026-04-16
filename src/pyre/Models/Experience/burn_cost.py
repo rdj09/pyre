@@ -424,8 +424,8 @@ class BurnCostModel:
                 burn_costs[year] = ultimate_claims / earned_exposure if earned_exposure > 0 else 0.0
 
             except Exception as e:
-                # If there's an error, use the chainladder method as fallback
-                ultimate_claims = chainladder_method(latest_incurred, dev_factor)
-                burn_costs[year] = ultimate_claims / earned_exposure if earned_exposure > 0 else 0.0
+                raise ValueError(
+                    f"Projection failed for year {year}, layer {self._layer_id}: {e}"
+                ) from e
 
         return burn_costs
