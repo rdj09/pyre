@@ -1,31 +1,12 @@
 from dataclasses import dataclass, field
 from datetime import date
-from enum import Enum
 from typing import Any, Dict, List, Sequence
 
 from ..treaty.layer_loss_functions import layer_loss_calculation
-from ..claims.claims import ClaimYearType
 from ..exceptions.exceptions import ContractException
-from ..treaty.contract_types import ContractType
-
-
-class ClaimTriggerBasis(Enum):
-    LOD = "Losses Occurrence"   # Accident Year
-    RAD = "Risk Attaching"      # Policy Inception Year
-    CMB = "Claims Made Basis"   # Reported Year
-
-
-class IndexationClauseType(Enum):
-    FULL_INDEXATION = "Full Indexation"
-    FIC = "Franchise - FIC"
-    SIC = "Severe Inflation (also London Market) - SIC"
-
-
-_TRIGGER_TO_CLAIM_YEAR: Dict[ClaimTriggerBasis, ClaimYearType] = {
-    ClaimTriggerBasis.RAD: ClaimYearType.UNDERWRITING_YEAR,
-    ClaimTriggerBasis.CMB: ClaimYearType.REPORTED_YEAR,
-    ClaimTriggerBasis.LOD: ClaimYearType.ACCIDENT_YEAR,
-}
+from ..enums import (
+    ClaimYearType, ClaimTriggerBasis, IndexationClauseType, ContractType
+)
 
 
 @dataclass
@@ -92,12 +73,13 @@ class RIContractMetadata:
 
     @property
     def claim_year_basis(self) -> ClaimYearType:
-        if self.trigger_basis in _TRIGGER_TO_CLAIM_YEAR:
-            return _TRIGGER_TO_CLAIM_YEAR[self.trigger_basis]
-        raise ContractException(
-            contract_id=self.contract_id,
-            message="Trigger basis not found in claim year mapping",
-        )
+        try:
+            return self.trigger_basis.to_claim_year_type()
+        except KeyError:
+            raise ContractException(
+                contract_id=self.contract_id,
+                message="Trigger basis not found in claim year mapping",
+            )
 
 
 class RIContract:

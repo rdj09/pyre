@@ -2,10 +2,7 @@ from enum import Enum, auto
 from math import log, exp
 from typing import Union, Dict, Any
 
-class ExposureCurveType(Enum):
-    RIEBESELL = auto()
-    MIXED_EXPONENTIAL = auto()
-    MBBEFD = auto()
+from ...enums import ExposureCurveType
 
 class mixed_expo_curves(Enum):
     CURVE_ONE = {

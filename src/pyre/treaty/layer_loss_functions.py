@@ -1,4 +1,4 @@
-from ..treaty.contract_types import ContractType
+from ..enums import ContractType
 
 
 def xol_calculation(gross_amount: float, attachment: float, limit: float):

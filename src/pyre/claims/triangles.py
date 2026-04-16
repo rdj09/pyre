@@ -1,5 +1,4 @@
 from typing import Dict, List, Optional, Union, Tuple, Any, Iterator
-from enum import Enum, auto
 from math import exp
 from ..claims.claims import Claims
 from ..models.experience.curve_fitting import (
@@ -7,16 +6,7 @@ from ..models.experience.curve_fitting import (
     weibull_fit, inverse_power_fit, r_squared,
     assess_error_assumptions, residuals_standardised
 )
-
-class CurveType(Enum):
-    """
-    Enum representing different types of curves that can be fitted to triangle data.
-    """
-    EXPONENTIAL = auto()
-    POWER = auto()
-    WEIBULL = auto()
-    INVERSE_POWER = auto()
-    OTHER = auto()
+from ..enums import CurveType
 
 class Triangle:
     """

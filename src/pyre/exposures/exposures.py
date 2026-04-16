@@ -2,18 +2,8 @@ from dataclasses import dataclass, field
 from datetime import date
 import operator
 from typing import List, Optional
-from enum import Enum, auto
 
-
-class ExposureBasis(Enum):
-    """Enumeration of exposure bases used in insurance calculations.
-
-    Attributes:
-        EARNED: Represents exposures that have been earned over a given period.
-        WRITTEN: Represents exposures that have been written (i.e., policies issued) during a given period.
-    """
-    EARNED = auto()
-    WRITTEN = auto()
+from ..enums import ExposureBasis
 
 
 @dataclass

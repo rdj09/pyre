@@ -5,7 +5,7 @@ from pyre.models.experience.experience_preparer import ExperienceModelData
 from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData, Claims, ClaimYearType
 from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis
 from pyre.treaty.contracts import RILayer, RIContractMetadata, RIContract, ClaimTriggerBasis, IndexationClauseType
-from pyre.treaty.contract_types import ContractType
+from pyre.enums import ContractType
 
 
 def _make_model_data() -> ExperienceModelData:

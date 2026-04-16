@@ -4,7 +4,7 @@ from pyre.models.exposure.exposure_rating_cost import ExposureModel
 from pyre.models.exposure.exposure_curve_functions import ExposureCurveType, swissRe_c_values
 from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis
 from pyre.treaty.contracts import RILayer, RIContractMetadata, RIContract, ClaimTriggerBasis, IndexationClauseType
-from pyre.treaty.contract_types import ContractType
+from pyre.enums import ContractType
 
 
 def _make_exposure_model() -> ExposureModel:

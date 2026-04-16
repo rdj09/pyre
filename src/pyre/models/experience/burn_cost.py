@@ -1,7 +1,7 @@
-from enum import Enum, auto
 from math import exp
 from typing import Any, Dict, List, Optional, Union, Callable
 from ...models.experience.experience_preparer import ExperienceModelData
+from ...enums import ProjectionMethods
 
 def chainladder_method(data: float, development_factor: float) -> float:
     """
@@ -142,15 +142,6 @@ def cape_cod_prior_algo(trend_factors: List[float], losses: List[float], develop
         psuedo_exposures = sum(exposures[i] / development_factors[i]
                                for i in range(len(exposures)))
         return psuedo_claims / psuedo_exposures
-
-class ProjectionMethods(Enum):
-    """
-    Enumeration of available projection methods for burn cost calculations.
-    """
-    CHAINLADDER = auto()
-    BF = auto()
-    SIMPLE_CAPE_COD = auto()
-    GENERALISED_CAPE_COD = auto()
 
 projection_methods_fn = {
     ProjectionMethods.CHAINLADDER: chainladder_method,

@@ -1,7 +1,5 @@
-from pyre.treaty.contract_types import ContractType
+from pyre.enums import ContractType, ClaimTriggerBasis, IndexationClauseType
 from pyre.treaty.contracts import (
-    ClaimTriggerBasis,
-    IndexationClauseType,
     RILayer,
     RIContractMetadata,
     RIContract
