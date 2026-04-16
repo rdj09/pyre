@@ -1,6 +1,7 @@
 """
 Rate Change Metrics Calculation Module
 
+
 Bodoff, N. (2009). "Measuring Rate Change: Methods and Implications."
 https://www.casact.org/sites/default/files/database/forum_09wforum_bodoff.pdf
 
@@ -11,6 +12,7 @@ https://assets.lloyds.com/assets/pdf-performance-management-pmdr-renewal-scenari
 
 
 """
+from typing import Optional
 
 def rate_change_simple(expiring_premium: float, renewed_premium: float) -> float:
     """

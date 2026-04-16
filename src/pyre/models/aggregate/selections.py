@@ -1,10 +1,10 @@
 from typing import Dict, List, Optional, Union, Any
 import math
 from ...models.experience.experience_preparer import ExperienceModelData
-from ...models.exposure.exposure_rating_cost import  * # TODO: sort out
+from ...models.exposure.exposure_rating_cost import ExposureModel
 
 class CredibilityWeight:
-    def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModelData) -> None:
+    def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModel) -> None:
         """
         Initialize the CredibilityWeight class with experience and exposure data.
 
@@ -297,7 +297,7 @@ class CredibilityWeight:
 
 
 class Selections:
-    def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModelData, 
+    def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModel, 
                  credibility_weight: Optional[CredibilityWeight] = None) -> None:
         """
         Initialize the Selections class with experience and exposure data.
