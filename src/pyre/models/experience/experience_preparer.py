@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Dict, List, Any, Optional
 from ...models.trending import Trending
 from ...claims.claims import Claim, ClaimDevelopmentHistory, Claims
@@ -62,6 +63,8 @@ class ExperienceModelData:
             value (Claims): The new claims data.
         """
         self._claims = value
+        for attr in ("trended_claims", "subject_contract_claims", "aggregate_subject_contract_claims"):
+            self.__dict__.pop(attr, None)
 
     @property
     def exposures(self) -> Exposures:
@@ -82,6 +85,8 @@ class ExperienceModelData:
             value (Exposures): The new exposures data.
         """
         self._exposures = value
+        for attr in ("trended_exposures", "aggregate_exposures"):
+            self.__dict__.pop(attr, None)
 
     @property
     def ri_contract(self) -> RIContract:
@@ -102,6 +107,8 @@ class ExperienceModelData:
             value (RIContract): The new reinsurance contract.
         """
         self._ri_contract = value
+        for attr in ("subject_contract_claims", "aggregate_subject_contract_claims", "aggregate_exposures"):
+            self.__dict__.pop(attr, None)
 
     @property
     def trending(self) -> Trending:
@@ -139,8 +146,16 @@ class ExperienceModelData:
             claim_trend_factors=claim_trend_factors,
             base_year=base_year
         )
+        for attr in (
+            "trended_claims",
+            "trended_exposures",
+            "subject_contract_claims",
+            "aggregate_subject_contract_claims",
+            "aggregate_exposures",
+        ):
+            self.__dict__.pop(attr, None)
 
-    @property
+    @cached_property
     def trended_claims(self) -> Claims:
         """
         Get the claims data trended to the contract inception year.
@@ -154,7 +169,7 @@ class ExperienceModelData:
         """
         return self._trending.trend_claims(self.claims)
 
-    @property
+    @cached_property
     def subject_contract_claims(self) -> Dict[int, Claims]:
         """
         Returns a dictionary mapping layer IDs to Claims objects where each claim's cumulative_dev_paid 
@@ -185,7 +200,7 @@ class ExperienceModelData:
 
         return ceded_claims_dict # returns dictionary of Claims objects by layer id that can be used to create aggregate numbers
 
-    @property
+    @cached_property
     def trended_exposures(self) -> Exposures:
         """
         Get the exposures data trended to the contract inception year.
@@ -199,7 +214,7 @@ class ExperienceModelData:
         """
         return self._trending.trend_exposures(self.exposures)
 
-    @property
+    @cached_property
     def aggregate_subject_contract_claims(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
         """
         Aggregates the output of subject_contract_claims by modelling year and layer, and also returns claim counts by layer, modelling year, claim status, and total count.
@@ -250,7 +265,7 @@ class ExperienceModelData:
 
         return subject_claims_by_year
 
-    @property
+    @cached_property
     def aggregate_exposures(self) -> Dict[int, Dict[str, float]]:
         """
         Aggregates the trended exposures by modelling year, summing the written and earned exposure values.
