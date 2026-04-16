@@ -101,5 +101,83 @@ class TestRIContract(unittest.TestCase):
         self.assertEqual(self.contract._layers[0].layer_name, "Layer 1")
 
 
+import pytest
+
+
+def _make_xol_layer() -> RILayer:
+    return RILayer(
+        layer_id=1,
+        layer_name="1m xs 1m",
+        layer_type=ContractType.EXCESS_OF_LOSS,
+        occurrence_attachment=1_000_000.0,
+        occurrence_limit=1_000_000.0,
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=["Property"],
+        subject_lob_exposure_amounts=[10_000_000.0],
+        full_subject_premium=500_000.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=1,
+        reinstatement_cost={1: 1.0},
+    )
+
+
+def test_loss_to_layer_fn_xol_below_attachment():
+    layer = _make_xol_layer()
+    assert layer.loss_to_layer_fn(500_000.0) == pytest.approx(0.0)
+
+
+def test_loss_to_layer_fn_xol_in_layer():
+    layer = _make_xol_layer()
+    assert layer.loss_to_layer_fn(1_500_000.0) == pytest.approx(500_000.0)
+
+
+def test_loss_to_layer_fn_xol_above_limit():
+    layer = _make_xol_layer()
+    assert layer.loss_to_layer_fn(5_000_000.0) == pytest.approx(1_000_000.0)
+
+
+def test_loss_to_layer_fn_quota_share_passes_through():
+    layer = RILayer(
+        layer_id=2,
+        layer_name="QS",
+        layer_type=ContractType.QUOTA_SHARE,
+        occurrence_attachment=0.0,
+        occurrence_limit=float("inf"),
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=["Property"],
+        subject_lob_exposure_amounts=[1_000_000.0],
+        full_subject_premium=100_000.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=0,
+        reinstatement_cost={},
+    )
+    assert layer.loss_to_layer_fn(250_000.0) == pytest.approx(250_000.0)
+
+
+def test_loss_to_layer_fn_surplus_share_raises():
+    layer = RILayer(
+        layer_id=3,
+        layer_name="SS",
+        layer_type=ContractType.SURPLUS_SHARE,
+        occurrence_attachment=0.0,
+        occurrence_limit=float("inf"),
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=[],
+        subject_lob_exposure_amounts=[],
+        full_subject_premium=0.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=0,
+        reinstatement_cost={},
+    )
+    with pytest.raises(NotImplementedError):
+        layer.loss_to_layer_fn(100_000.0)
+
+
 if __name__ == "__main__":
     unittest.main()

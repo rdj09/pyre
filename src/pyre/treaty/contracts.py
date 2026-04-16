@@ -207,14 +207,24 @@ class RILayer:
     def signed_line_premium(self) -> float | Any:
         return self.cession * self.signed_line * self.full_subject_premium
 
-    def loss_to_layer_fn(self, gross_amount:float):
-        func = layer_loss_calculation[self.layer_type]
-        if self.layer_type == ContractType.QUOTA_SHARE:
-            return gross_amount  # TODO analysis typically easier to do at 100% - inuring and profitability at share consider elsewhere !!!!!!
+    def loss_to_layer_fn(self, gross_amount: float) -> float:
+        """Apply this layer's terms to a gross loss amount.
+
+        Args:
+            gross_amount: Ground-up (or ceded-in) loss amount.
+
+        Returns:
+            The amount ceded to this layer.
+
+        Raises:
+            NotImplementedError: If layer_type is SURPLUS_SHARE.
+        """
         if self.layer_type == ContractType.SURPLUS_SHARE:
-            return NotImplementedError("Yet to be implemented")
-        else:
-            return lambda gross_amount : func(gross_amount, self.occurrence_attachment, self.occurrence_limit)
+            raise NotImplementedError("Surplus share loss function not yet implemented")
+        if self.layer_type == ContractType.QUOTA_SHARE:
+            return gross_amount
+        func = layer_loss_calculation[self.layer_type]
+        return func(gross_amount, self.occurrence_attachment, self.occurrence_limit)
 
 class RIContractMetadata:
     def __init__(
