@@ -316,3 +316,38 @@ class TestStandaloneFunctions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+import pytest
+
+def test_trend_exposures_returns_trended_values():
+    """Regression test: trend_exposures() was calling modelling_year() and
+    exposure_values() as functions — both are properties. This test verifies
+    the trended exposure value is 1000 * 1.05 = 1050.0."""
+    from pyre.Models.trending import Trending
+    from pyre.exposures.exposures import (
+        Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis,
+    )
+    from datetime import date
+
+    meta = ExposureMetaData(
+        exposure_id="E1",
+        exposure_name="Test Exposure",
+        exposure_period_start=date(2020, 1, 1),
+        exposure_period_end=date(2020, 12, 31),
+        currency="GBP",
+        exposure_type=ExposureBasis.EARNED,
+    )
+    values = ExposureValues(exposure_value=1000.0, attachment_point=0.0, limit=1_000_000.0)
+    exposures = Exposures([Exposure(meta, values)])
+
+    trending = Trending(
+        exposure_trend_factors={2020: 1.05},
+        claim_trend_factors={2020: 1.05},
+        base_year=2021,
+    )
+
+    result = trending.trend_exposures(exposures)
+
+    assert len(result) == 1
+    assert result[0].exposure_values.exposure_value == pytest.approx(1050.0)

@@ -92,14 +92,14 @@ class Trending:
 
         for exposure in exposures:
             # Get the modelling year and exposure value
-            origin_year = exposure.modelling_year()
+            origin_year = exposure.modelling_year
 
             # Create a new exposure with trended values
             # Use exposure trend factors (for_claims=False is the default)
             trend_factor = self.calculate_trend_factor(origin_year, for_claims=False)
 
             # Get the original exposure values
-            original_values = exposure.exposure_values()
+            original_values = exposure.exposure_values
             trended_value = original_values.exposure_value * trend_factor
 
             # Create new ExposureValues with the trended value
