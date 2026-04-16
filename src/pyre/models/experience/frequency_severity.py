@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from enum import Enum, auto
-from ...Models.Experience.experience_preparer import ExperienceModelData
+from ...models.experience.experience_preparer import ExperienceModelData
 
 
 class SeverityDistribution(Enum):

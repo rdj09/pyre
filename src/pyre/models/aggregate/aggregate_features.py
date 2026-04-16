@@ -1,6 +1,6 @@
 from collections import namedtuple
 from ...treaty.contracts import RIContract
-from ...Models.AggregateFeatures.simulation_engine import Simulation
+from ...models.aggregate.simulation_engine import Simulation
 
 #TODO tidy up and consider refactor and seperate processes 
 modelling_assumptions = namedtuple("ModellingAssumptions",["cost_of_capital","required_rate_of_return"])

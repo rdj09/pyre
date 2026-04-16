@@ -1,4 +1,4 @@
-from ...Models.Experience.experience_preparer import ExperienceModelData
+from ...models.experience.experience_preparer import ExperienceModelData
 from random import choice
 
 

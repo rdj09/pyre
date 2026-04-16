@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Union, Any
 import math
-from ...Models.Experience.experience_preparer import ExperienceModelData
-from ...Models.Exposure.exposure_rating_cost import  * # TODO: sort out
+from ...models.experience.experience_preparer import ExperienceModelData
+from ...models.exposure.exposure_rating_cost import  * # TODO: sort out
 
 class CredibilityWeight:
     def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModelData) -> None:

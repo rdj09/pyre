@@ -1,7 +1,7 @@
 import pytest
 from datetime import date
-from pyre.Models.Experience.burn_cost import BurnCostModel, ProjectionMethods, projection_methods_fn
-from pyre.Models.Experience.experience_preparer import ExperienceModelData
+from pyre.models.experience.burn_cost import BurnCostModel, ProjectionMethods, projection_methods_fn
+from pyre.models.experience.experience_preparer import ExperienceModelData
 from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData, Claims, ClaimYearType
 from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis
 from pyre.treaty.contracts import RILayer, RIContractMetadata, RIContract, ClaimTriggerBasis, IndexationClauseType
@@ -102,7 +102,7 @@ def test_burn_cost_bf_returns_dict():
 def test_burn_cost_raises_on_invalid_projection(monkeypatch):
     """Regression: calculate_burn_cost used to silently swallow exceptions
     and substitute chain-ladder results. Now it must propagate."""
-    import pyre.Models.Experience.burn_cost as bc_module
+    import pyre.models.experience.burn_cost as bc_module
 
     model_data = _make_model_data()
     model = BurnCostModel(

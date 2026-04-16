@@ -1,7 +1,7 @@
 from enum import Enum, auto
 from math import exp
 from typing import Any, Dict, List, Optional, Union, Callable
-from ...Models.Experience.experience_preparer import ExperienceModelData
+from ...models.experience.experience_preparer import ExperienceModelData
 
 def chainladder_method(data: float, development_factor: float) -> float:
     """

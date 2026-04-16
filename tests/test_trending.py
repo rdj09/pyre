@@ -1,6 +1,6 @@
 import unittest
 from datetime import date
-from pyre.Models.trending import (
+from pyre.models.trending import (
     Trending,
     calculate_trend_factor,
     trend_exposures,
@@ -324,7 +324,7 @@ def test_trend_exposures_returns_trended_values():
     """Regression test: trend_exposures() was calling modelling_year() and
     exposure_values() as functions — both are properties. This test verifies
     the trended exposure value is 1000 * 1.05 = 1050.0."""
-    from pyre.Models.trending import Trending
+    from pyre.models.trending import Trending
     from pyre.exposures.exposures import (
         Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis,
     )
