@@ -226,5 +226,59 @@ class TestTriangle(unittest.TestCase):
 
 
 
+import pytest
+from datetime import date
+from pyre.claims.claims import (
+    Claim, ClaimDevelopmentHistory, ClaimsMetaData, Claims, ClaimYearType,
+)
+
+
+def test_triangle_from_claims_builds_correctly():
+    """Regression: from_claims() called claim.modelling_year (doesn't exist)
+    and iterated dev_history.items() on a List[float]."""
+    meta = ClaimsMetaData(
+        claim_id="C1",
+        currency="GBP",
+        contract_limit=1_000_000.0,
+        contract_deductible=0.0,
+        claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
+        loss_date=date(2020, 6, 1),
+    )
+    dev_hist = ClaimDevelopmentHistory(
+        development_months=[12, 24, 36],
+        cumulative_dev_paid=[100.0, 150.0, 175.0],
+        cumulative_dev_incurred=[200.0, 220.0, 225.0],
+    )
+    claims = Claims([Claim(meta, dev_hist)])
+
+    triangle = Triangle.from_claims(claims, value_type="incurred")
+
+    assert triangle[2020, 12] == pytest.approx(200.0)
+    assert triangle[2020, 24] == pytest.approx(220.0)
+    assert triangle[2020, 36] == pytest.approx(225.0)
+
+
+def test_triangle_from_claims_paid():
+    meta = ClaimsMetaData(
+        claim_id="C1",
+        currency="GBP",
+        contract_limit=1_000_000.0,
+        contract_deductible=0.0,
+        claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
+        loss_date=date(2020, 6, 1),
+    )
+    dev_hist = ClaimDevelopmentHistory(
+        development_months=[12, 24],
+        cumulative_dev_paid=[100.0, 150.0],
+        cumulative_dev_incurred=[200.0, 220.0],
+    )
+    claims = Claims([Claim(meta, dev_hist)])
+
+    triangle = Triangle.from_claims(claims, value_type="paid")
+
+    assert triangle[2020, 12] == pytest.approx(100.0)
+    assert triangle[2020, 24] == pytest.approx(150.0)
+
+
 if __name__ == "__main__":
     unittest.main()

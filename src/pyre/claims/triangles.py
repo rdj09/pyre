@@ -282,24 +282,21 @@ class Triangle:
 
         # Aggregate claims by origin year and development period
         for claim in claims:
-            origin_year = claim.modelling_year
+            origin_year = claim.claims_meta_data.modelling_year
+            dev_hist = claim.capped_claim_development_history
 
-            # Skip claims with no development history
-            if not hasattr(claim, 'capped_claim_development_history'):
-                continue
-
-            # Get the appropriate development history based on value_type
+            # Get the appropriate development values based on value_type
             if value_type == "incurred":
-                dev_history = claim.capped_claim_development_history.cumulative_dev_incurred
+                values = dev_hist.cumulative_dev_incurred
             else:  # value_type == "paid"
-                dev_history = claim.capped_claim_development_history.cumulative_dev_paid
+                values = dev_hist.cumulative_dev_paid
 
             # Add values to the triangle
-            for dev_period, value in dev_history.items():
-                if dev_period in dev_periods:
-                    if dev_period not in triangle[origin_year]:
-                        triangle[origin_year][dev_period] = 0.0
-                    triangle[origin_year][dev_period] += value
+            for dev_period, value in zip(dev_hist.development_months, values):
+                if origin_year in triangle:
+                    triangle[origin_year][dev_period] = (
+                        triangle[origin_year].get(dev_period, 0.0) + value
+                    )
 
         return cls(triangle=triangle, origin_years=origin_years, dev_periods=dev_periods)
 
