@@ -454,30 +454,52 @@ class IBNERPatternExtractor:
         self.D = {oy: {} for oy in self.origin_years}
         self._compute_N_and_D()
 
-    def _compute_N_and_D(self):
+    def _compute_N_and_D(self) -> None:
         """
-        Compute the N and D triangles from cumulative data.
-        """
-        for oy in self.origin_years:
-            cumulative = [self.triangle[oy].get(d, None) for d in self.dev_periods]
-            for idx, d in enumerate(self.dev_periods):
-                if idx >= len(cumulative) or cumulative[idx] is None:
-                    self.N[oy][d] = None
-                    self.D[oy][d] = None
-                    continue
+        Compute N (new IBNR emergence) and D (IBNER development) triangles.
 
-                current = cumulative[idx]
+        Per Schnieper (1991): at each development step d from d-1:
+          - D[oy, d] = triangle[oy, d-1] * (f - 1)
+            where f is the volume-weighted age-to-age factor for that step.
+            This represents IBNER: development of already-reported claims.
+          - N[oy, d] = (triangle[oy, d] - triangle[oy, d-1]) - D[oy, d]
+            This represents new IBNR: emergence of previously unreported claims.
+
+        Citation: Schnieper, R. (1991). Separating True IBNR and IBNER Claims.
+        ASTIN Bulletin, 21(1), 111-127.
+        """
+        # Step 1: compute volume-weighted ATA factors across all origin years
+        ata: Dict[int, float] = {}
+        for i in range(len(self.dev_periods) - 1):
+            d_curr = self.dev_periods[i]
+            d_next = self.dev_periods[i + 1]
+            pairs = [
+                oy for oy in self.origin_years
+                if self.triangle[oy].get(d_curr) is not None
+                and self.triangle[oy].get(d_next) is not None
+            ]
+            numerator = sum(self.triangle[oy][d_next] for oy in pairs)
+            denominator = sum(self.triangle[oy][d_curr] for oy in pairs)
+            ata[d_curr] = numerator / denominator if denominator > 0 else 1.0
+
+        # Step 2: fill N and D triangles
+        for oy in self.origin_years:
+            for idx, d in enumerate(self.dev_periods):
+                current = self.triangle[oy].get(d)
                 if idx == 0:
                     self.N[oy][d] = current
                     self.D[oy][d] = None
                 else:
-                    prev = cumulative[idx - 1]
+                    prev_d = self.dev_periods[idx - 1]
+                    prev = self.triangle[oy].get(prev_d)
                     if current is None or prev is None:
                         self.N[oy][d] = None
                         self.D[oy][d] = None
                     else:
-                        self.D[oy][d] = prev - current
-                        self.N[oy][d] = current - prev + self.D[oy][d]
+                        f = ata.get(prev_d, 1.0)
+                        ibner = prev * (f - 1.0)
+                        self.D[oy][d] = ibner
+                        self.N[oy][d] = (current - prev) - ibner
 
     def get_N_triangle(self) -> Dict[int, Dict[int, float]]:
         """
