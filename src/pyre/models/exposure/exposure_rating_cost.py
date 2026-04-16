@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from .exposure_curve_functions import ExposureCurveType, exposure_curve_calculation
+from .exposure_curve_functions import ExposureCurveType
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
 
@@ -24,11 +24,8 @@ class ExposureModel():
         Returns:
             float: Calculated curve value
         """
-        if curve_type not in exposure_curve_calculation:
-            raise ValueError(f"Unsupported curve type: {curve_type}")
-
-        func = exposure_curve_calculation[curve_type]
-        return func(**parameters, curve_position=position)
+        from ...models.exposure.exposure_curve_functions import calculate_curve
+        return calculate_curve(curve_type, parameters, position)
 
     def _calculate_single_exposure_share(self, exposure) -> dict:
         """

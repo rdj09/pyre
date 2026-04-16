@@ -327,7 +327,10 @@ class Selections:
         """
         # Get claim count if not provided
         if 'claim_count' not in kwargs and hasattr(self.experience_data, 'subject_contract_claims'):
-            kwargs['claim_count'] = len(self.experience_data.subject_contract_claims())
+            total_claims = sum(
+                len(claims_obj.claims) for claims_obj in self.experience_data.subject_contract_claims.values()
+            )
+            kwargs['claim_count'] = total_claims
 
         # Calculate credibility based on the selected method
         if method == "limited_fluctuation":
@@ -380,7 +383,11 @@ class Selections:
         elif method == "greatest_accuracy":
             # Get loss data if not provided
             if 'data' not in kwargs and hasattr(self.experience_data, 'subject_contract_claims'):
-                kwargs['data'] = [claim.amount for claim in self.experience_data.subject_contract_claims()]
+                kwargs['data'] = [
+                    claim.capped_claim_development_history.latest_incurred
+                    for claims_obj in self.experience_data.subject_contract_claims.values()
+                    for claim in claims_obj.claims
+                ]
 
             # Get data for easier access
             data = kwargs.get('data', [])
@@ -392,7 +399,11 @@ class Selections:
         elif method == "bayesian":
             # Get loss data if not provided
             if 'data' not in kwargs and hasattr(self.experience_data, 'subject_contract_claims'):
-                kwargs['data'] = [claim.amount for claim in self.experience_data.subject_contract_claims()]
+                kwargs['data'] = [
+                    claim.capped_claim_development_history.latest_incurred
+                    for claims_obj in self.experience_data.subject_contract_claims.values()
+                    for claim in claims_obj.claims
+                ]
 
             # Calculate data variance if not provided
             data = kwargs.get('data', [])
