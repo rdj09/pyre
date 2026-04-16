@@ -1,9 +1,11 @@
+from dataclasses import dataclass, field
 from datetime import date
 import operator
 from typing import Optional, List, Sequence, Set
 from enum import Enum, auto
 
 from ..exceptions.exceptions import ClaimsException
+
 
 class ClaimYearType(Enum):
     """Enumeration of claim year types used in insurance data analysis.
@@ -17,72 +19,36 @@ class ClaimYearType(Enum):
     UNDERWRITING_YEAR = auto()
     REPORTED_YEAR = auto()
 
+
+@dataclass
 class ClaimDevelopmentHistory:
-    """Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.
+    """Development history of an insurance claim.
 
     Attributes:
-        development_months (List[int]): List of development months corresponding to each data point.
-        cumulative_dev_paid (List[float]): Cumulative paid amounts at each development month.
-        cumulative_dev_incurred (List[float]): Cumulative incurred amounts at each development month.
-
-    Properties:
-        cumulative_reserved_amount (List[float]): List of reserved amounts (incurred minus paid) at each development month.
-        latest_paid (float): Most recent cumulative paid amount, or 0.0 if no data.
-        latest_incurred (float): Most recent cumulative incurred amount, or 0.0 if no data.
-        latest_reserved_amount (float): Most recent reserved amount (incurred minus paid), or 0.0 if no data.
-        latest_development_month (int): Most recent development month, or 0 if no data.
-        incremental_dev_incurred (List[float]): List of incremental incurred amounts at each development month.
-        incremental_dev_paid (List[float]): List of incremental paid amounts at each development month.
-        mean_payment_duration (Optional[float]): Weighted average development month of payments, or None if no payments.
-
-    Methods:
-        incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
-            Converts a sequence of cumulative values into incremental values.
+        development_months: Development month at each data point.
+        cumulative_dev_paid: Cumulative paid at each development month.
+        cumulative_dev_incurred: Cumulative incurred at each development month.
     """
-    def __init__(self, development_months=None, cumulative_dev_paid=None, cumulative_dev_incurred=None):
-        self._development_months = development_months if development_months is not None else []
-        self._cumulative_dev_paid = cumulative_dev_paid if cumulative_dev_paid is not None else []
-        self._cumulative_dev_incurred = cumulative_dev_incurred if cumulative_dev_incurred is not None else []
+    development_months: List[int] = field(default_factory=list)
+    cumulative_dev_paid: List[float] = field(default_factory=list)
+    cumulative_dev_incurred: List[float] = field(default_factory=list)
 
-        # Validate that all lists have the same length
+    def __post_init__(self) -> None:
         self._validate_list_lengths()
 
     def _validate_list_lengths(self) -> None:
-        """Validates that all development lists have the same length."""
-        if len(self._development_months) != len(self._cumulative_dev_paid) or len(self._development_months) != len(self._cumulative_dev_incurred):
-            raise ValueError("All development lists (months, paid, incurred) must have the same length.")
-
-    @property
-    def development_months(self) -> List[int]:
-        return self._development_months
-
-    @development_months.setter
-    def development_months(self, value: List[int]) -> None:
-        self._development_months = value
-        self._validate_list_lengths()
-
-    @property
-    def cumulative_dev_paid(self) -> List[float]:
-        return self._cumulative_dev_paid
-
-    @cumulative_dev_paid.setter
-    def cumulative_dev_paid(self, value: List[float]) -> None:
-        self._cumulative_dev_paid = value
-        self._validate_list_lengths()
-
-    @property
-    def cumulative_dev_incurred(self) -> List[float]:
-        return self._cumulative_dev_incurred
-
-    @cumulative_dev_incurred.setter
-    def cumulative_dev_incurred(self, value: List[float]) -> None:
-        self._cumulative_dev_incurred = value
-        self._validate_list_lengths()
+        if not (
+            len(self.development_months)
+            == len(self.cumulative_dev_paid)
+            == len(self.cumulative_dev_incurred)
+        ):
+            raise ValueError(
+                "All development lists (months, paid, incurred) must have the same length."
+            )
 
     @property
     def cumulative_reserved_amount(self) -> List[float]:
-        """Returns a list of reserved amounts (incurred minus paid) at each development month."""
-        return [incurred - paid for incurred, paid in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)]
+        return [i - p for i, p in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)]
 
     @property
     def latest_paid(self) -> float:
@@ -94,7 +60,11 @@ class ClaimDevelopmentHistory:
 
     @property
     def latest_reserved_amount(self) -> float:
-        return self.cumulative_dev_incurred[-1] - self.cumulative_dev_paid[-1] if self.cumulative_dev_paid else 0.0
+        return (
+            self.cumulative_dev_incurred[-1] - self.cumulative_dev_paid[-1]
+            if self.cumulative_dev_paid
+            else 0.0
+        )
 
     @property
     def latest_development_month(self) -> int:
@@ -102,9 +72,12 @@ class ClaimDevelopmentHistory:
 
     @staticmethod
     def incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
-        incremental_dev = [cumulative_dev[0]]
-        incremental_dev.extend([cumulative_dev[i] - cumulative_dev[i - 1] for i in range(1, len(cumulative_dev))])
-        return incremental_dev
+        if not cumulative_dev:
+            return []
+        result = [cumulative_dev[0]]
+        result.extend(cumulative_dev[i] - cumulative_dev[i - 1] for i in range(1, len(cumulative_dev)))
+        return result
+
     @property
     def incremental_dev_incurred(self) -> List[float]:
         return self.incremental_dev(self.cumulative_dev_incurred)
@@ -116,166 +89,55 @@ class ClaimDevelopmentHistory:
     @property
     def mean_payment_duration(self) -> Optional[float]:
         if self.latest_paid > 0:
-            time_weighted_payments = sum(month * paid for month, paid in zip(self.development_months, self.incremental_dev_paid))
-            return time_weighted_payments / self.latest_paid
+            return sum(
+                m * p for m, p in zip(self.development_months, self.incremental_dev_paid)
+            ) / self.latest_paid
         return None
 
+
+@dataclass
 class ClaimsMetaData:
-    """Metadata for an insurance claim, including key dates, financial limits, and classification details.
+    """Metadata for an insurance claim.
 
     Attributes:
-        claim_id (str): Unique identifier for the claim.
-        currency (str): Currency code for the claim amounts.
-        contract_limit (float): Maximum limit of the insurance contract. Defaults to 0.0.
-        contract_deductible (float): Deductible amount for the contract. Defaults to 0.0.
-        claim_in_xs_of_deductible (bool): Indicates if the claim is in excess of the deductible. Defaults to False.
-        claim_year_basis (ClaimYearType): Basis for determining the claim year (e.g., accident, underwriting, reported). Defaults to ClaimYearType.ACCIDENT_YEAR.
-        loss_date (date): Date of loss occurrence. Defaults to 1900-01-01.
-        policy_inception_date (date): Policy inception date. Defaults to 1900-01-01.
-        report_date (date): Date the claim was reported. Defaults to 1900-01-01.
-        line_of_business (Optional[str]): Line of business associated with the claim. Defaults to None.
-        status (Optional[str]): Status of the claim (e.g., "Open", "Closed"). Defaults to "Open".
-
-    Properties:
-        modelling_year (ClaimsException | int): Returns the modelling year based on the claim_year_basis, or raises ClaimsException if required date is missing.
+        claim_id: Unique identifier for the claim.
+        currency: ISO currency code.
+        contract_limit: Maximum contract limit. Defaults to 0.0.
+        contract_deductible: Contract deductible. Defaults to 0.0.
+        claim_in_xs_of_deductible: Whether amounts are already net of deductible.
+        claim_year_basis: Year type used for modelling.
+        loss_date: Date of loss.
+        policy_inception_date: Policy inception date.
+        report_date: Date claim was reported.
+        line_of_business: Optional LOB classification.
+        status: Claim status. Defaults to "Open".
     """
-    def __init__(
-        self,
-        claim_id: str,
-        currency: str,
-        contract_limit: float = 0.0,
-        contract_deductible: float = 0.0,
-        claim_in_xs_of_deductible: bool = False,
-        claim_year_basis: ClaimYearType = ClaimYearType.ACCIDENT_YEAR,
-        loss_date: date = date(day=1, month=1, year=1900),
-        policy_inception_date: date = date(day=1, month=1, year=1900),
-        report_date: date = date(day=1, month=1, year=1900),
-        line_of_business: Optional[str] = None,
-        status: Optional[str] = "Open"
-    ):
-        self._claim_id = claim_id
-        self._currency = currency
-        self._contract_limit = contract_limit
-        self._contract_deductible = contract_deductible
-        self._claim_in_xs_of_deductible = claim_in_xs_of_deductible
-        self._claim_year_basis = claim_year_basis
-        self._loss_date = loss_date
-        self._policy_inception_date = policy_inception_date
-        self._report_date = report_date
-        self._line_of_business = line_of_business
-        self._status = status
-
-    @property
-    def claim_id(self):
-        return self._claim_id
-
-    @claim_id.setter
-    def claim_id(self, value):
-        self._claim_id = value
-
-    @property
-    def currency(self):
-        return self._currency
-
-    @currency.setter
-    def currency(self, value):
-        self._currency = value
-
-    @property
-    def contract_limit(self):
-        return self._contract_limit
-
-    @contract_limit.setter
-    def contract_limit(self, value):
-        self._contract_limit = value
-
-    @property
-    def contract_deductible(self):
-        return self._contract_deductible
-
-    @contract_deductible.setter
-    def contract_deductible(self, value):
-        self._contract_deductible = value
-
-    @property
-    def claim_in_xs_of_deductible(self):
-        return self._claim_in_xs_of_deductible
-
-    @claim_in_xs_of_deductible.setter
-    def claim_in_xs_of_deductible(self, value):
-        self._claim_in_xs_of_deductible = value
-
-    @property
-    def claim_year_basis(self):
-        return self._claim_year_basis
-
-    @claim_year_basis.setter
-    def claim_year_basis(self, value):
-        self._claim_year_basis = value
-
-    @property
-    def loss_date(self):
-        return self._loss_date
-
-    @loss_date.setter
-    def loss_date(self, value):
-        self._loss_date = value
-
-    @property
-    def policy_inception_date(self):
-        return self._policy_inception_date
-
-    @policy_inception_date.setter
-    def policy_inception_date(self, value):
-        self._policy_inception_date = value
-
-    @property
-    def report_date(self):
-        return self._report_date
-
-    @report_date.setter
-    def report_date(self, value):
-        self._report_date = value
-
-    @property
-    def line_of_business(self):
-        return self._line_of_business
-
-    @line_of_business.setter
-    def line_of_business(self, value):
-        self._line_of_business = value
-
-    @property
-    def status(self):
-        return self._status
-
-    @status.setter
-    def status(self, value):
-        self._status = value
+    claim_id: str
+    currency: str
+    contract_limit: float = 0.0
+    contract_deductible: float = 0.0
+    claim_in_xs_of_deductible: bool = False
+    claim_year_basis: ClaimYearType = field(default=ClaimYearType.ACCIDENT_YEAR)
+    loss_date: date = field(default_factory=lambda: date(1900, 1, 1))
+    policy_inception_date: date = field(default_factory=lambda: date(1900, 1, 1))
+    report_date: date = field(default_factory=lambda: date(1900, 1, 1))
+    line_of_business: Optional[str] = None
+    status: Optional[str] = "Open"
 
     @property
     def modelling_year(self) -> int:
-        """
-        Returns the modelling year based on the claim_year_basis.
-
-        Returns:
-            int: The year to use for modelling purposes.
-
-        Raises:
-            ClaimsException: If the required date for the specified claim_year_basis is missing.
-        """
-        _modeling_basis_years={
+        """Year used for experience modelling, derived from claim_year_basis."""
+        mapping = {
             ClaimYearType.ACCIDENT_YEAR: self.loss_date.year,
             ClaimYearType.UNDERWRITING_YEAR: self.policy_inception_date.year,
-            ClaimYearType.REPORTED_YEAR: self.report_date.year
+            ClaimYearType.REPORTED_YEAR: self.report_date.year,
         }
-        if self.claim_year_basis in _modeling_basis_years:
-            return _modeling_basis_years[self.claim_year_basis]
-        else: 
-            raise ClaimsException(
-                claim_id=self.claim_id, 
-                message="Required date missing from data"
-                )
+        if self.claim_year_basis in mapping:
+            return mapping[self.claim_year_basis]
+        raise ClaimsException(
+            claim_id=self.claim_id,
+            message="Required date missing from data",
+        )
 
 
 class Claim:
@@ -334,12 +196,10 @@ class Claim:
             self._capped_claim_development_history = ClaimDevelopmentHistory(self._claim_development_history.development_months, capped_paid, capped_incurred)
         return self._capped_claim_development_history
 
-
     def __repr__(self) -> str:
         return (
             f"claim_id={self._claims_meta_data.claim_id},modelling_year={self._claims_meta_data.modelling_year},latest_incurred={self._claim_development_history.latest_incurred},latest_capped_incurred={self.capped_claim_development_history.latest_incurred}"
         )
-
 
 
 class Claims:
@@ -371,7 +231,7 @@ class Claims:
         return self._claims
 
     @claims.setter
-    def claims(self, list_of_claim_classes:list[Claim]):
+    def claims(self, list_of_claim_classes: list[Claim]):
         self._claims = list_of_claim_classes
 
     @property
@@ -403,7 +263,7 @@ class Claims:
         self._claims.append(claim)
 
     def __getitem__(self, key):
-        if isinstance(key,slice):
+        if isinstance(key, slice):
             cls = type(self)
             return cls(self._claims[key])
         index = operator.index(key)
