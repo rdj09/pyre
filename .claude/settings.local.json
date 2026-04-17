@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest tests/ -q --tb=no)",
+      "Bash(grep -rn \"TODO\\\\|FIXME\\\\|PLACEHOLDER\\\\|NotImplemented\\\\|pass$\\\\|raise NotImplementedError\" src/pyre --include=\"*.py\")",
+      "Bash(uv --version)",
+      "Bash(ls *.lock)",
+      "Bash(uv pip *)",
+      "Bash(uv run *)",
+      "Bash(uv lock *)",
+      "Bash(sort -t'%' -k1 -n)",
+      "Bash(awk -F'%' '{print $1}')",
+      "Bash(awk '{print $NF, $0}')"
+    ]
+  }
+}

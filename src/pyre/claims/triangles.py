@@ -267,9 +267,12 @@ class Triangle:
         if value_type not in ["incurred", "paid"]:
             raise ValueError(f"value_type must be 'incurred' or 'paid', got '{value_type}'")
 
-        # Collect all unique modelling years and development periods
+        # Collect all unique modelling years and development month integers
         origin_years = claims.modelling_years
-        dev_periods = claims.development_periods
+        dev_periods_set: set[int] = set()
+        for claim in claims:
+            dev_periods_set.update(claim.capped_claim_development_history.development_months)
+        dev_periods = sorted(dev_periods_set)
 
         # Build the triangle
         triangle = {year: {} for year in origin_years}

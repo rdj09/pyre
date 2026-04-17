@@ -1,6 +1,8 @@
 import unittest
 from datetime import date
 
+import pytest
+
 from pyre.claims.claims import ClaimYearType  # Ensure this import is correct
 from pyre.treaty import (
     ClaimTriggerBasis,
@@ -9,6 +11,12 @@ from pyre.treaty import (
     RIContract,
     RIContractMetadata,
     RILayer,
+)
+from pyre.treaty.layer_loss_functions import (
+    franchise_calculation,
+    qs_calculation,
+    surplus_share_calculation,
+    xol_calculation,
 )
 
 
@@ -103,9 +111,6 @@ class TestRIContract(unittest.TestCase):
         self.assertEqual(self.contract._layers[0].layer_name, "Layer 1")
 
 
-import pytest
-
-
 def _make_xol_layer() -> RILayer:
     return RILayer(
         layer_id=1,
@@ -179,6 +184,95 @@ def test_loss_to_layer_fn_surplus_share_raises():
     )
     with pytest.raises(NotImplementedError):
         layer.loss_to_layer_fn(100_000.0)
+
+
+def test_loss_to_layer_fn_franchise_above_attachment():
+    layer = RILayer(
+        layer_id=4,
+        layer_name="Franchise",
+        layer_type=ContractType.FRANCHISE_DEDUCTIBLE,
+        occurrence_attachment=500_000.0,
+        occurrence_limit=2_000_000.0,
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=["Property"],
+        subject_lob_exposure_amounts=[5_000_000.0],
+        full_subject_premium=200_000.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=0,
+        reinstatement_cost={},
+    )
+    # Above attachment — full gross amount paid up to limit
+    assert layer.loss_to_layer_fn(1_000_000.0) == pytest.approx(1_000_000.0)
+
+
+def test_loss_to_layer_fn_franchise_below_attachment():
+    layer = RILayer(
+        layer_id=4,
+        layer_name="Franchise",
+        layer_type=ContractType.FRANCHISE_DEDUCTIBLE,
+        occurrence_attachment=500_000.0,
+        occurrence_limit=2_000_000.0,
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=["Property"],
+        subject_lob_exposure_amounts=[5_000_000.0],
+        full_subject_premium=200_000.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=0,
+        reinstatement_cost={},
+    )
+    # Below attachment — zero recovery
+    assert layer.loss_to_layer_fn(400_000.0) == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# Direct tests for layer_loss_functions (bring coverage above 80%)
+# ---------------------------------------------------------------------------
+
+def test_xol_calculation_in_layer():
+    assert xol_calculation(1_500_000.0, 1_000_000.0, 1_000_000.0) == pytest.approx(500_000.0)
+
+
+def test_xol_calculation_above_limit():
+    assert xol_calculation(3_000_000.0, 1_000_000.0, 1_000_000.0) == pytest.approx(1_000_000.0)
+
+
+def test_xol_calculation_below_attachment():
+    assert xol_calculation(500_000.0, 1_000_000.0, 1_000_000.0) == pytest.approx(0.0)
+
+
+def test_qs_calculation():
+    assert qs_calculation(1_000_000.0, 0.5) == pytest.approx(500_000.0)
+
+
+def test_qs_calculation_zero_gross():
+    assert qs_calculation(0.0, 0.3) == pytest.approx(0.0)
+
+
+def test_franchise_calculation_above():
+    assert franchise_calculation(800_000.0, 500_000.0, 2_000_000.0) == pytest.approx(800_000.0)
+
+
+def test_franchise_calculation_above_limit():
+    assert franchise_calculation(3_000_000.0, 500_000.0, 2_000_000.0) == pytest.approx(2_000_000.0)
+
+
+def test_franchise_calculation_below_attachment():
+    assert franchise_calculation(300_000.0, 500_000.0, 2_000_000.0) == pytest.approx(0.0)
+
+
+def test_surplus_share_no_surplus():
+    # sum_insured <= attachment: no cession
+    assert surplus_share_calculation(1_000_000.0, 500_000.0, 500_000.0) == pytest.approx(0.0)
+
+
+def test_surplus_share_with_surplus():
+    # sum_insured = 2m, attachment = 1m → share = 50%
+    result = surplus_share_calculation(1_000_000.0, 2_000_000.0, 1_000_000.0)
+    assert result == pytest.approx(500_000.0)
 
 
 if __name__ == "__main__":

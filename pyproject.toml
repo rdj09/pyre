@@ -34,6 +34,44 @@ Source = "https://github.com/rdj09/pyre"
 [tool.hatch.version]
 path = "src/pyre/__about__.py"
 
+# ---------------------------------------------------------------------------
+# uv dependency groups (PEP 735)
+# ---------------------------------------------------------------------------
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.4.0",
+  "mypy>=1.10.0",
+  "pre-commit>=3.7",
+]
+docs = [
+  "mkdocs>=1.6",
+  "mkdocs-material>=9.5",
+  "mkdocstrings[python]>=0.25",
+  "mkdocs-gen-files>=0.5",
+  "mkdocs-literate-nav>=0.6",
+  "pymdown-extensions>=10.0",
+]
+
+# ---------------------------------------------------------------------------
+# uv configuration
+# ---------------------------------------------------------------------------
+
+[tool.uv]
+dev-dependencies = [
+  "pytest>=8.0",
+  "pytest-cov>=5.0",
+  "ruff>=0.4.0",
+  "mypy>=1.10.0",
+  "pre-commit>=3.7",
+]
+
+# ---------------------------------------------------------------------------
+# Hatch environments (kept for backward compatibility)
+# ---------------------------------------------------------------------------
+
 [tool.hatch.envs.default]
 dependencies = [
   "pytest",
@@ -66,6 +104,10 @@ dependencies = [
 build = "mkdocs build --clean --strict"
 deploy = "mkdocs gh-deploy --force --clean --remote-branch gh-pages"
 serve = "mkdocs serve --dev-addr localhost:8000"
+
+# ---------------------------------------------------------------------------
+# Tooling
+# ---------------------------------------------------------------------------
 
 [tool.ruff]
 line-length = 100

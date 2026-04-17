@@ -113,6 +113,59 @@ def test_burn_cost_bf_returns_dict():
     assert 2020 in result
 
 
+def test_burn_cost_simple_cape_cod_returns_dict():
+    model_data = _make_model_data()
+    model = BurnCostModel(
+        model_data=model_data,
+        layer_id=1,
+        projection_methods={2020: ProjectionMethods.SIMPLE_CAPE_COD},
+        development_pattern={2020: 1.0},
+    )
+    result = model.calculate_burn_cost()
+    assert isinstance(result, dict)
+    assert 2020 in result
+    assert result[2020] >= 0.0
+
+
+def test_burn_cost_generalised_cape_cod_returns_dict():
+    model_data = _make_model_data()
+    model = BurnCostModel(
+        model_data=model_data,
+        layer_id=1,
+        projection_methods={2020: ProjectionMethods.GENERALISED_CAPE_COD},
+        development_pattern={2020: 1.0},
+    )
+    result = model.calculate_burn_cost()
+    assert isinstance(result, dict)
+    assert 2020 in result
+
+
+def test_burn_cost_skips_missing_layer():
+    model_data = _make_model_data()
+    model = BurnCostModel(
+        model_data=model_data,
+        layer_id=99,  # non-existent layer
+        projection_methods={2020: ProjectionMethods.CHAINLADDER},
+        development_pattern={2020: 1.0},
+    )
+    result = model.calculate_burn_cost()
+    assert result == {}
+
+
+def test_burn_cost_setters():
+    model_data = _make_model_data()
+    model = BurnCostModel(model_data=model_data, layer_id=1)
+    model.modelling_years = [2020]
+    model.years_weighting = {2020: 2.0}
+    model.projection_methods = {2020: ProjectionMethods.BF}
+    model.development_pattern = {2020: 1.1}
+    model.a_priori = {2020: 0.05}
+    model.layer_id = 1
+    model.data = model_data
+    assert model.modelling_years == [2020]
+    assert model.years_weighting[2020] == 2.0
+
+
 def test_burn_cost_raises_on_invalid_projection(monkeypatch):
     """Regression: calculate_burn_cost used to silently swallow exceptions
     and substitute chain-ladder results. Now it must propagate."""

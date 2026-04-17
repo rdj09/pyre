@@ -15,13 +15,11 @@ jobs:
         with:
           fetch-depth: 0  # required for git-revision-date plugin
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
-      - name: Install Hatch
-        run: pip install hatch
+      - name: Install docs dependencies
+        run: uv sync --group docs
 
       - name: Deploy docs
-        run: hatch run docs:deploy
+        run: uv run mkdocs gh-deploy --force --clean --remote-branch gh-pages

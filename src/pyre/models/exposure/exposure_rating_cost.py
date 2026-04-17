@@ -144,5 +144,3 @@ class ExposureModel:
                 layer_weighted_sums[layer_id] += ev * share * ilf
 
         return {lid: val / total_earned for lid, val in layer_weighted_sums.items()}
-
-        return shares_by_layer
