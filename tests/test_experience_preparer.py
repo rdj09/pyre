@@ -1,13 +1,18 @@
 """Tests for ExperienceModelData caching behaviour."""
-import pytest
 from datetime import date
 from functools import cached_property
 
+from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData, ClaimYearType
+from pyre.enums import ClaimTriggerBasis, ContractType, IndexationClauseType
+from pyre.exposures.exposures import (
+    Exposure,
+    ExposureBasis,
+    ExposureMetaData,
+    Exposures,
+    ExposureValues,
+)
 from pyre.models.experience.experience_preparer import ExperienceModelData
-from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData, Claims, ClaimYearType
-from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis
-from pyre.treaty.contracts import RILayer, RIContractMetadata, RIContract
-from pyre.enums import ContractType, ClaimTriggerBasis, IndexationClauseType
+from pyre.treaty.contracts import RIContract, RIContractMetadata, RILayer
 
 
 def _make_model_data() -> ExperienceModelData:

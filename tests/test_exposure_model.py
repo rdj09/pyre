@@ -1,10 +1,24 @@
-import pytest
 from datetime import date
-from pyre.models.exposure.exposure_rating_cost import ExposureModel
-from pyre.models.exposure.exposure_curve_functions import ExposureCurveType, swissRe_c_values
-from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis
-from pyre.treaty.contracts import RILayer, RIContractMetadata, RIContract, ClaimTriggerBasis, IndexationClauseType
+
+import pytest
+
 from pyre.enums import ContractType
+from pyre.exposures.exposures import (
+    Exposure,
+    ExposureBasis,
+    ExposureMetaData,
+    Exposures,
+    ExposureValues,
+)
+from pyre.models.exposure.exposure_curve_functions import ExposureCurveType, swissRe_c_values
+from pyre.models.exposure.exposure_rating_cost import ExposureModel
+from pyre.treaty.contracts import (
+    ClaimTriggerBasis,
+    IndexationClauseType,
+    RIContract,
+    RIContractMetadata,
+    RILayer,
+)
 
 
 def _make_exposure_model() -> ExposureModel:
@@ -59,6 +73,30 @@ def _make_exposure_model() -> ExposureModel:
         selected_curve=ExposureCurveType.MBBEFD,
         curve_parameters={"curve": swissRe_c_values.COMMERCIAL_LINES_MEDIUM},
     )
+
+
+def test_calculate_exposure_rate_returns_rate_per_layer():
+    model = _make_exposure_model()
+    analysis_date = date(2021, 1, 1)
+    rates = model.calculate_exposure_rate(analysis_date)
+    assert isinstance(rates, dict)
+    assert 1 in rates
+    assert rates[1] >= 0.0
+
+
+def test_calculate_ilf_adjusted_rate_differs_from_base():
+    from pyre.models.exposure.exposure_ILF_functions import power_ilf
+    model = _make_exposure_model()
+    analysis_date = date(2021, 1, 1)
+    base_rates = model.calculate_exposure_rate(analysis_date)
+
+    def ilf_fn(limit: float) -> float:
+        return power_ilf(limit=limit, basic_limit=1_000_000.0, power_parameter=0.5)
+
+    ilf_rates = model.calculate_ilf_adjusted_rate(ilf_fn, analysis_date)
+    assert isinstance(ilf_rates, dict)
+    assert 1 in ilf_rates
+    assert ilf_rates[1] != pytest.approx(base_rates[1])
 
 
 def test_exposure_share_is_populated_for_all_layers():

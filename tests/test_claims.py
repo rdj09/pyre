@@ -2,13 +2,14 @@ import unittest
 from datetime import date
 
 from src.pyre.claims.claims import (
-    ClaimYearType,
-    ClaimDevelopmentHistory,
-    ClaimsMetaData,
     Claim,
+    ClaimDevelopmentHistory,
     Claims,
+    ClaimsMetaData,
+    ClaimYearType,
 )
 from src.pyre.exceptions.exceptions import ClaimsException
+
 
 class TestClaimDevelopmentHistory(unittest.TestCase):
     def setUp(self):

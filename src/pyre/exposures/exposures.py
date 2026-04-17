@@ -1,7 +1,6 @@
+import operator
 from dataclasses import dataclass, field
 from datetime import date
-import operator
-from typing import List, Optional
 
 from ..enums import ExposureBasis
 
@@ -30,12 +29,12 @@ class ExposureMetaData:
     exposure_period_end: date
     currency: str
     aggregate: bool = False
-    line_of_business: Optional[str] = None
-    stacking_id: Optional[str] = None
-    exposure_type: Optional[ExposureBasis] = field(default=ExposureBasis.EARNED)
-    location: Optional[str] = None
-    peril: Optional[str] = None
-    occupancy: Optional[str] = None
+    line_of_business: str | None = None
+    stacking_id: str | None = None
+    exposure_type: ExposureBasis | None = field(default=ExposureBasis.EARNED)
+    location: str | None = None
+    peril: str | None = None
+    occupancy: str | None = None
 
     def __post_init__(self) -> None:
         if self.exposure_period_end < self.exposure_period_start:
@@ -108,9 +107,38 @@ class Exposure:
         if self._exposure_meta.exposure_term_length_days == 0:
             return 0.0
         if self._exposure_meta.aggregate:
-            return 0.0
+            return self._parallelogram_earned_pct(analysis_date)
         raw = (analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days
         return max(0.0, min(raw, 1.0))
+
+    def _parallelogram_earned_pct(self, analysis_date: date) -> float:
+        """Parallelogram method for aggregate exposures.
+
+        Assumes policies are written uniformly throughout the exposure period,
+        each with duration equal to exposure_term_length_days. The earning
+        window extends from exposure_period_start to
+        exposure_period_end + timedelta(days=term).
+        """
+
+        start = self._exposure_meta.exposure_period_start
+        end = self._exposure_meta.exposure_period_end
+        term = self._exposure_meta.exposure_term_length_days
+
+        if term == 0:
+            return 0.0
+
+        period_days = (end - start).days
+        total_earning_window = period_days + term
+
+        if analysis_date <= start:
+            return 0.0
+
+        days_elapsed = (analysis_date - start).days
+
+        if days_elapsed >= total_earning_window:
+            return 1.0
+
+        return days_elapsed / total_earning_window
 
     def earned_exposure_value(self, analysis_date: date) -> float:
         if self._exposure_meta.exposure_type == ExposureBasis.WRITTEN:
@@ -138,19 +166,19 @@ class Exposure:
 class Exposures:
     """A container class for managing a collection of Exposure objects."""
 
-    def __init__(self, exposures: List[Exposure]) -> None:
+    def __init__(self, exposures: list[Exposure]) -> None:
         self._exposures = exposures
 
     @property
-    def exposures(self) -> List[Exposure]:
+    def exposures(self) -> list[Exposure]:
         return self._exposures
 
     @exposures.setter
-    def exposures(self, list_of_exposure_classes: List[Exposure]) -> None:
+    def exposures(self, list_of_exposure_classes: list[Exposure]) -> None:
         self._exposures = list_of_exposure_classes
 
     @property
-    def modelling_years(self) -> List[int]:
+    def modelling_years(self) -> list[int]:
         years = {exposure.modelling_year for exposure in self.exposures}
         return sorted(years)
 

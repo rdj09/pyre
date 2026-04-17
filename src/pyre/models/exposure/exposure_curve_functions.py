@@ -1,6 +1,6 @@
 from enum import Enum
-from math import log, exp
-from typing import Union, Dict, Any
+from math import exp, log
+from typing import Any
 
 from ...enums import ExposureCurveType
 
@@ -17,7 +17,7 @@ MIXED_EXPO_CURVE_TWO = {
 }
 
 
-class swissRe_c_values(Enum):
+class SwissReCValues(Enum):
     """
     https://www.swissre.com/dam/jcr:7137dac0-83a6-4cfa-80a4-93d33c35562f/exposure-rating-brochure.pdf
     """
@@ -29,6 +29,10 @@ class swissRe_c_values(Enum):
     CAPTIVE_BI_PD = 3.4
     INDUSTRIAL_LARGE_COMMERCIAL = 4.0
     LLOYDS_INDUSTRY = 5.0
+
+
+# Backward-compatibility alias
+swissRe_c_values = SwissReCValues
 
 
 def mixed_exponential_curve(parameters_mus: list, parameter_weights: list, curve_position: float) -> float:
@@ -45,26 +49,26 @@ def mixed_exponential_curve(parameters_mus: list, parameter_weights: list, curve
         float: Curve value at curve_position.
     """
     total_limited_severity = 0.0
-    for mu, weight in zip(parameters_mus, parameter_weights):
+    for mu, weight in zip(parameters_mus, parameter_weights, strict=False):
         if mu != 0:
             contributing_limiting_severity = (1 - exp((-1 / mu) * curve_position)) * mu
             total_limited_severity += contributing_limiting_severity * weight
     return total_limited_severity
 
 
-def mbbefd_curve(curve: Union[swissRe_c_values, float], curve_position: float) -> float:
+def mbbefd_curve(curve: SwissReCValues | float, curve_position: float) -> float:
     """Calculate the MBBEFD curve value.
 
     Citation: https://www.casact.org/sites/default/files/2021-03/8_Bernegger.pdf
 
     Args:
-        curve (Union[swissRe_c_values, float]): Either a swissRe_c_values enum or a manual c-value as float.
+        curve (Union[SwissReCValues, float]): Either a SwissReCValues enum or a manual c-value as float.
         curve_position (float): Position on the curve.
 
     Returns:
         float: The calculated curve value.
     """
-    c_value = curve.value if isinstance(curve, swissRe_c_values) else curve
+    c_value = curve.value if isinstance(curve, SwissReCValues) else curve
     b = exp(3.1 - 0.15 * (1 + c_value) * c_value)
     g = exp((0.78 + 0.12 * c_value) * c_value)
     return log(((g - 1) * b + (1 - b * g) * b ** curve_position) / (1 - b)) / log(b * g)
@@ -97,7 +101,7 @@ exposure_curve_calculation = {
 
 def calculate_curve(
     curve_type: ExposureCurveType,
-    parameters: Dict[str, Any],
+    parameters: dict[str, Any],
     position: float,
 ) -> float:
     """Calculate an exposure curve value at a given position.

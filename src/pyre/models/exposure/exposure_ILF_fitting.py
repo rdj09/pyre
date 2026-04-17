@@ -3,12 +3,15 @@
 # "Increased Limits Ratemaking for Liability Insurance" by Palmer (CAS Study Note)
 # https://www.casact.org/sites/default/files/database/studynotes_palmer.pdf
 
-import numpy as np
-from scipy import optimize
-import pandas as pd
+from collections.abc import Callable
+
 import matplotlib.pyplot as plt
-from typing import List, Dict, Tuple, Optional, Union, Callable
-from .exposure_ILF_functions import pareto_ilf, power_ilf, pareto_limited_severity
+import numpy as np
+import pandas as pd
+from scipy import optimize
+
+from .exposure_ILF_functions import pareto_ilf, power_ilf
+
 
 class ILFFitter:
     """
@@ -18,7 +21,7 @@ class ILFFitter:
     including empirical fitting, curve fitting, and distribution fitting.
     """
 
-    def __init__(self, limits: List[float], ilfs: List[float], base_limit: float):
+    def __init__(self, limits: list[float], ilfs: list[float], base_limit: float):
         """
         Initialize the ILF fitter with observed limits and ILFs.
 
@@ -41,7 +44,7 @@ class ILFFitter:
         if self.base_limit <= 0:
             raise ValueError("Base limit must be positive")
 
-    def fit_power_curve(self) -> Tuple[float, float]:
+    def fit_power_curve(self) -> tuple[float, float]:
         """
         Fit a power curve to the observed ILFs.
 
@@ -70,7 +73,7 @@ class ILFFitter:
 
         return slope, r_squared
 
-    def fit_pareto(self) -> Tuple[float, float, float]:
+    def fit_pareto(self) -> tuple[float, float, float]:
         """
         Fit a Pareto distribution to the observed ILFs.
 
@@ -113,14 +116,14 @@ class ILFFitter:
 
         return alpha, x_m, r_squared
 
-    def fit_empirical(self) -> Dict[float, float]:
+    def fit_empirical(self) -> dict[float, float]:
         """
         Create an empirical ILF table from the observed data.
 
         Returns:
             Dictionary mapping limits to ILFs
         """
-        return dict(zip(self.limits, self.ilfs))
+        return dict(zip(self.limits, self.ilfs, strict=False))
 
     def plot_fits(self, power_params=None, pareto_params=None, title="ILF Curve Fitting"):
         """
@@ -159,7 +162,7 @@ class ILFFitter:
 
         return plt.gcf()  # Return the figure for further customization or saving
 
-def fit_ilf_from_losses(losses: List[float], limits: List[float], base_limit: float) -> ILFFitter:
+def fit_ilf_from_losses(losses: list[float], limits: list[float], base_limit: float) -> ILFFitter:
     """
     Fit ILFs directly from loss data.
 
@@ -182,7 +185,7 @@ def fit_ilf_from_losses(losses: List[float], limits: List[float], base_limit: fl
     # Create and return ILFFitter
     return ILFFitter(limits, ilfs, base_limit)
 
-def fit_ilf_from_severity_curve(severity_function: Callable, limits: List[float], base_limit: float) -> ILFFitter:
+def fit_ilf_from_severity_curve(severity_function: Callable, limits: list[float], base_limit: float) -> ILFFitter:
     """
     Generate ILFs from a severity curve function.
 
@@ -201,7 +204,7 @@ def fit_ilf_from_severity_curve(severity_function: Callable, limits: List[float]
     # Create and return ILFFitter
     return ILFFitter(limits, ilfs, base_limit)
 
-def calculate_ilf_table(alpha: float, x_m: float, base_limit: float, limits: List[float]) -> pd.DataFrame:
+def calculate_ilf_table(alpha: float, x_m: float, base_limit: float, limits: list[float]) -> pd.DataFrame:
     """
     Calculate an ILF table using the Pareto distribution.
 

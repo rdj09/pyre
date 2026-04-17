@@ -1,12 +1,11 @@
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Dict, List, Sequence
+from typing import Any
 
-from ..treaty.layer_loss_functions import layer_loss_calculation
+from ..enums import ClaimTriggerBasis, ClaimYearType, ContractType, IndexationClauseType
 from ..exceptions.exceptions import ContractException
-from ..enums import (
-    ClaimYearType, ClaimTriggerBasis, IndexationClauseType, ContractType
-)
+from ..treaty.layer_loss_functions import layer_loss_calculation
 
 
 @dataclass
@@ -19,16 +18,16 @@ class RILayer:
     occurrence_limit: float
     aggregate_attachment: float
     aggregate_limit: float
-    subject_lines_of_business: List[str]
-    subject_lob_exposure_amounts: List[float]
+    subject_lines_of_business: list[str]
+    subject_lob_exposure_amounts: list[float]
     full_subject_premium: float
     written_line: float
     signed_line: float
     number_of_reinstatements: int
-    reinstatement_cost: Dict[int, float]
+    reinstatement_cost: dict[int, float]
     cession: float = 1.0
-    inures_to_benefit_of: List[Any] = field(default_factory=list)
-    interlocking_classes: List[Any] = field(default_factory=list)
+    inures_to_benefit_of: list[Any] = field(default_factory=list)
+    interlocking_classes: list[Any] = field(default_factory=list)
 
     @property
     def written_line_premium(self) -> float:
@@ -69,7 +68,7 @@ class RIContractMetadata:
     indexation_margin: float
     inception_date: date
     expiration_date: date
-    fx_rates: Dict[str, float]
+    fx_rates: dict[str, float]
 
     @property
     def claim_year_basis(self) -> ClaimYearType:
@@ -88,21 +87,21 @@ class RIContract:
         self._layers = list(layers)
 
     @property
-    def contract_meta_data(self):
+    def contract_meta_data(self) -> RIContractMetadata:
         return self._contract_meta_data
 
     @contract_meta_data.setter
-    def contract_meta_data(self, value):
+    def contract_meta_data(self, value: RIContractMetadata) -> None:
         self._contract_meta_data = value
 
     @property
-    def layers(self):
+    def layers(self) -> list[RILayer]:
         return self._layers
 
     @layers.setter
-    def layers(self, value):
+    def layers(self, value: Sequence[RILayer]) -> None:
         self._layers = list(value)
 
     @property
-    def layer_ids(self) -> list:
+    def layer_ids(self) -> list[int]:
         return [layer.layer_id for layer in self._layers]

@@ -1,11 +1,10 @@
-from math import log, exp, sqrt
-from typing import List, Tuple
+from math import exp, log, sqrt
 
 # source citation
 # Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
 # https://www.actuaries.org.uk/system/files/documents/pdf/lyons.pdf
 
-def linear_regression(x: List[float], y: List[float]) -> Tuple[float, float]:
+def linear_regression(x: list[float], y: list[float]) -> tuple[float, float]:
     """
     Performs linear regression to calculate the slope and intercept.
 
@@ -19,7 +18,7 @@ def linear_regression(x: List[float], y: List[float]) -> Tuple[float, float]:
     mean_x = sum(x) / len(x)
     mean_y = sum(y) / len(y)
 
-    numerator = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, y))
+    numerator = sum((xi - mean_x) * (yi - mean_y) for xi, yi in zip(x, y, strict=False))
     denominator = sum((xi - mean_x) ** 2 for xi in x)
 
     slope = numerator / denominator
@@ -28,7 +27,7 @@ def linear_regression(x: List[float], y: List[float]) -> Tuple[float, float]:
     return (slope, intercept)
 
 
-def exponential_fit(age_to_age_factors: List[float], time_periods: List[float]) -> Tuple[float,float]:
+def exponential_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float,float]:
     """
     Fits an exponential curve to the given age-to-age factors using the model:
     rj = exp(a + b * t), where ln(rj) = a + b * t.
@@ -45,7 +44,7 @@ def exponential_fit(age_to_age_factors: List[float], time_periods: List[float]) 
     return (a, b)
 
 
-def power_fit(age_to_age_factors: List[float], time_periods: List[float]) -> Tuple[float,float]:
+def power_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float,float]:
     """
     Fits a power curve to the given cumulative age-to-age factors using the model:
     Rj = a * (b^t), where ln(ln(Rj)) = ln(ln(a)) + (ln(b) * t).
@@ -64,7 +63,7 @@ def power_fit(age_to_age_factors: List[float], time_periods: List[float]) -> Tup
     return (a, b)
 
 
-def weibull_fit(age_to_age_factors: List[float], time_periods: List[float]) -> Tuple[float,float]:
+def weibull_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float,float]:
     """
     Fits a Weibull curve to the given cumulative age-to-age factors using the model:
     Rj = 1 / (1 - exp(-a * t^b)).
@@ -83,7 +82,7 @@ def weibull_fit(age_to_age_factors: List[float], time_periods: List[float]) -> T
     return (a, b)
 
 
-def inverse_power_fit(age_to_age_factors: List[float], time_periods: List[float], c_values: List[float]) -> Tuple[float, float, float]:
+def inverse_power_fit(age_to_age_factors: list[float], time_periods: list[float], c_values: list[float]) -> tuple[float, float, float]:
     """
     Fits a Sherman Curve (Inverse Power Curve) to the given incremental age-to-age factors using the model:
     rj = a * (t + c)^b.
@@ -98,7 +97,7 @@ def inverse_power_fit(age_to_age_factors: List[float], time_periods: List[float]
     """
     def calculate_standard_error(a: float, b: float, c: float) -> float:
         predicted_rj = [a * ((t + c) ** b) for t in time_periods]
-        errors = [(rj - pred_rj) ** 2 for rj, pred_rj in zip(age_to_age_factors, predicted_rj)]
+        errors = [(rj - pred_rj) ** 2 for rj, pred_rj in zip(age_to_age_factors, predicted_rj, strict=False)]
         return sqrt(sum(errors) / len(errors))
 
     best_a, best_b, best_c = 0.0, 0.0, 0.0
@@ -118,20 +117,20 @@ def inverse_power_fit(age_to_age_factors: List[float], time_periods: List[float]
     return (best_a, best_b, best_c)
 
 
-def residuals_standardised(actual: List[float], expected: List[float], num_parameters: int) -> List[float]:
+def residuals_standardised(actual: list[float], expected: list[float], num_parameters: int) -> list[float]:
     # Calculate residuals
-    residuals = [a - e for a, e in zip(actual, expected)]
+    residuals = [a - e for a, e in zip(actual, expected, strict=False)]
     
     n = len(actual)
     dof = n - num_parameters
     if dof <= 0:
         return [0.0] * n
-    sigma_squared = sum((a - e) ** 2 for a, e in zip(actual, expected)) / dof
+    sigma_squared = sum((a - e) ** 2 for a, e in zip(actual, expected, strict=False)) / dof
     sigma = sqrt(sigma_squared) if sigma_squared > 0 else 1.0
     return [residual / sigma for residual in residuals]
 
 
-def r_squared(actual: List[float], expected: List[float]) -> float:
+def r_squared(actual: list[float], expected: list[float]) -> float:
     """
     Calculates the R-squared (coefficient of determination) value.
 
@@ -147,14 +146,14 @@ def r_squared(actual: List[float], expected: List[float]) -> float:
     total_sum_of_squares = sum((a - mean_actual) ** 2 for a in actual)
 
     # Calculate the residual sum of squares (RSS)
-    residual_sum_of_squares = sum((a - e) ** 2 for a, e in zip(actual, expected))
+    residual_sum_of_squares = sum((a - e) ** 2 for a, e in zip(actual, expected, strict=False))
 
     # Calculate R-squared
     r_squared_value = 1 - (residual_sum_of_squares / total_sum_of_squares)
 
     return r_squared_value
 
-def assess_error_assumptions(actual: List[float], expected: List[float], num_parameters: int) -> dict:
+def assess_error_assumptions(actual: list[float], expected: list[float], num_parameters: int) -> dict:
     """
     Assesses the error term based on standardized residuals and calculates:
     - The proportion of positive standardized residuals.

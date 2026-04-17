@@ -1,6 +1,5 @@
-from typing import Dict, Optional, Union, List
-from ..claims.claims import Claims, Claim, ClaimDevelopmentHistory
-from ..exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues
+from ..claims.claims import Claim, ClaimDevelopmentHistory, Claims
+from ..exposures.exposures import Exposure, Exposures, ExposureValues
 
 
 class Trending:
@@ -18,7 +17,7 @@ class Trending:
         base_year (int): The year to which all data will be trended.
     """
 
-    def __init__(self, exposure_trend_factors: Dict[int, float], claim_trend_factors: Dict[int, float] = None, trend_factors: Dict[int, float] = None, base_year: int = None):
+    def __init__(self, exposure_trend_factors: dict[int, float], claim_trend_factors: dict[int, float] | None = None, trend_factors: dict[int, float] | None = None, base_year: int | None = None):
         """
         Initialize the Trending class with trend factors and a base year.
 
@@ -104,7 +103,7 @@ class Trending:
 
         return Exposures(trended_exposures)
 
-    def get_trend_factors(self) -> Dict[str, Dict[int, float]]:
+    def get_trend_factors(self) -> dict[str, dict[int, float]]:
         """
         Get the trend factors from this Trending instance.
 
@@ -160,7 +159,7 @@ class Trending:
 
 
 # For backward compatibility
-def calculate_trend_factor(origin_year: int, base_year: int, trend_factors: Dict[int, float], for_claims: bool = False) -> float:
+def calculate_trend_factor(origin_year: int, base_year: int, trend_factors: dict[int, float], for_claims: bool = False) -> float:
     """
     Calculate the trend factor between the origin year and the base year.
 
@@ -182,7 +181,7 @@ def calculate_trend_factor(origin_year: int, base_year: int, trend_factors: Dict
         return trending.calculate_trend_factor(origin_year, for_claims=False)
 
 
-def trend_exposures(exposures: Exposures, trend_factors: Dict[int, float], base_year: int) -> Exposures:
+def trend_exposures(exposures: Exposures, trend_factors: dict[int, float], base_year: int) -> Exposures:
     """
     Apply trend factors to a collection of exposures.
 
@@ -198,7 +197,7 @@ def trend_exposures(exposures: Exposures, trend_factors: Dict[int, float], base_
     return trending.trend_exposures(exposures)
 
 
-def trend_claims(claims: Claims, trend_factors: Dict[int, float], base_year: int) -> Claims:
+def trend_claims(claims: Claims, trend_factors: dict[int, float], base_year: int) -> Claims:
     """
     Apply trend factors to a collection of claims.
 
@@ -214,7 +213,7 @@ def trend_claims(claims: Claims, trend_factors: Dict[int, float], base_year: int
     return trending.trend_claims(claims)
 
 
-def get_trend_factors(trending_instance: Trending) -> Dict[str, Dict[int, float]]:
+def get_trend_factors(trending_instance: Trending) -> dict[str, dict[int, float]]:
     """
     Get the trend factors from a Trending instance.
 

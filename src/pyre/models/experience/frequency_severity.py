@@ -2,11 +2,9 @@
 
 import math
 from dataclasses import dataclass
-from typing import Any, Dict, List, Union
 
+from ...enums import FrequencyDistribution, SeverityDistribution
 from ...models.experience.experience_preparer import ExperienceModelData
-from ...enums import SeverityDistribution, FrequencyDistribution
-
 
 # ---------------------------------------------------------------------------
 # FitResult
@@ -22,8 +20,8 @@ class FitResult:
         log_likelihood: Log-likelihood at the estimated parameters.
         aic: Akaike Information Criterion = 2k - 2 ln(L).
     """
-    distribution: Union[SeverityDistribution, FrequencyDistribution]
-    parameters: Dict[str, float]
+    distribution: SeverityDistribution | FrequencyDistribution
+    parameters: dict[str, float]
     log_likelihood: float
     aic: float
 
@@ -32,7 +30,7 @@ class FitResult:
 # Internal fitting functions
 # ---------------------------------------------------------------------------
 
-def _fit_lognormal(data: List[float]) -> Dict[str, float]:
+def _fit_lognormal(data: list[float]) -> dict[str, float]:
     """Fit lognormal distribution by method of moments.
 
     mu = log(mean^2 / sqrt(variance + mean^2))
@@ -63,7 +61,7 @@ def _fit_lognormal(data: List[float]) -> Dict[str, float]:
     return {"mu": mu, "sigma": math.sqrt(sigma2)}
 
 
-def _fit_pareto(data: List[float]) -> Dict[str, float]:
+def _fit_pareto(data: list[float]) -> dict[str, float]:
     """Fit single-parameter Pareto by maximum likelihood.
 
     x_m = min(data)
@@ -97,7 +95,7 @@ def _fit_pareto(data: List[float]) -> Dict[str, float]:
     return {"alpha": alpha, "x_m": x_m}
 
 
-def _fit_poisson(counts: List[int]) -> Dict[str, float]:
+def _fit_poisson(counts: list[int]) -> dict[str, float]:
     """Fit Poisson distribution by MLE (lambda = sample mean).
 
     Args:
@@ -114,7 +112,7 @@ def _fit_poisson(counts: List[int]) -> Dict[str, float]:
     return {"lambda_": sum(counts) / len(counts)}
 
 
-def _fit_negative_binomial(counts: List[int]) -> Dict[str, float]:
+def _fit_negative_binomial(counts: list[int]) -> dict[str, float]:
     """Fit Negative Binomial by method of moments.
 
     mean = r * (1-p) / p
@@ -165,9 +163,9 @@ class SeverityFit:
 
     def __init__(
         self,
-        distributions: List[SeverityDistribution],
+        distributions: list[SeverityDistribution],
         data: ExperienceModelData,
-        ibner_dev_pattern: Dict[int, float],
+        ibner_dev_pattern: dict[int, float],
         ground_up: bool = True,
     ) -> None:
         self.distributions = distributions
@@ -176,7 +174,7 @@ class SeverityFit:
         self.ground_up = ground_up
 
     @property
-    def _individual_projected_claims(self) -> List[float]:
+    def _individual_projected_claims(self) -> list[float]:
         """Individual projected ultimate claims using IBNER development factors."""
         if self.ground_up:
             return [
@@ -186,14 +184,14 @@ class SeverityFit:
             ]
         raise NotImplementedError("Non-ground-up fitting has not been implemented yet")
 
-    def fit(self) -> Dict[str, Dict[str, float]]:
+    def fit(self) -> dict[str, dict[str, float]]:
         """Fit each distribution in self.distributions to the projected claims.
 
         Returns:
             Dict mapping distribution name to fitted parameter dict.
         """
         claims = self._individual_projected_claims
-        results: Dict[str, Dict[str, float]] = {}
+        results: dict[str, dict[str, float]] = {}
         for dist in self.distributions:
             if dist == SeverityDistribution.LOGNORMAL:
                 results["lognormal"] = _fit_lognormal(claims)
@@ -216,16 +214,16 @@ class FrequencyFit:
 
     def __init__(
         self,
-        distributions: List[FrequencyDistribution],
+        distributions: list[FrequencyDistribution],
         data: ExperienceModelData,
     ) -> None:
         self.distributions = distributions
         self.data = data
 
     @property
-    def _claim_counts_by_year(self) -> Dict[int, int]:
+    def _claim_counts_by_year(self) -> dict[int, int]:
         """Claim count per modelling year from subject_contract_claims."""
-        counts: Dict[int, int] = {}
+        counts: dict[int, int] = {}
         for layer_claims in self.data.subject_contract_claims.values():
             for claim in layer_claims.claims:
                 year = claim.claims_meta_data.modelling_year
@@ -233,7 +231,7 @@ class FrequencyFit:
             break  # Use first layer only for frequency — avoid double-counting
         return counts
 
-    def fit(self) -> Dict[str, Dict[str, float]]:
+    def fit(self) -> dict[str, dict[str, float]]:
         """Fit each distribution to claim counts across modelling years.
 
         Returns:
@@ -242,7 +240,7 @@ class FrequencyFit:
         counts_by_year = self._claim_counts_by_year
         counts = list(counts_by_year.values())
 
-        results: Dict[str, Dict[str, float]] = {}
+        results: dict[str, dict[str, float]] = {}
         for dist in self.distributions:
             if dist == FrequencyDistribution.POISSON:
                 results["poisson"] = _fit_poisson(counts)

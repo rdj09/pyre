@@ -1,7 +1,9 @@
-from typing import Dict, List, Optional, Union, Any
 import math
+from typing import Any
+
 from ...models.experience.experience_preparer import ExperienceModelData
 from ...models.exposure.exposure_rating_cost import ExposureModel
+
 
 class CredibilityWeight:
     def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModel) -> None:
@@ -15,7 +17,7 @@ class CredibilityWeight:
         self.experience_data = experience_data
         self.exposure_data = exposure_data
 
-    def calculate_sample_variance(self, data: List[float]) -> float:
+    def calculate_sample_variance(self, data: list[float]) -> float:
         """
         Calculate the sample variance of a list of data points.
 
@@ -33,7 +35,7 @@ class CredibilityWeight:
 
         return variance
 
-    def calculate_data_variance(self, data: List[float], method: str = "sample") -> float:
+    def calculate_data_variance(self, data: list[float], method: str = "sample") -> float:
         """
         Calculate the variance of data using different methods.
 
@@ -65,7 +67,7 @@ class CredibilityWeight:
         else:
             raise ValueError(f"Invalid variance calculation method: {method}")
 
-    def estimate_process_variance(self, data_by_group: Dict[Any, List[float]]) -> float:
+    def estimate_process_variance(self, data_by_group: dict[Any, list[float]]) -> float:
         """
         Estimate the process variance (within variance) from grouped data.
         This is useful for Bühlmann and Bühlmann-Straub credibility methods.
@@ -82,7 +84,7 @@ class CredibilityWeight:
         total_variance = 0.0
         total_weight = 0.0
 
-        for group, values in data_by_group.items():
+        for _group, values in data_by_group.items():
             if len(values) < 2:
                 continue
 
@@ -100,7 +102,7 @@ class CredibilityWeight:
 
         return total_variance / total_weight
 
-    def estimate_variance_of_hypothetical_means(self, data_by_group: Dict[Any, List[float]]) -> float:
+    def estimate_variance_of_hypothetical_means(self, data_by_group: dict[Any, list[float]]) -> float:
         """
         Estimate the variance of hypothetical means (between variance) from grouped data.
         This is useful for Bühlmann and Bühlmann-Straub credibility methods.
@@ -204,7 +206,7 @@ class CredibilityWeight:
 
         return min(max(credibility, 0.0), 1.0)
 
-    def buhlmann_straub_credibility(self, exposures: List[float], claim_counts: List[int], 
+    def buhlmann_straub_credibility(self, exposures: list[float], claim_counts: list[int], 
                                    expected_process_variance: float, 
                                    variance_of_hypothetical_means: float) -> float:
         """
@@ -235,7 +237,7 @@ class CredibilityWeight:
 
         return min(max(credibility, 0.0), 1.0)
 
-    def greatest_accuracy_credibility(self, data: List[float], collective_mean: float) -> float:
+    def greatest_accuracy_credibility(self, data: list[float], collective_mean: float) -> float:
         """
         Calculate credibility using the Greatest Accuracy Credibility method.
         This method aims to minimize the mean squared error.
@@ -270,7 +272,7 @@ class CredibilityWeight:
         return min(max(credibility, 0.0), 1.0)
 
     def bayesian_credibility(self, prior_mean: float, prior_variance: float, 
-                            data: List[float], data_variance: float) -> float:
+                            data: list[float], data_variance: float) -> float:
         """
         Calculate credibility using Bayesian Credibility approach.
 
@@ -298,7 +300,7 @@ class CredibilityWeight:
 
 class Selections:
     def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModel, 
-                 credibility_weight: Optional[CredibilityWeight] = None) -> None:
+                 credibility_weight: CredibilityWeight | None = None) -> None:
         """
         Initialize the Selections class with experience and exposure data.
 

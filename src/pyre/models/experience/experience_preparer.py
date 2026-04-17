@@ -1,8 +1,9 @@
 from functools import cached_property
-from typing import Dict, List, Any, Optional
-from ...models.trending import Trending
+from typing import Any
+
 from ...claims.claims import Claim, ClaimDevelopmentHistory, Claims
-from ...exposures.exposures import Exposure, Exposures
+from ...exposures.exposures import Exposures
+from ...models.trending import Trending
 from ...treaty.contracts import RIContract
 
 
@@ -16,8 +17,8 @@ class ExperienceModelData:
         _exposures (Exposures): The exposures data for the reinsurance contract.
         _ri_contract (RIContract): The reinsurance contract with layers and metadata.
     """
-    def __init__(self, claims: Claims, exposures: Exposures, ri_contract: RIContract, 
-                 exposure_trend_factors: Dict[int, float] = None, claim_trend_factors: Dict[int, float] = None) -> None:
+    def __init__(self, claims: Claims, exposures: Exposures, ri_contract: RIContract,
+                 exposure_trend_factors: dict[int, float] | None = None, claim_trend_factors: dict[int, float] | None = None) -> None:
         """
         Initialize an ExperienceModelData instance.
 
@@ -120,7 +121,7 @@ class ExperienceModelData:
         """
         return self._trending
 
-    def update_trend_factors(self, exposure_trend_factors: Dict[int, float] = None, claim_trend_factors: Dict[int, float] = None, base_year: int = None) -> None:
+    def update_trend_factors(self, exposure_trend_factors: dict[int, float] | None = None, claim_trend_factors: dict[int, float] | None = None, base_year: int | None = None) -> None:
         """
         Update the trend factors used for trending claims and exposures.
 
@@ -170,7 +171,7 @@ class ExperienceModelData:
         return self._trending.trend_claims(self.claims)
 
     @cached_property
-    def subject_contract_claims(self) -> Dict[int, Claims]:
+    def subject_contract_claims(self) -> dict[int, Claims]:
         """
         Returns a dictionary mapping layer IDs to Claims objects where each claim's cumulative_dev_paid 
         and cumulative_dev_incurred have had the RI contract's loss_to_layer_fn applied for that layer.
@@ -215,7 +216,7 @@ class ExperienceModelData:
         return self._trending.trend_exposures(self.exposures)
 
     @cached_property
-    def aggregate_subject_contract_claims(self) -> Dict[int, Dict[int, Dict[str, Any]]]:
+    def aggregate_subject_contract_claims(self) -> dict[int, dict[int, dict[str, Any]]]:
         """
         Aggregates the output of subject_contract_claims by modelling year and layer, and also returns claim counts by layer, modelling year, claim status, and total count.
 
@@ -266,7 +267,7 @@ class ExperienceModelData:
         return subject_claims_by_year
 
     @cached_property
-    def aggregate_exposures(self) -> Dict[int, Dict[str, float]]:
+    def aggregate_exposures(self) -> dict[int, dict[str, float]]:
         """
         Aggregates the trended exposures by modelling year, summing the written and earned exposure values.
 

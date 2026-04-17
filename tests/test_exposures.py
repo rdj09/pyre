@@ -1,6 +1,8 @@
 import unittest
 from datetime import date
-from pyre.exposures.exposures import ExposureMetaData, ExposureValues, Exposure, Exposures
+
+from pyre.exposures.exposures import Exposure, ExposureMetaData, Exposures, ExposureValues
+
 
 class TestExposureMetaData(unittest.TestCase):
     def setUp(self):

@@ -1,12 +1,18 @@
 #citation : https://pep.vse.cz/pdfs/pep/2019/02/01.pdf // https://doi.org/10.18267/j.pep.683
 # EXPOSURE MODELLING IN PROPERTY REINSURANCE Jan Hrevuš,1Luboš Marek
 
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
-import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List, Dict, Tuple, Optional, Union, Callable
-from .exposure_curve_functions import ExposureCurveType, riebesell_curve, mixed_exponential_curve, mbbefd_curve, swissRe_c_values
+
+from .exposure_curve_functions import (
+    ExposureCurveType,
+    mbbefd_curve,
+    mixed_exponential_curve,
+    riebesell_curve,
+)
+
 
 class ExposureCurveFitter:
     """
@@ -19,7 +25,7 @@ class ExposureCurveFitter:
     by Jan Hrevuš and Luboš Marek
     """
 
-    def __init__(self, positions: List[float], values: List[float], base_value: float = 1.0):
+    def __init__(self, positions: list[float], values: list[float], base_value: float = 1.0):
         """
         Initialize the exposure curve fitter with observed positions and values.
 
@@ -40,7 +46,7 @@ class ExposureCurveFitter:
         if not all(x >= 0 for x in self.values):
             raise ValueError("All values must be non-negative")
 
-    def fit_riebesell(self) -> Tuple[float, float]:
+    def fit_riebesell(self) -> tuple[float, float]:
         """
         Fit a Riebesell curve to the observed data.
 
@@ -80,7 +86,7 @@ class ExposureCurveFitter:
 
         return z_value, r_squared
 
-    def fit_mixed_exponential(self, num_components: int = 3) -> Tuple[List[float], List[float], float]:
+    def fit_mixed_exponential(self, num_components: int = 3) -> tuple[list[float], list[float], float]:
         """
         Fit a mixed exponential curve to the observed data.
 
@@ -137,7 +143,7 @@ class ExposureCurveFitter:
 
         return mus.tolist(), weights.tolist(), r_squared
 
-    def fit_mbbefd(self) -> Tuple[float, float]:
+    def fit_mbbefd(self) -> tuple[float, float]:
         """
         Fit an MBBEFD curve to the observed data.
 
@@ -177,7 +183,7 @@ class ExposureCurveFitter:
 
         return c_value, r_squared
 
-    def fit_all_curves(self) -> Dict[str, Tuple]:
+    def fit_all_curves(self) -> dict[str, tuple]:
         """
         Fit all supported curve types and return the results.
 
@@ -247,7 +253,7 @@ class ExposureCurveFitter:
 
         return plt.gcf()  # Return the figure for further customization or saving
 
-def fit_exposure_curve_from_data(positions: List[float], values: List[float]) -> ExposureCurveFitter:
+def fit_exposure_curve_from_data(positions: list[float], values: list[float]) -> ExposureCurveFitter:
     """
     Fit exposure curves directly from position-value data.
 
@@ -260,7 +266,7 @@ def fit_exposure_curve_from_data(positions: List[float], values: List[float]) ->
     """
     return ExposureCurveFitter(positions, values)
 
-def generate_exposure_curve_parameters(curve_type: ExposureCurveType, data: List[Tuple[float, float]]) -> Dict:
+def generate_exposure_curve_parameters(curve_type: ExposureCurveType, data: list[tuple[float, float]]) -> dict:
     """
     Generate parameters for an exposure curve based on data points.
 
@@ -271,7 +277,7 @@ def generate_exposure_curve_parameters(curve_type: ExposureCurveType, data: List
     Returns:
         Dictionary of parameters suitable for use with exposure_curve_calculation
     """
-    positions, values = zip(*data)
+    positions, values = zip(*data, strict=False)
     fitter = ExposureCurveFitter(positions, values)
 
     if curve_type == ExposureCurveType.RIEBESELL:
@@ -289,7 +295,7 @@ def generate_exposure_curve_parameters(curve_type: ExposureCurveType, data: List
     else:
         raise ValueError(f"Unsupported curve type: {curve_type}")
 
-def select_best_curve(positions: List[float], values: List[float]) -> Tuple[ExposureCurveType, Dict, float]:
+def select_best_curve(positions: list[float], values: list[float]) -> tuple[ExposureCurveType, dict, float]:
     """
     Select the best fitting curve based on R-squared values.
 

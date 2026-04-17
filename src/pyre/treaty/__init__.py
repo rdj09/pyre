@@ -1,13 +1,9 @@
-from pyre.enums import ContractType, ClaimTriggerBasis, IndexationClauseType
-from pyre.treaty.contracts import (
-    RILayer,
-    RIContractMetadata,
-    RIContract
-)
+from pyre.enums import ClaimTriggerBasis, ContractType, IndexationClauseType
+from pyre.treaty.contracts import RIContract, RIContractMetadata, RILayer
 from pyre.treaty.layer_loss_functions import (
-    xol_calculation,
-    qs_calculation,
     franchise_calculation,
+    layer_loss_calculation,
+    qs_calculation,
     surplus_share_calculation,
-    layer_loss_calculation
+    xol_calculation,
 )

@@ -1,10 +1,10 @@
+import operator
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import date
-import operator
-from typing import Optional, List, Sequence, Set
 
-from ..exceptions.exceptions import ClaimsException
 from ..enums import ClaimYearType
+from ..exceptions.exceptions import ClaimsException
 
 
 @dataclass
@@ -16,9 +16,9 @@ class ClaimDevelopmentHistory:
         cumulative_dev_paid: Cumulative paid at each development month.
         cumulative_dev_incurred: Cumulative incurred at each development month.
     """
-    development_months: List[int] = field(default_factory=list)
-    cumulative_dev_paid: List[float] = field(default_factory=list)
-    cumulative_dev_incurred: List[float] = field(default_factory=list)
+    development_months: list[int] = field(default_factory=list)
+    cumulative_dev_paid: list[float] = field(default_factory=list)
+    cumulative_dev_incurred: list[float] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         self._validate_list_lengths()
@@ -34,8 +34,8 @@ class ClaimDevelopmentHistory:
             )
 
     @property
-    def cumulative_reserved_amount(self) -> List[float]:
-        return [i - p for i, p in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)]
+    def cumulative_reserved_amount(self) -> list[float]:
+        return [i - p for i, p in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid, strict=False)]
 
     @property
     def latest_paid(self) -> float:
@@ -58,7 +58,7 @@ class ClaimDevelopmentHistory:
         return self.development_months[-1] if self.development_months else 0
 
     @staticmethod
-    def incremental_dev(cumulative_dev: Sequence[float]) -> List[float]:
+    def incremental_dev(cumulative_dev: Sequence[float]) -> list[float]:
         if not cumulative_dev:
             return []
         result = [cumulative_dev[0]]
@@ -66,18 +66,18 @@ class ClaimDevelopmentHistory:
         return result
 
     @property
-    def incremental_dev_incurred(self) -> List[float]:
+    def incremental_dev_incurred(self) -> list[float]:
         return self.incremental_dev(self.cumulative_dev_incurred)
 
     @property
-    def incremental_dev_paid(self) -> List[float]:
+    def incremental_dev_paid(self) -> list[float]:
         return self.incremental_dev(self.cumulative_dev_paid)
 
     @property
-    def mean_payment_duration(self) -> Optional[float]:
+    def mean_payment_duration(self) -> float | None:
         if self.latest_paid > 0:
             return sum(
-                m * p for m, p in zip(self.development_months, self.incremental_dev_paid)
+                m * p for m, p in zip(self.development_months, self.incremental_dev_paid, strict=False)
             ) / self.latest_paid
         return None
 
@@ -108,8 +108,8 @@ class ClaimsMetaData:
     loss_date: date = field(default_factory=lambda: date(1900, 1, 1))
     policy_inception_date: date = field(default_factory=lambda: date(1900, 1, 1))
     report_date: date = field(default_factory=lambda: date(1900, 1, 1))
-    line_of_business: Optional[str] = None
-    status: Optional[str] = "Open"
+    line_of_business: str | None = None
+    status: str | None = "Open"
 
     @property
     def modelling_year(self) -> int:
@@ -222,7 +222,7 @@ class Claims:
         self._claims = list_of_claim_classes
 
     @property
-    def modelling_years(self) -> List:
+    def modelling_years(self) -> list:
         """
         Returns a list of modelling years for all claims.
         """
@@ -230,7 +230,7 @@ class Claims:
         return sorted(years)
 
     @property
-    def development_periods(self) -> List:
+    def development_periods(self) -> list:
         """
         Returns a sorted list of unique development period sequences across all claims.
 
@@ -240,7 +240,7 @@ class Claims:
         return sorted([list(period) for period in dev_periods])
 
     @property
-    def currencies(self) -> Set:
+    def currencies(self) -> set:
         """
         Returns a list of currencies for all claims.
         """

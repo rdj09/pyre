@@ -1,6 +1,7 @@
 import unittest
-from math import exp
-from pyre.claims.triangles import Triangle, CurveType
+
+from pyre.claims.triangles import CurveType, Triangle
+
 
 class TestTriangle(unittest.TestCase):
     """Test cases for the Triangle class."""
@@ -226,10 +227,16 @@ class TestTriangle(unittest.TestCase):
 
 
 
-import pytest
 from datetime import date
+
+import pytest
+
 from pyre.claims.claims import (
-    Claim, ClaimDevelopmentHistory, ClaimsMetaData, Claims, ClaimYearType,
+    Claim,
+    ClaimDevelopmentHistory,
+    Claims,
+    ClaimsMetaData,
+    ClaimYearType,
 )
 
 
@@ -278,6 +285,47 @@ def test_triangle_from_claims_paid():
 
     assert triangle[2020, 12] == pytest.approx(100.0)
     assert triangle[2020, 24] == pytest.approx(150.0)
+
+
+def test_get_selected_development_pattern_returns_dict():
+    from src.pyre.claims.triangles import CurveType, Triangle
+
+    tri = Triangle(triangle={
+        2018: {12: 100.0, 24: 160.0, 36: 190.0, 48: 200.0},
+        2019: {12: 110.0, 24: 172.0, 36: 200.0},
+        2020: {12: 120.0, 24: 185.0},
+        2021: {12: 130.0},
+    })
+    pattern = tri.get_selected_development_pattern(
+        curve_type=CurveType.EXPONENTIAL, tail_factor=1.05
+    )
+    assert isinstance(pattern, dict)
+    for _dev, factor in pattern.items():
+        assert factor >= 1.0
+    dev_periods = sorted(pattern.keys())
+    assert pattern[dev_periods[0]] >= pattern[dev_periods[-1]]
+
+
+def test_get_selected_development_pattern_tail_factor_applied():
+    import pytest
+
+    from src.pyre.claims.triangles import CurveType, Triangle
+
+    tri = Triangle(triangle={
+        2018: {12: 100.0, 24: 160.0, 36: 200.0},
+        2019: {12: 110.0, 24: 172.0},
+        2020: {12: 120.0},
+    })
+    pattern_no_tail = tri.get_selected_development_pattern(
+        curve_type=CurveType.EXPONENTIAL, tail_factor=1.0
+    )
+    pattern_with_tail = tri.get_selected_development_pattern(
+        curve_type=CurveType.EXPONENTIAL, tail_factor=1.10
+    )
+    for dev in pattern_no_tail:
+        assert pattern_with_tail[dev] == pytest.approx(
+            pattern_no_tail[dev] * 1.10, rel=1e-6
+        )
 
 
 if __name__ == "__main__":

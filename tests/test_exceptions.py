@@ -1,10 +1,12 @@
 import unittest
+
 from pyre.exceptions.exceptions import (
-    GeneralException,
-    ExposureException,
     ClaimsException,
-    ContractException
+    ContractException,
+    ExposureException,
+    GeneralException,
 )
+
 
 class TestGeneralException(unittest.TestCase):
     def test_init_with_identifier(self):

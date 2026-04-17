@@ -4,6 +4,7 @@
 
 from math import log
 
+
 def frequency_extrapolate(frequency_deductible_one:float,deductible_one:float,deductible_two:float, alpha:float) ->float:
     return frequency_deductible_one * ((deductible_one/deductible_two)**alpha)
 

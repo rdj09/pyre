@@ -1,26 +1,28 @@
 import unittest
 from datetime import date
+
+from pyre.claims.claims import (
+    Claim,
+    ClaimDevelopmentHistory,
+    Claims,
+    ClaimsMetaData,
+    ClaimYearType,
+)
+from pyre.exposures.exposures import (
+    Exposure,
+    ExposureBasis,
+    ExposureMetaData,
+    Exposures,
+    ExposureValues,
+)
 from pyre.models.trending import (
     Trending,
     calculate_trend_factor,
-    trend_exposures,
+    get_trend_factors,
     trend_claims,
-    get_trend_factors
+    trend_exposures,
 )
-from pyre.claims.claims import (
-    ClaimYearType,
-    ClaimDevelopmentHistory,
-    ClaimsMetaData,
-    Claim,
-    Claims,
-)
-from pyre.exposures.exposures import (
-    ExposureBasis,
-    ExposureMetaData,
-    ExposureValues,
-    Exposure,
-    Exposures,
-)
+
 
 class TestTrending(unittest.TestCase):
     def setUp(self):
@@ -320,15 +322,20 @@ if __name__ == "__main__":
 
 import pytest
 
+
 def test_trend_exposures_returns_trended_values():
     """Regression test: trend_exposures() was calling modelling_year() and
     exposure_values() as functions — both are properties. This test verifies
     the trended exposure value is 1000 * 1.05 = 1050.0."""
-    from pyre.models.trending import Trending
-    from pyre.exposures.exposures import (
-        Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis,
-    )
     from datetime import date
+
+    from pyre.exposures.exposures import (
+        Exposure,
+        ExposureMetaData,
+        Exposures,
+        ExposureValues,
+    )
+    from pyre.models.trending import Trending
 
     meta = ExposureMetaData(
         exposure_id="E1",

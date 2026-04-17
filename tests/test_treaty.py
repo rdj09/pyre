@@ -1,14 +1,16 @@
 import unittest
 from datetime import date
-from pyre.treaty import (
-    ContractType,
-    RILayer,
-    RIContractMetadata,
-    RIContract,
-    ClaimTriggerBasis,
-    IndexationClauseType,
-)
+
 from pyre.claims.claims import ClaimYearType  # Ensure this import is correct
+from pyre.treaty import (
+    ClaimTriggerBasis,
+    ContractType,
+    IndexationClauseType,
+    RIContract,
+    RIContractMetadata,
+    RILayer,
+)
+
 
 class TestRILayer(unittest.TestCase):
     def setUp(self):

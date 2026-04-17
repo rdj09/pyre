@@ -12,7 +12,7 @@ https://assets.lloyds.com/assets/pdf-performance-management-pmdr-renewal-scenari
 
 
 """
-from typing import Optional
+
 
 def rate_change_simple(expiring_premium: float, renewed_premium: float) -> float:
     """
@@ -32,7 +32,7 @@ def rate_change_simple(expiring_premium: float, renewed_premium: float) -> float
 def rate_change_adjusted(
     expiring_premium: float,
     renewed_premium: float,
-    adjusted_expiring_premium: Optional[float] = None
+    adjusted_expiring_premium: float | None = None
 ) -> float:
     """
     Calculate rate change, optionally adjusting expiring premium for exposure/terms.

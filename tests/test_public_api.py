@@ -9,16 +9,12 @@ def test_version_is_accessible():
 
 def test_enum_types_accessible():
     from pyre import (
-        ClaimYearType,
         ClaimTriggerBasis,
-        ExposureBasis,
+        ClaimYearType,
         ContractType,
+        ExposureBasis,
         IndexationClauseType,
         ProjectionMethods,
-        SeverityDistribution,
-        FrequencyDistribution,
-        ExposureCurveType,
-        CurveType,
     )
     assert ClaimYearType.ACCIDENT_YEAR is not None
     assert ClaimTriggerBasis.LOD is not None
@@ -30,10 +26,21 @@ def test_enum_types_accessible():
 
 def test_core_classes_accessible():
     from pyre import (
-        Claim, Claims, ClaimDevelopmentHistory, ClaimsMetaData,
-        Exposure, Exposures, ExposureMetaData, ExposureValues,
-        RILayer, RIContractMetadata, RIContract,
-        Trending, ExperienceModelData, BurnCostModel, ExposureModel,
+        BurnCostModel,
+        Claim,
+        ClaimDevelopmentHistory,
+        Claims,
+        ClaimsMetaData,
+        ExperienceModelData,
+        Exposure,
+        ExposureMetaData,
+        ExposureModel,
+        Exposures,
+        ExposureValues,
+        RIContract,
+        RIContractMetadata,
+        RILayer,
+        Trending,
     )
     assert all(cls is not None for cls in [
         Claim, Claims, ClaimDevelopmentHistory, ClaimsMetaData,
@@ -44,7 +51,7 @@ def test_core_classes_accessible():
 
 
 def test_rate_monitoring_functions_accessible():
-    from pyre import rate_adequacy, rate_adequacy_change, rate_change_simple, rate_change_adjusted
+    from pyre import rate_adequacy, rate_adequacy_change, rate_change_adjusted, rate_change_simple
     assert callable(rate_adequacy)
     assert callable(rate_adequacy_change)
     assert callable(rate_change_simple)

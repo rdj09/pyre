@@ -1,11 +1,11 @@
 
-from typing import Optional
+
 
 class GeneralException(Exception):
     """
     Custom exception class for handling errors related to exposures.
     """
-    def __init__(self, message: str, identifier:Optional[str]):
+    def __init__(self, message: str, identifier: str | None = None):
         """
         Initialize the exception with an error message and optional exposure ID.
 
@@ -30,26 +30,17 @@ class GeneralException(Exception):
     
 
 class ExposureException(GeneralException):
-    def __init__(self, message: str, exposure_id: Optional[str]):
+    def __init__(self, message: str, exposure_id: str | None):
         super().__init__(message, exposure_id)
 
 
 class ClaimsException(GeneralException):
-    def __init__(self, message: str, claim_id: Optional[str]):
+    def __init__(self, message: str, claim_id: str | None):
         super().__init__(message, claim_id)
         self.claim_id = claim_id
         
 
 class ContractException(GeneralException):
-    def __init__(self, message: str, contract_id: Optional[str]):
+    def __init__(self, message: str, contract_id: str | None):
         super().__init__(message, contract_id)
 
-# ExposureException(
-#                 "Exposure period start date cannot be after the end date.",
-#                 exposure_id=exposure_meta.exposure_id
-#             )
-
-# ClaimsException(
-#                     "Policy inception date is required for UNDERWRITING_YEAR modelling.",
-#                     claim_id=self.claim_id
-#                 )

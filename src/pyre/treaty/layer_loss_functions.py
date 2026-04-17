@@ -1,21 +1,21 @@
 from ..enums import ContractType
 
 
-def xol_calculation(gross_amount: float, attachment: float, limit: float):
-    return max(min(gross_amount - attachment,limit),0)
+def xol_calculation(gross_amount: float, attachment: float, limit: float) -> float:
+    return max(min(gross_amount - attachment, limit), 0)
 
-def qs_calculation(gross_amount:float, cession:float):
-    return max(gross_amount * cession,0)
+def qs_calculation(gross_amount: float, cession: float) -> float:
+    return max(gross_amount * cession, 0)
 
-def franchise_calculation(    gross_amount: float, attachment: float, limit: float):
+def franchise_calculation(gross_amount: float, attachment: float, limit: float) -> float:
     if gross_amount > attachment:
-        return min(gross_amount,limit)
-    else: 
+        return min(gross_amount, limit)
+    else:
         return 0.0
 
-def surplus_share_calculation(gross_amount: float, sum_insured:float, attachment:float):
+def surplus_share_calculation(gross_amount: float, sum_insured: float, attachment: float) -> float:
     if sum_insured <= attachment:
-        return 0.0  # No ceded amount if the sum insured is within the retention
+        return 0.0
     surplus = sum_insured - attachment
     share = surplus / sum_insured
     return share * gross_amount

@@ -9,21 +9,22 @@ description = 'Python package for non-life reinsurance pricing exercises.'
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
-keywords = []
+keywords = ["reinsurance", "actuarial", "pricing", "insurance"]
 authors = [
   { name = "Rhys Jones", email = "rhysjones437@googlemail.com" },
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Scientific/Engineering :: Mathematics",
 ]
 dependencies = []
-
 
 [project.urls]
 Documentation = "https://github.com/rdj09/pyre#readme"
@@ -33,16 +34,54 @@ Source = "https://github.com/rdj09/pyre"
 [tool.hatch.version]
 path = "src/pyre/__about__.py"
 
-[tool.hatch.envs.types]
-extra-dependencies = [
-  "mypy>=1.0.0",
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "mypy>=1.10.0",
+  "pre-commit",
 ]
 
-[tool.hatch.envs.default]
-dependencies = []
+[tool.hatch.envs.default.scripts]
+test = "pytest --cov=pyre --cov-report=term-missing --cov-fail-under=80 {args}"
+test-no-cov = "pytest {args}"
+lint = "ruff check src/pyre tests"
+fmt = "ruff format src/pyre tests"
+fmt-check = "ruff format --check src/pyre tests"
+typecheck = "mypy src/pyre"
+check-all = ["lint", "fmt-check", "typecheck", "test"]
 
-[tool.hatch.envs.types.scripts]
-check = "mypy --install-types --non-interactive {args:src/pyre tests}"
+[tool.hatch.envs.docs]
+dependencies = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocstrings[python]",
+  "mkdocs-gen-files",
+  "mkdocs-literate-nav",
+  "pymdown-extensions",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict"
+deploy = "mkdocs gh-deploy --force --clean --remote-branch gh-pages"
+serve = "mkdocs serve --dev-addr localhost:8000"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008", "SIM108"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+exclude = ["tests/"]
 
 [tool.coverage.run]
 source_pkgs = ["pyre", "tests"]
@@ -63,16 +102,5 @@ exclude_lines = [
   "if TYPE_CHECKING:",
 ]
 
-[tool.hatch.envs.docs]
-dependencies = [
-  "mkdocs",
-  "mkdocstrings[python]",
-  "mkdocs-material[imaging]",
-  "mkdocs-material",
-  "markdown",
-  "pymdown-extensions"
-]
-[tool.hatch.envs.docs.scripts]
-build = "mkdocs build --clean --strict"
-deploy = "mkdocs gh-deploy --force --clean --remote-branch gh-pages"
-serve = "mkdocs serve --dev-addr localhost:8000"
+[tool.pytest.ini_options]
+testpaths = ["tests"]

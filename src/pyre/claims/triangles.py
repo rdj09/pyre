@@ -1,12 +1,16 @@
-from typing import Dict, List, Optional, Union, Tuple, Any, Iterator
 from math import exp
+
 from ..claims.claims import Claims
-from ..models.experience.curve_fitting import (
-    linear_regression, exponential_fit, power_fit,
-    weibull_fit, inverse_power_fit, r_squared,
-    assess_error_assumptions, residuals_standardised
-)
 from ..enums import CurveType
+from ..models.experience.curve_fitting import (
+    assess_error_assumptions,
+    exponential_fit,
+    inverse_power_fit,
+    power_fit,
+    r_squared,
+    weibull_fit,
+)
+
 
 class Triangle:
     """
@@ -27,9 +31,9 @@ class Triangle:
 
     def __init__(
         self,
-        triangle: Optional[Dict[int, Dict[int, float]]] = None,
-        origin_years: Optional[List[int]] = None,
-        dev_periods: Optional[List[int]] = None,
+        triangle: dict[int, dict[int, float]] | None = None,
+        origin_years: list[int] | None = None,
+        dev_periods: list[int] | None = None,
     ):
         """
         Initialize a Triangle directly or as an empty structure.
@@ -101,7 +105,7 @@ class Triangle:
 
         return header + "\n" + "\n".join(rows)
 
-    def __getitem__(self, key: Tuple[int, int]) -> Optional[float]:
+    def __getitem__(self, key: tuple[int, int]) -> float | None:
         """
         Get a value from the triangle using tuple indexing.
 
@@ -117,7 +121,7 @@ class Triangle:
         origin_year, dev_period = key
         return self.triangle.get(origin_year, {}).get(dev_period)
 
-    def __setitem__(self, key: Tuple[int, int], value: Optional[float]) -> None:
+    def __setitem__(self, key: tuple[int, int], value: float | None) -> None:
         """
         Set a value in the triangle using tuple indexing.
 
@@ -145,7 +149,7 @@ class Triangle:
             self.dev_periods.append(dev_period)
             self.dev_periods.sort()
 
-    def get_value(self, origin_year: int, dev_period: int) -> Optional[float]:
+    def get_value(self, origin_year: int, dev_period: int) -> float | None:
         """
         Get a value from the triangle.
 
@@ -158,7 +162,7 @@ class Triangle:
         """
         return self.triangle.get(origin_year, {}).get(dev_period)
 
-    def set_value(self, origin_year: int, dev_period: int, value: Optional[float]) -> None:
+    def set_value(self, origin_year: int, dev_period: int, value: float | None) -> None:
         """
         Set a value in the triangle.
 
@@ -169,7 +173,7 @@ class Triangle:
         """
         self[origin_year, dev_period] = value
 
-    def get_latest_diagonal(self) -> Dict[int, float]:
+    def get_latest_diagonal(self) -> dict[int, float]:
         """
         Get the latest diagonal of the triangle.
 
@@ -282,7 +286,7 @@ class Triangle:
                 values = dev_hist.cumulative_dev_paid
 
             # Add values to the triangle
-            for dev_period, value in zip(dev_hist.development_months, values):
+            for dev_period, value in zip(dev_hist.development_months, values, strict=False):
                 if origin_year in triangle:
                     triangle[origin_year][dev_period] = (
                         triangle[origin_year].get(dev_period, 0.0) + value
@@ -290,7 +294,7 @@ class Triangle:
 
         return cls(triangle=triangle, origin_years=origin_years, dev_periods=dev_periods)
 
-    def calculate_age_to_age_factors(self) -> Dict[int, Dict[int, float]]:
+    def calculate_age_to_age_factors(self) -> dict[int, dict[int, float]]:
         """
         Calculate age-to-age factors for the triangle.
 
@@ -317,7 +321,7 @@ class Triangle:
 
         return factors
 
-    def get_average_age_to_age_factors(self, method: str = "simple") -> Dict[int, float]:
+    def get_average_age_to_age_factors(self, method: str = "simple") -> dict[int, float]:
         """
         Calculate average age-to-age factors across all origin years.
 
@@ -361,7 +365,7 @@ class Triangle:
 
         return avg_factors
 
-    def fit_curve(self, curve_type: CurveType, c_values: List[float] = None) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def fit_curve(self, curve_type: CurveType, c_values: list[float] | None = None) -> tuple[dict[str, float], dict[str, float]]:
         """
         Fit a curve to the average age-to-age factors.
 
@@ -428,7 +432,52 @@ class Triangle:
 
         return params, metrics
 
-    #TODO output selected development pattern for the purpose of burn cost.
+    def get_selected_development_pattern(
+        self,
+        curve_type: CurveType,
+        tail_factor: float = 1.0,
+        c_values: list[float] | None = None,
+    ) -> dict[int, float]:
+        """Fit a curve to age-to-age factors and return cumulative-to-ultimate
+        development factors for each development period.
+
+        The returned dict maps development period to CDF factor (>= 1.0),
+        suitable for use as BurnCostModel.development_pattern.
+
+        Args:
+            curve_type: Which development curve to fit.
+            tail_factor: Multiplicative tail beyond the last development period.
+            c_values: Candidate c-values for INVERSE_POWER fit.
+
+        Returns:
+            Dict mapping development period to cumulative-to-ultimate factor.
+        """
+        from math import exp as _exp
+
+        params, _ = self.fit_curve(curve_type, c_values)
+        dev_sorted = sorted(self.dev_periods)
+
+        ata: dict[int, float] = {}
+        for dp in dev_sorted[:-1]:
+            if curve_type == CurveType.EXPONENTIAL:
+                ata[dp] = 1.0 + _exp(params["a"] + params["b"] * dp)
+            elif curve_type == CurveType.POWER:
+                ata[dp] = params["a"] * (params["b"] ** dp)
+            elif curve_type == CurveType.WEIBULL:
+                ata[dp] = 1.0 / (1.0 - _exp(-params["a"] * (dp ** params["b"])))
+            elif curve_type == CurveType.INVERSE_POWER:
+                ata[dp] = 1.0 + params["a"] * ((dp + params["c"]) ** params["b"])
+            else:
+                raise ValueError(f"Unknown curve type: {curve_type}")
+
+        cdf: dict[int, float] = {}
+        cdf[dev_sorted[-1]] = tail_factor
+        for dp in reversed(dev_sorted[:-1]):
+            next_dp = dev_sorted[dev_sorted.index(dp) + 1]
+            cdf[dp] = ata[dp] * cdf[next_dp]
+
+        return cdf
+
 
 #TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
 class IBNERPatternExtractor:
@@ -459,7 +508,7 @@ class IBNERPatternExtractor:
         ASTIN Bulletin, 21(1), 111-127.
         """
         # Step 1: compute volume-weighted ATA factors across all origin years
-        ata: Dict[int, float] = {}
+        ata: dict[int, float] = {}
         for i in range(len(self.dev_periods) - 1):
             d_curr = self.dev_periods[i]
             d_next = self.dev_periods[i + 1]
@@ -491,19 +540,19 @@ class IBNERPatternExtractor:
                         self.D[oy][d] = ibner
                         self.N[oy][d] = (current - prev) - ibner
 
-    def get_N_triangle(self) -> Dict[int, Dict[int, float]]:
+    def get_N_triangle(self) -> dict[int, dict[int, float]]:
         """
         Returns the N triangle (new claims).
         """
         return self.N
 
-    def get_D_triangle(self) -> Dict[int, Dict[int, float]]:
+    def get_D_triangle(self) -> dict[int, dict[int, float]]:
         """
         Returns the D triangle (IBNER development).
         """
         return self.D
 
-    def get_IBNER_pattern(self) -> Dict[int, float]:
+    def get_IBNER_pattern(self) -> dict[int, float]:
         """
         Returns the average D (IBNER) pattern per development year.
         """

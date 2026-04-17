@@ -1,11 +1,25 @@
-import pytest
 from datetime import date
-from pyre.models.experience.burn_cost import BurnCostModel, ProjectionMethods, projection_methods_fn
-from pyre.models.experience.experience_preparer import ExperienceModelData
-from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData, Claims, ClaimYearType
-from pyre.exposures.exposures import Exposure, Exposures, ExposureMetaData, ExposureValues, ExposureBasis
-from pyre.treaty.contracts import RILayer, RIContractMetadata, RIContract, ClaimTriggerBasis, IndexationClauseType
+
+import pytest
+
+from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData, ClaimYearType
 from pyre.enums import ContractType
+from pyre.exposures.exposures import (
+    Exposure,
+    ExposureBasis,
+    ExposureMetaData,
+    Exposures,
+    ExposureValues,
+)
+from pyre.models.experience.burn_cost import BurnCostModel, ProjectionMethods
+from pyre.models.experience.experience_preparer import ExperienceModelData
+from pyre.treaty.contracts import (
+    ClaimTriggerBasis,
+    IndexationClauseType,
+    RIContract,
+    RIContractMetadata,
+    RILayer,
+)
 
 
 def _make_model_data() -> ExperienceModelData:

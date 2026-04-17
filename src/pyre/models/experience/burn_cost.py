@@ -1,7 +1,8 @@
 from math import exp
-from typing import Any, Dict, List, Optional, Union, Callable
-from ...models.experience.experience_preparer import ExperienceModelData
+
 from ...enums import ProjectionMethods
+from ...models.experience.experience_preparer import ExperienceModelData
+
 
 def chainladder_method(data: float, development_factor: float) -> float:
     """
@@ -33,9 +34,9 @@ def bf_method(data: float, exposure: float, development_factor: float, a_priori:
 
 # Citation source: Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
 # https://www.actuaries.org.uk/documents/claims-reserving-working-party-paper
-def cape_cod_method(data: float, exposure: float, development_factor: float, 
-                    trend_factors: List[float] = None, losses: List[float] = None, 
-                    development_factors: List[float] = None, exposures: List[float] = None) -> float:
+def cape_cod_method(data: float, exposure: float, development_factor: float,
+                    trend_factors: list[float] | None = None, losses: list[float] | None = None,
+                    development_factors: list[float] | None = None, exposures: list[float] | None = None) -> float:
     """
     Apply the Cape Cod method to project ultimate claims.
 
@@ -69,8 +70,8 @@ def cape_cod_method(data: float, exposure: float, development_factor: float,
     return bf_method(data, exposure, development_factor, a_priori=cape_cod_prior)
 
 def generalised_cape_cod_method(data: float, exposure: float, development_factor: float,
-                               trend_factors: List[float] = None, losses: List[float] = None,
-                               development_factors: List[float] = None, exposures: List[float] = None,
+                               trend_factors: list[float] | None = None, losses: list[float] | None = None,
+                               development_factors: list[float] | None = None, exposures: list[float] | None = None,
                                decay_factor: float = 0.0) -> float:
     """
     Apply the Generalised Cape Cod method to project ultimate claims.
@@ -107,9 +108,8 @@ def generalised_cape_cod_method(data: float, exposure: float, development_factor
     return bf_method(data, exposure, development_factor, a_priori=generalised_cape_cod_prior)
 
 
-def cape_cod_prior_algo(trend_factors: List[float], losses: List[float], development_factors: List[float],
-                        exposures: List[float], decay_factor: float = 0.0, generalised: bool = False) -> Union[
-    Any, float]:
+def cape_cod_prior_algo(trend_factors: list[float], losses: list[float], development_factors: list[float],
+                        exposures: list[float], decay_factor: float = 0.0, generalised: bool = False) -> float:
     """
     Calculate the a priori expected loss ratio using the Cape Cod algorithm.
 
@@ -164,15 +164,15 @@ class BurnCostModel:
         _development_pattern (Dict[int, float]): Development factors for each modelling year.
         _a_priori (Dict[int, float]): A priori expected loss ratios for each modelling year.
         _data (ExperienceModelData): The claims and exposures data for the reinsurance contract.
-        _layer_id (Any): The identifier for the reinsurance contract layer.
+        _layer_id (int): The identifier for the reinsurance contract layer.
     """
     def __init__(self,
-                model_data: ExperienceModelData, 
-                layer_id: Any, 
-                years_weighting: Optional[Dict[int, float]] = None, 
-                projection_methods: Optional[Dict[int, ProjectionMethods]] = None,
-                development_pattern: Optional[Dict[int, float]] = None,
-                a_priori_assumption: Optional[Dict[int, float]] = None) -> None:
+                model_data: ExperienceModelData,
+                layer_id: int,
+                years_weighting: dict[int, float] | None = None, 
+                projection_methods: dict[int, ProjectionMethods] | None = None,
+                development_pattern: dict[int, float] | None = None,
+                a_priori_assumption: dict[int, float] | None = None) -> None:
         """
         Initialize a BurnCostModel instance.
 
@@ -197,7 +197,7 @@ class BurnCostModel:
         self._layer_id = layer_id
 
     @property
-    def modelling_years(self) -> List[int]:
+    def modelling_years(self) -> list[int]:
         """
         Get the years to be used in the modelling.
 
@@ -207,7 +207,7 @@ class BurnCostModel:
         return self._modelling_years
 
     @modelling_years.setter
-    def modelling_years(self, years: List[int]) -> None:
+    def modelling_years(self, years: list[int]) -> None:
         """
         Set the years to be used in the modelling.
 
@@ -217,7 +217,7 @@ class BurnCostModel:
         self._modelling_years = years
 
     @property
-    def years_weighting(self) -> Dict[int, float]:
+    def years_weighting(self) -> dict[int, float]:
         """
         Get the weighting factors for each modelling year.
 
@@ -227,7 +227,7 @@ class BurnCostModel:
         return self._years_weighting
 
     @years_weighting.setter
-    def years_weighting(self, weighting: Dict[int, float]) -> None:
+    def years_weighting(self, weighting: dict[int, float]) -> None:
         """
         Set the weighting factors for each modelling year.
 
@@ -237,7 +237,7 @@ class BurnCostModel:
         self._years_weighting = weighting
 
     @property
-    def projection_methods(self) -> Dict[int, ProjectionMethods]:
+    def projection_methods(self) -> dict[int, ProjectionMethods]:
         """
         Get the projection method to use for each modelling year.
 
@@ -247,7 +247,7 @@ class BurnCostModel:
         return self._projection_methods
 
     @projection_methods.setter
-    def projection_methods(self, methods: Dict[int, ProjectionMethods]) -> None:
+    def projection_methods(self, methods: dict[int, ProjectionMethods]) -> None:
         """
         Set the projection method to use for each modelling year.
 
@@ -257,7 +257,7 @@ class BurnCostModel:
         self._projection_methods = methods
 
     @property
-    def development_pattern(self) -> Dict[int, float]:
+    def development_pattern(self) -> dict[int, float]:
         """
         Get the development factors for each modelling year.
 
@@ -267,7 +267,7 @@ class BurnCostModel:
         return self._development_pattern
 
     @development_pattern.setter
-    def development_pattern(self, pattern: Dict[int, float]) -> None:
+    def development_pattern(self, pattern: dict[int, float]) -> None:
         """
         Set the development factors for each modelling year.
 
@@ -297,27 +297,27 @@ class BurnCostModel:
         self._data = model_data
 
     @property
-    def layer_id(self) -> Any:
+    def layer_id(self) -> int:
         """
         Get the identifier for the reinsurance contract layer.
 
         Returns:
-            Any: The layer identifier.
+            int: The layer identifier.
         """
         return self._layer_id
 
     @layer_id.setter
-    def layer_id(self, lid: Any) -> None:
+    def layer_id(self, lid: int) -> None:
         """
         Set the identifier for the reinsurance contract layer.
 
         Args:
-            lid (Any): The new layer identifier.
+            lid (int): The new layer identifier.
         """
         self._layer_id = lid
 
     @property
-    def a_priori(self) -> Dict[int, float]:
+    def a_priori(self) -> dict[int, float]:
         """
         Get the a priori expected loss ratios for each modelling year.
 
@@ -327,7 +327,7 @@ class BurnCostModel:
         return self._a_priori
 
     @a_priori.setter
-    def a_priori(self, prior: Dict[int, float]) -> None:
+    def a_priori(self, prior: dict[int, float]) -> None:
         """
         Set the a priori expected loss ratios for each modelling year.
 
@@ -336,7 +336,7 @@ class BurnCostModel:
         """
         self._a_priori = prior
 
-    def calculate_burn_cost(self) -> Dict[int, float]:
+    def calculate_burn_cost(self) -> dict[int, float]:
         """
         Calculate the burn cost for each modelling year.
 

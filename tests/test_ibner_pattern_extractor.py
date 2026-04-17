@@ -1,5 +1,6 @@
 import pytest
-from pyre.claims.triangles import Triangle, IBNERPatternExtractor
+
+from pyre.claims.triangles import IBNERPatternExtractor, Triangle
 
 
 def test_ibner_n_and_d_are_not_both_zero():
