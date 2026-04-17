@@ -122,15 +122,13 @@ def residuals_standardised(actual: List[float], expected: List[float], num_param
     # Calculate residuals
     residuals = [a - e for a, e in zip(actual, expected)]
     
-    # Calculate sigma^2 (variance estimate)
     n = len(actual)
-    sigma_squared = sum((a - e) ** 2 for a, e in zip(actual, expected)) / (n - num_parameters)
-    sigma = sqrt(sigma_squared)
-    
-    # Calculate standardized residuals
-    standardized_residuals = [residual / sigma for residual in residuals]
-    
-    return standardized_residuals
+    dof = n - num_parameters
+    if dof <= 0:
+        return [0.0] * n
+    sigma_squared = sum((a - e) ** 2 for a, e in zip(actual, expected)) / dof
+    sigma = sqrt(sigma_squared) if sigma_squared > 0 else 1.0
+    return [residual / sigma for residual in residuals]
 
 
 def r_squared(actual: List[float], expected: List[float]) -> float:

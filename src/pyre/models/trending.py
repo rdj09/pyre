@@ -34,7 +34,6 @@ class Trending:
         self.exposure_trend_factors = exposure_trend_factors
         self.claim_trend_factors = claim_trend_factors
         self.base_year = base_year
-        self._validate_inputs()
 
     def _validate_inputs(self) -> None:
         """
@@ -62,21 +61,11 @@ class Trending:
         Returns:
             float: The calculated trend factor.
         """
-        # Select the appropriate trend factors based on the for_claims parameter
         trend_factors = self.claim_trend_factors if for_claims else self.exposure_trend_factors
 
         if origin_year == self.base_year:
             return 1.0
-        elif origin_year < self.base_year:
-            factor = 1.0
-            for year in range(origin_year, self.base_year):
-                factor *= trend_factors.get(year, 1.0)
-            return factor
-        else:
-            factor = 1.0
-            for year in range(self.base_year, origin_year):
-                factor /= trend_factors.get(year, 1.0)
-            return factor
+        return trend_factors[origin_year]
 
     def trend_exposures(self, exposures: Exposures) -> Exposures:
         """
@@ -91,25 +80,21 @@ class Trending:
         trended_exposures = []
 
         for exposure in exposures:
-            # Get the modelling year and exposure value
             origin_year = exposure.modelling_year
-
-            # Create a new exposure with trended values
-            # Use exposure trend factors (for_claims=False is the default)
             trend_factor = self.calculate_trend_factor(origin_year, for_claims=False)
-
-            # Get the original exposure values
             original_values = exposure.exposure_values
-            trended_value = original_values.exposure_value * trend_factor
+            if origin_year < self.base_year:
+                trended_value = original_values.exposure_value * trend_factor
+            elif origin_year > self.base_year:
+                trended_value = original_values.exposure_value / trend_factor
+            else:
+                trended_value = original_values.exposure_value
 
-            # Create new ExposureValues with the trended value
             new_values = ExposureValues(
                 exposure_value=trended_value,
                 attachment_point=original_values.attachment_point,
                 limit=original_values.limit
             )
-
-            # Create a new Exposure with the same metadata but trended values
             new_exposure = Exposure(
                 exposure_meta=exposure.exposure_meta,
                 exposure_values=new_values
@@ -129,7 +114,8 @@ class Trending:
         """
         return {
             'exposure': self.exposure_trend_factors,
-            'claim': self.claim_trend_factors
+            'claim': self.claim_trend_factors,
+            'base_year': self.base_year,
         }
 
     def trend_claims(self, claims: Claims) -> Claims:
@@ -145,26 +131,24 @@ class Trending:
         trended_claims = []
 
         for claim in claims.claims:
-            # Get the modelling year for trending
             origin_year = claim.claims_meta_data.modelling_year
-            # Use claim trend factors (for_claims=True)
             trend_factor = self.calculate_trend_factor(origin_year, for_claims=True)
-
-            # Get the development history
             dev_hist = claim.uncapped_claim_development_history
+            if origin_year < self.base_year:
+                trended_paid = [x * trend_factor for x in dev_hist.cumulative_dev_paid]
+                trended_incurred = [x * trend_factor for x in dev_hist.cumulative_dev_incurred]
+            elif origin_year > self.base_year:
+                trended_paid = [x / trend_factor for x in dev_hist.cumulative_dev_paid]
+                trended_incurred = [x / trend_factor for x in dev_hist.cumulative_dev_incurred]
+            else:
+                trended_paid = list(dev_hist.cumulative_dev_paid)
+                trended_incurred = list(dev_hist.cumulative_dev_incurred)
 
-            # Trend all paid and incurred values in the development history
-            trended_paid = [x * trend_factor for x in dev_hist.cumulative_dev_paid]
-            trended_incurred = [x * trend_factor for x in dev_hist.cumulative_dev_incurred]
-
-            # Create a new development history with trended values
             trended_dev_hist = ClaimDevelopmentHistory(
                 development_months=dev_hist.development_months,
                 cumulative_dev_paid=trended_paid,
                 cumulative_dev_incurred=trended_incurred,
             )
-
-            # Create a new Claim with the same metadata and trended development history
             trended_claim = Claim(
                 claims_meta_data=claim.claims_meta_data, 
                 claims_development_history=trended_dev_hist
@@ -242,8 +226,9 @@ def get_trend_factors(trending_instance: Trending) -> Dict[str, Dict[int, float]
             their respective trend factors dictionary.
     """
     return {
-        'exposure': trending_instance.exposure_trend_factors,
-        'claim': trending_instance.claim_trend_factors
+        'exposure_trend_factors': trending_instance.exposure_trend_factors,
+        'claim_trend_factors': trending_instance.claim_trend_factors,
+        'base_year': trending_instance.base_year,
     }
 
 

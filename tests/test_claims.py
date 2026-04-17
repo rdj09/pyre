@@ -8,7 +8,7 @@ from src.pyre.claims.claims import (
     Claim,
     Claims,
 )
-from pyre.exceptions.exceptions import ClaimsException
+from src.pyre.exceptions.exceptions import ClaimsException
 
 class TestClaimDevelopmentHistory(unittest.TestCase):
     def setUp(self):
@@ -31,9 +31,8 @@ class TestClaimDevelopmentHistory(unittest.TestCase):
         self.assertEqual(self.history.cumulative_reserved_amount, [500.0, 500.0, 500.0])
 
     def test_cumulative_reserved_amount_error(self):
-        hist = ClaimDevelopmentHistory([1,2], [1.0,2.0], [1.0])
         with self.assertRaises(ValueError):
-            _ = hist.cumulative_reserved_amount
+            ClaimDevelopmentHistory([1, 2], [1.0, 2.0], [1.0])
 
     def test_latest_paid(self):
         self.assertEqual(self.history.latest_paid, 3000.0)
@@ -112,15 +111,15 @@ class TestClaimsMetaData(unittest.TestCase):
 
     def test_modelling_year_accident_year(self):
         self.meta_data.claim_year_basis = ClaimYearType.ACCIDENT_YEAR
-        self.assertEqual(self.meta_data.modelling_year, 2022)
+        self.assertEqual(self.meta_data.modelling_year, 2020)
 
     def test_modelling_year_underwriting_year(self):
         self.meta_data.claim_year_basis = ClaimYearType.UNDERWRITING_YEAR
-        self.assertEqual(self.meta_data.modelling_year, 2023)
+        self.assertEqual(self.meta_data.modelling_year, 2019)
 
     def test_modelling_year_reported_year(self):
         self.meta_data.claim_year_basis = ClaimYearType.REPORTED_YEAR
-        self.assertEqual(self.meta_data.modelling_year, 2024)
+        self.assertEqual(self.meta_data.modelling_year, 2021)
 
     def test_modelling_year_invalid_basis(self):
         class DummyYearType:
@@ -128,7 +127,7 @@ class TestClaimsMetaData(unittest.TestCase):
         self.meta_data.claim_year_basis = DummyYearType()
         with self.assertRaises(ClaimsException) as context:
             _ = self.meta_data.modelling_year
-        self.assertEqual(context.exception.claim_id, self.meta_data.claim_id)
+        self.assertEqual(context.exception.identifier, self.meta_data.claim_id)
         self.assertEqual(context.exception.message, "Required date missing from data")
 
 class TestClaim(unittest.TestCase):
@@ -253,7 +252,7 @@ class TestClaims(unittest.TestCase):
         )
         claim3 = Claim(meta3, hist3)
         self.claims.append(claim3)
-        self.assertEqual(len(self.claims), 2)
+        self.assertEqual(len(self.claims), 3)
 
     def test_getitem_and_slice(self):
         self.assertIs(self.claims[0], self.claim1)

@@ -37,6 +37,7 @@ class ExposureException(GeneralException):
 class ClaimsException(GeneralException):
     def __init__(self, message: str, claim_id: Optional[str]):
         super().__init__(message, claim_id)
+        self.claim_id = claim_id
         
 
 class ContractException(GeneralException):

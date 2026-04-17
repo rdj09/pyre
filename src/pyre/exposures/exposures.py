@@ -109,13 +109,21 @@ class Exposure:
             return 0.0
         if self._exposure_meta.aggregate:
             return 0.0
-        return min((analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days, 1.0)
+        raw = (analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days
+        return max(0.0, min(raw, 1.0))
 
     def earned_exposure_value(self, analysis_date: date) -> float:
-        if self._exposure_meta.exposure_type == ExposureBasis.EARNED:
+        if self._exposure_meta.exposure_type == ExposureBasis.WRITTEN:
             return self._exposure_values.exposure_value
         else:
             return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
+
+    def __repr__(self) -> str:
+        return (
+            f"Exposure(id={self._exposure_meta.exposure_id!r}, "
+            f"name={self._exposure_meta.exposure_name!r}, "
+            f"value={self._exposure_values.exposure_value})"
+        )
 
     def written_exposure_value(self, analysis_date: date) -> float:
         if self._exposure_meta.exposure_type == ExposureBasis.EARNED:
@@ -146,8 +154,20 @@ class Exposures:
         years = {exposure.modelling_year for exposure in self.exposures}
         return sorted(years)
 
+    @property
+    def currencies(self):
+        return {e.exposure_meta.currency for e in self._exposures}
+
+    @property
+    def exposure_ids(self):
+        return {e.exposure_meta.exposure_id for e in self._exposures}
+
     def append(self, exposure: Exposure) -> None:
         self._exposures.append(exposure)
+
+    def __repr__(self) -> str:
+        ids = ", ".join(e.exposure_meta.exposure_id for e in self._exposures)
+        return f"Exposures([{ids}])"
 
     def __getitem__(self, key):
         if isinstance(key, slice):
