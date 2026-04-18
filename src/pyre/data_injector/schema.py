@@ -24,7 +24,7 @@ class Schema(Generic[T]):
 
     target_class: type[T]
     fields: list[FieldDescriptor]
-    nested: dict[str, "Schema[Any]"] = dataclasses.field(default_factory=dict)
+    nested: dict[str, Schema[Any]] = dataclasses.field(default_factory=dict)
     pre_hooks: list[Callable[[dict[str, Any]], dict[str, Any]]] = dataclasses.field(
         default_factory=list
     )
@@ -33,7 +33,7 @@ class Schema(Generic[T]):
     @classmethod
     def from_dataclass(
         cls, dc: type[T], **overrides: FieldDescriptor
-    ) -> "Schema[T]":
+    ) -> Schema[T]:
         """Auto-derive a Schema from a dataclass's declared fields.
 
         Pass keyword arguments named after fields to supply custom
