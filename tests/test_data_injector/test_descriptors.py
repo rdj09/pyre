@@ -1,6 +1,4 @@
 # tests/test_data_injector/test_descriptors.py
-from dataclasses import MISSING
-
 import pytest
 
 from pyre.data_injector.descriptors import FieldDescriptor

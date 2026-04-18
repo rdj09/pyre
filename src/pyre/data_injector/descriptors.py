@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import MISSING, dataclass, field
+from dataclasses import dataclass, field
 from typing import Any
 
 from .exceptions import InjectionError
