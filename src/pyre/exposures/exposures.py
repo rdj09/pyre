@@ -1,6 +1,8 @@
 import operator
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import date
+from typing import Union
 
 from ..enums import ExposureBasis
 
@@ -23,6 +25,7 @@ class ExposureMetaData:
         peril: Associated peril.
         occupancy: Occupancy class.
     """
+
     exposure_id: str
     exposure_name: str
     exposure_period_start: date
@@ -54,6 +57,7 @@ class ExposureValues:
         attachment_point: Threshold at which coverage begins.
         limit: Maximum amount payable.
     """
+
     exposure_value: float
     attachment_point: float
     limit: float
@@ -108,7 +112,9 @@ class Exposure:
             return 0.0
         if self._exposure_meta.aggregate:
             return self._parallelogram_earned_pct(analysis_date)
-        raw = (analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days
+        raw = (
+            analysis_date - self._exposure_meta.exposure_period_start
+        ).days / self._exposure_meta.exposure_term_length_days
         return max(0.0, min(raw, 1.0))
 
     def _parallelogram_earned_pct(self, analysis_date: date) -> float:
@@ -183,28 +189,28 @@ class Exposures:
         return sorted(years)
 
     @property
-    def currencies(self):
+    def currencies(self) -> set[str]:
         return {e.exposure_meta.currency for e in self._exposures}
 
     @property
-    def exposure_ids(self):
+    def exposure_ids(self) -> set[str]:
         return {e.exposure_meta.exposure_id for e in self._exposures}
 
-    def append(self, exposure: Exposure) -> None:
+    def append(self, exposure: "Exposure") -> None:
         self._exposures.append(exposure)
 
     def __repr__(self) -> str:
         ids = ", ".join(e.exposure_meta.exposure_id for e in self._exposures)
         return f"Exposures([{ids}])"
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int | slice) -> Union["Exposure", "Exposures"]:
         if isinstance(key, slice):
             cls = type(self)
             return cls(self._exposures[key])
         index = operator.index(key)
         return self._exposures[index]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator["Exposure"]:
         return iter(self._exposures)
 
     def __len__(self) -> int:

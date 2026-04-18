@@ -1,4 +1,5 @@
 """pyRE — Python Reinsurance Pricing Library."""
+
 from pyre.__about__ import __version__
 from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData
 from pyre.claims.triangles import IBNERPatternExtractor, Triangle

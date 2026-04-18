@@ -11,6 +11,7 @@ from ..treaty.layer_loss_functions import layer_loss_calculation
 @dataclass
 class RILayer:
     """A single reinsurance layer with its terms and conditions."""
+
     layer_id: int
     layer_name: str
     layer_type: ContractType
@@ -54,12 +55,13 @@ class RILayer:
         if self.layer_type == ContractType.QUOTA_SHARE:
             return gross_amount
         func = layer_loss_calculation[self.layer_type]
-        return func(gross_amount, self.occurrence_attachment, self.occurrence_limit)
+        return float(func(gross_amount, self.occurrence_attachment, self.occurrence_limit))
 
 
 @dataclass
 class RIContractMetadata:
     """Contract-level metadata for a reinsurance agreement."""
+
     contract_id: str
     contract_description: str
     cedent_name: str
@@ -78,7 +80,7 @@ class RIContractMetadata:
             raise ContractException(
                 contract_id=self.contract_id,
                 message="Trigger basis not found in claim year mapping",
-            )
+            ) from None
 
 
 class RIContract:

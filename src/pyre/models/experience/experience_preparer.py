@@ -9,7 +9,7 @@ from ...treaty.contracts import RIContract
 
 class ExperienceModelData:
     """
-    ExperienceModelData is a data class that holds the claims and exposures data for a reinsurance contract.    
+    ExperienceModelData is a data class that holds the claims and exposures data for a reinsurance contract.
     It provides methods to trend claims and exposures, apply reinsurance contract layers, and aggregate results by modelling year and layer.
 
     Attributes:
@@ -17,8 +17,15 @@ class ExperienceModelData:
         _exposures (Exposures): The exposures data for the reinsurance contract.
         _ri_contract (RIContract): The reinsurance contract with layers and metadata.
     """
-    def __init__(self, claims: Claims, exposures: Exposures, ri_contract: RIContract,
-                 exposure_trend_factors: dict[int, float] | None = None, claim_trend_factors: dict[int, float] | None = None) -> None:
+
+    def __init__(
+        self,
+        claims: Claims,
+        exposures: Exposures,
+        ri_contract: RIContract,
+        exposure_trend_factors: dict[int, float] | None = None,
+        claim_trend_factors: dict[int, float] | None = None,
+    ) -> None:
         """
         Initialize an ExperienceModelData instance.
 
@@ -40,10 +47,18 @@ class ExperienceModelData:
         default_trend_factors = {year: 1.0 for year in range(base_year - 10, base_year + 1)}
 
         # Use provided trend factors or default ones
-        exposure_factors = exposure_trend_factors if exposure_trend_factors is not None else default_trend_factors
-        claim_factors = claim_trend_factors if claim_trend_factors is not None else default_trend_factors
+        exposure_factors = (
+            exposure_trend_factors if exposure_trend_factors is not None else default_trend_factors
+        )
+        claim_factors = (
+            claim_trend_factors if claim_trend_factors is not None else default_trend_factors
+        )
 
-        self._trending = Trending(exposure_trend_factors=exposure_factors, claim_trend_factors=claim_factors, base_year=base_year)
+        self._trending = Trending(
+            exposure_trend_factors=exposure_factors,
+            claim_trend_factors=claim_factors,
+            base_year=base_year,
+        )
 
     @property
     def claims(self) -> Claims:
@@ -64,7 +79,11 @@ class ExperienceModelData:
             value (Claims): The new claims data.
         """
         self._claims = value
-        for attr in ("trended_claims", "subject_contract_claims", "aggregate_subject_contract_claims"):
+        for attr in (
+            "trended_claims",
+            "subject_contract_claims",
+            "aggregate_subject_contract_claims",
+        ):
             self.__dict__.pop(attr, None)
 
     @property
@@ -108,7 +127,11 @@ class ExperienceModelData:
             value (RIContract): The new reinsurance contract.
         """
         self._ri_contract = value
-        for attr in ("subject_contract_claims", "aggregate_subject_contract_claims", "aggregate_exposures"):
+        for attr in (
+            "subject_contract_claims",
+            "aggregate_subject_contract_claims",
+            "aggregate_exposures",
+        ):
             self.__dict__.pop(attr, None)
 
     @property
@@ -121,7 +144,12 @@ class ExperienceModelData:
         """
         return self._trending
 
-    def update_trend_factors(self, exposure_trend_factors: dict[int, float] | None = None, claim_trend_factors: dict[int, float] | None = None, base_year: int | None = None) -> None:
+    def update_trend_factors(
+        self,
+        exposure_trend_factors: dict[int, float] | None = None,
+        claim_trend_factors: dict[int, float] | None = None,
+        base_year: int | None = None,
+    ) -> None:
         """
         Update the trend factors used for trending claims and exposures.
 
@@ -145,7 +173,7 @@ class ExperienceModelData:
         self._trending = Trending(
             exposure_trend_factors=exposure_trend_factors,
             claim_trend_factors=claim_trend_factors,
-            base_year=base_year
+            base_year=base_year,
         )
         for attr in (
             "trended_claims",
@@ -173,7 +201,7 @@ class ExperienceModelData:
     @cached_property
     def subject_contract_claims(self) -> dict[int, Claims]:
         """
-        Returns a dictionary mapping layer IDs to Claims objects where each claim's cumulative_dev_paid 
+        Returns a dictionary mapping layer IDs to Claims objects where each claim's cumulative_dev_paid
         and cumulative_dev_incurred have had the RI contract's loss_to_layer_fn applied for that layer.
 
         This property uses the trended_claims and ri_contract properties to calculate the ceded claims
@@ -188,8 +216,14 @@ class ExperienceModelData:
             for claim in self.trended_claims.claims:
                 new_dev_hist = ClaimDevelopmentHistory(
                     development_months=claim.capped_claim_development_history.development_months,
-                    cumulative_dev_paid=[layer.loss_to_layer_fn(paid) for paid in claim.capped_claim_development_history.cumulative_dev_paid],
-                    cumulative_dev_incurred=[layer.loss_to_layer_fn(incurred) for incurred in claim.capped_claim_development_history.cumulative_dev_incurred]
+                    cumulative_dev_paid=[
+                        layer.loss_to_layer_fn(paid)
+                        for paid in claim.capped_claim_development_history.cumulative_dev_paid
+                    ],
+                    cumulative_dev_incurred=[
+                        layer.loss_to_layer_fn(incurred)
+                        for incurred in claim.capped_claim_development_history.cumulative_dev_incurred
+                    ],
                 )
                 new_claim = Claim(
                     claims_meta_data=claim.claims_meta_data,
@@ -199,7 +233,7 @@ class ExperienceModelData:
 
             ceded_claims_dict[layer.layer_id] = Claims(layer_ceded_claims)
 
-        return ceded_claims_dict # returns dictionary of Claims objects by layer id that can be used to create aggregate numbers
+        return ceded_claims_dict  # returns dictionary of Claims objects by layer id that can be used to create aggregate numbers
 
     @cached_property
     def trended_exposures(self) -> Exposures:
@@ -236,9 +270,9 @@ class ExperienceModelData:
                     }, ...
                 }
         """
-        subject_claims_by_year = {}
+        subject_claims_by_year: dict[int, dict[int, dict[str, Any]]] = {}
         for layer_id, claims_obj in self.subject_contract_claims.items():
-            year_agg = {}
+            year_agg: dict[int, dict[str, Any]] = {}
             for claim in claims_obj.claims:
                 year = claim.claims_meta_data.modelling_year
                 status = getattr(claim.claims_meta_data, "status", "Unknown")
@@ -250,7 +284,7 @@ class ExperienceModelData:
                         "latest_paid": 0.0,
                         "latest_incurred": 0.0,
                         "claim_counts": {},
-                        "total_count": 0
+                        "total_count": 0,
                     }
 
                 year_agg[year]["latest_paid"] += latest_paid

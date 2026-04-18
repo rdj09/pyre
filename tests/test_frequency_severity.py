@@ -16,6 +16,7 @@ from src.pyre.models.experience.frequency_severity import (
 
 def test_fit_lognormal_returns_mu_and_sigma():
     import random
+
     random.seed(42)
     data = [math.exp(random.gauss(0, 1)) for _ in range(500)]
     params = _fit_lognormal(data)
@@ -86,8 +87,11 @@ def test_frequency_fit_poisson():
     )
 
     meta = ClaimsMetaData(
-        claim_id="C1", currency="GBP", contract_limit=1_000_000.0,
-        contract_deductible=0.0, claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
+        claim_id="C1",
+        currency="GBP",
+        contract_limit=1_000_000.0,
+        contract_deductible=0.0,
+        claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
         loss_date=date(2020, 6, 1),
     )
     dev_hist = ClaimDevelopmentHistory(
@@ -97,29 +101,46 @@ def test_frequency_fit_poisson():
     )
     claims = Claims([Claim(meta, dev_hist)])
     exp_meta = ExposureMetaData(
-        exposure_id="E1", exposure_name="2020",
-        exposure_period_start=date(2020, 1, 1), exposure_period_end=date(2020, 12, 31),
-        currency="GBP", exposure_type=ExposureBasis.EARNED,
+        exposure_id="E1",
+        exposure_name="2020",
+        exposure_period_start=date(2020, 1, 1),
+        exposure_period_end=date(2020, 12, 31),
+        currency="GBP",
+        exposure_type=ExposureBasis.EARNED,
     )
     exposures = Exposures([Exposure(exp_meta, ExposureValues(1_000_000.0, 0.0, 1_000_000.0))])
     layer = RILayer(
-        layer_id=1, layer_name="test", layer_type=ContractType.EXCESS_OF_LOSS,
-        occurrence_attachment=0.0, occurrence_limit=1_000_000.0,
-        aggregate_attachment=0.0, aggregate_limit=float("inf"),
-        subject_lines_of_business=["Property"], subject_lob_exposure_amounts=[1_000_000.0],
-        full_subject_premium=100_000.0, written_line=1.0, signed_line=1.0,
-        number_of_reinstatements=1, reinstatement_cost={1: 1.0},
+        layer_id=1,
+        layer_name="test",
+        layer_type=ContractType.EXCESS_OF_LOSS,
+        occurrence_attachment=0.0,
+        occurrence_limit=1_000_000.0,
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=["Property"],
+        subject_lob_exposure_amounts=[1_000_000.0],
+        full_subject_premium=100_000.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=1,
+        reinstatement_cost={1: 1.0},
     )
     contract_meta = RIContractMetadata(
-        contract_id="C1", contract_description="Test", cedent_name="Test",
+        contract_id="C1",
+        contract_description="Test",
+        cedent_name="Test",
         trigger_basis=ClaimTriggerBasis.LOD,
         indexation_clause=IndexationClauseType.FULL_INDEXATION,
-        indexation_margin=0.0, inception_date=date(2021, 1, 1),
-        expiration_date=date(2021, 12, 31), fx_rates={"GBP": 1.0},
+        indexation_margin=0.0,
+        inception_date=date(2021, 1, 1),
+        expiration_date=date(2021, 12, 31),
+        fx_rates={"GBP": 1.0},
     )
     contract = RIContract(contract_meta_data=contract_meta, layers=[layer])
     model_data = ExperienceModelData(
-        claims=claims, exposures=exposures, ri_contract=contract,
+        claims=claims,
+        exposures=exposures,
+        ri_contract=contract,
         exposure_trend_factors={yr: 1.0 for yr in range(2010, 2022)},
         claim_trend_factors={yr: 1.0 for yr in range(2010, 2022)},
     )

@@ -182,9 +182,7 @@ def test_burn_cost_raises_on_invalid_projection(monkeypatch):
     def bad_fn(*args, **kwargs):
         raise RuntimeError("intentional failure")
 
-    monkeypatch.setitem(
-        bc_module.projection_methods_fn, ProjectionMethods.CHAINLADDER, bad_fn
-    )
+    monkeypatch.setitem(bc_module.projection_methods_fn, ProjectionMethods.CHAINLADDER, bad_fn)
 
     with pytest.raises(ValueError, match="Projection failed"):
         model.calculate_burn_cost()

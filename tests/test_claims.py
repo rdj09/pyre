@@ -70,6 +70,7 @@ class TestClaimDevelopmentHistory(unittest.TestCase):
         empty = ClaimDevelopmentHistory()
         self.assertIsNone(empty.mean_payment_duration)
 
+
 class TestClaimsMetaData(unittest.TestCase):
     def setUp(self):
         self.meta_data = ClaimsMetaData(
@@ -83,7 +84,7 @@ class TestClaimsMetaData(unittest.TestCase):
             policy_inception_date=date(2019, 1, 1),
             report_date=date(2021, 1, 1),
             line_of_business="LOB",
-            status="Closed"
+            status="Closed",
         )
 
     def test_property_setters_and_getters(self):
@@ -125,11 +126,13 @@ class TestClaimsMetaData(unittest.TestCase):
     def test_modelling_year_invalid_basis(self):
         class DummyYearType:
             pass
+
         self.meta_data.claim_year_basis = DummyYearType()
         with self.assertRaises(ClaimsException) as context:
             _ = self.meta_data.modelling_year
         self.assertEqual(context.exception.identifier, self.meta_data.claim_id)
         self.assertEqual(context.exception.message, "Required date missing from data")
+
 
 class TestClaim(unittest.TestCase):
     def setUp(self):
@@ -181,6 +184,7 @@ class TestClaim(unittest.TestCase):
         self.assertIn("modelling_year=2020", repr_str)
         self.assertIn("latest_incurred=3500.0", repr_str)
         self.assertIn("latest_capped_incurred=", repr_str)
+
 
 class TestClaims(unittest.TestCase):
     def setUp(self):
@@ -266,6 +270,7 @@ class TestClaims(unittest.TestCase):
         claims_list = list(iter(self.claims))
         self.assertEqual(claims_list[0], self.claim1)
         self.assertEqual(claims_list[1], self.claim2)
+
 
 if __name__ == "__main__":
     unittest.main()

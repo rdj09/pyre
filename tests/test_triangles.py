@@ -12,21 +12,17 @@ class TestTriangle(unittest.TestCase):
         self.triangle_data = {
             2020: {1: 100.0, 2: 150.0, 3: 175.0},
             2021: {1: 110.0, 2: 165.0},
-            2022: {1: 120.0}
+            2022: {1: 120.0},
         }
         self.triangle = Triangle(
-            triangle=self.triangle_data,
-            origin_years=[2020, 2021, 2022],
-            dev_periods=[1, 2, 3]
+            triangle=self.triangle_data, origin_years=[2020, 2021, 2022], dev_periods=[1, 2, 3]
         )
 
     def test_init(self):
         """Test initialization of Triangle."""
         # Test with explicit parameters
         triangle = Triangle(
-            triangle=self.triangle_data,
-            origin_years=[2020, 2021, 2022],
-            dev_periods=[1, 2, 3]
+            triangle=self.triangle_data, origin_years=[2020, 2021, 2022], dev_periods=[1, 2, 3]
         )
         self.assertEqual(triangle.origin_years, [2020, 2021, 2022])
         self.assertEqual(triangle.dev_periods, [1, 2, 3])
@@ -127,7 +123,7 @@ class TestTriangle(unittest.TestCase):
         incremental_data = {
             2020: {1: 100.0, 2: 50.0, 3: 25.0},
             2021: {1: 110.0, 2: 55.0},
-            2022: {1: 120.0}
+            2022: {1: 120.0},
         }
         incremental = Triangle(triangle=incremental_data)
 
@@ -190,7 +186,7 @@ class TestTriangle(unittest.TestCase):
         triangle_data = {
             2020: {1: 100.0, 2: 150.0, 3: 180.0, 4: 195.0},
             2021: {1: 110.0, 2: 165.0, 3: 198.0},
-            2022: {1: 120.0, 2: 180.0}
+            2022: {1: 120.0, 2: 180.0},
         }
         triangle = Triangle(triangle=triangle_data)
 
@@ -214,7 +210,9 @@ class TestTriangle(unittest.TestCase):
         self.assertIn("r_squared", metrics)
 
         # Test inverse power fit
-        params, metrics = triangle.fit_curve(curve_type=CurveType.INVERSE_POWER, c_values=[0.5, 1.0])
+        params, metrics = triangle.fit_curve(
+            curve_type=CurveType.INVERSE_POWER, c_values=[0.5, 1.0]
+        )
         self.assertIn("a", params)
         self.assertIn("b", params)
         self.assertIn("c", params)
@@ -223,8 +221,6 @@ class TestTriangle(unittest.TestCase):
         # Test invalid curve type
         with self.assertRaises(ValueError):
             triangle.fit_curve(curve_type="invalid_type")  # type: ignore
-
-
 
 
 from datetime import date
@@ -290,12 +286,14 @@ def test_triangle_from_claims_paid():
 def test_get_selected_development_pattern_returns_dict():
     from src.pyre.claims.triangles import CurveType, Triangle
 
-    tri = Triangle(triangle={
-        2018: {12: 100.0, 24: 160.0, 36: 190.0, 48: 200.0},
-        2019: {12: 110.0, 24: 172.0, 36: 200.0},
-        2020: {12: 120.0, 24: 185.0},
-        2021: {12: 130.0},
-    })
+    tri = Triangle(
+        triangle={
+            2018: {12: 100.0, 24: 160.0, 36: 190.0, 48: 200.0},
+            2019: {12: 110.0, 24: 172.0, 36: 200.0},
+            2020: {12: 120.0, 24: 185.0},
+            2021: {12: 130.0},
+        }
+    )
     pattern = tri.get_selected_development_pattern(
         curve_type=CurveType.EXPONENTIAL, tail_factor=1.05
     )
@@ -311,11 +309,13 @@ def test_get_selected_development_pattern_tail_factor_applied():
 
     from src.pyre.claims.triangles import CurveType, Triangle
 
-    tri = Triangle(triangle={
-        2018: {12: 100.0, 24: 160.0, 36: 200.0},
-        2019: {12: 110.0, 24: 172.0},
-        2020: {12: 120.0},
-    })
+    tri = Triangle(
+        triangle={
+            2018: {12: 100.0, 24: 160.0, 36: 200.0},
+            2019: {12: 110.0, 24: 172.0},
+            2020: {12: 120.0},
+        }
+    )
     pattern_no_tail = tri.get_selected_development_pattern(
         curve_type=CurveType.EXPONENTIAL, tail_factor=1.0
     )
@@ -323,9 +323,7 @@ def test_get_selected_development_pattern_tail_factor_applied():
         curve_type=CurveType.EXPONENTIAL, tail_factor=1.10
     )
     for dev in pattern_no_tail:
-        assert pattern_with_tail[dev] == pytest.approx(
-            pattern_no_tail[dev] * 1.10, rel=1e-6
-        )
+        assert pattern_with_tail[dev] == pytest.approx(pattern_no_tail[dev] * 1.10, rel=1e-6)
 
 
 if __name__ == "__main__":

@@ -1,20 +1,30 @@
+from collections.abc import Callable
+from datetime import date
 from typing import Any
 
+from ...enums import ExposureCurveType
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
-from .exposure_curve_functions import ExposureCurveType
 
 # citation https://www.casact.org/sites/default/files/presentation/reinsure_2009_handouts_cs1-rosin.pdf "STACKING"
 
 
 class ExposureModel:
-    def __init__(self, exposures: Exposures, ri_contract: RIContract, selected_curve: ExposureCurveType, curve_parameters: dict):
+    def __init__(
+        self,
+        exposures: Exposures,
+        ri_contract: RIContract,
+        selected_curve: ExposureCurveType,
+        curve_parameters: dict[str, Any],
+    ):
         self._exposures = exposures
         self._ri_contract = ri_contract
         self._selected_curve = selected_curve
         self._curve_parameters = curve_parameters
 
-    def calculate_exposure_curve(self, curve_type: ExposureCurveType, parameters: dict[str, Any], position: float) -> float:
+    def calculate_exposure_curve(
+        self, curve_type: ExposureCurveType, parameters: dict[str, Any], position: float
+    ) -> float:
         """Calculate curve value based on curve type and parameters.
 
         Args:
@@ -26,9 +36,10 @@ class ExposureModel:
             float: Calculated curve value
         """
         from ...models.exposure.exposure_curve_functions import calculate_curve
+
         return calculate_curve(curve_type, parameters, position)
 
-    def _calculate_single_exposure_share(self, exposure) -> dict:
+    def _calculate_single_exposure_share(self, exposure: Any) -> dict[int, float]:
         """
         Calculate the share of risk ceded to each treaty layer for a single exposure.
 
@@ -42,7 +53,7 @@ class ExposureModel:
         policy_limit = exposure.exposure_values.limit
         total_insured_value = policy_attachment + policy_limit
 
-        shares_by_layer: dict = {}
+        shares_by_layer: dict[int, float] = {}
 
         for layer in self._ri_contract.layers:
             treaty_attachment = layer.occurrence_attachment
@@ -90,7 +101,7 @@ class ExposureModel:
 
         return shares_by_layer
 
-    def calculate_exposure_rate(self, analysis_date) -> dict:
+    def calculate_exposure_rate(self, analysis_date: date) -> dict[int, float]:
         """Exposure-rated burning cost per unit of earned exposure per layer.
 
         For each layer: sum(exposure_value * share_of_risk) / total_earned_exposure.
@@ -101,13 +112,13 @@ class ExposureModel:
         Returns:
             Dict mapping layer_id to exposure rate.
         """
-        total_earned = sum(
-            exp.earned_exposure_value(analysis_date) for exp in self._exposures
-        )
+        total_earned = sum(exp.earned_exposure_value(analysis_date) for exp in self._exposures)
         if total_earned == 0:
             return {layer.layer_id: 0.0 for layer in self._ri_contract.layers}
 
-        layer_weighted_sums: dict = {layer.layer_id: 0.0 for layer in self._ri_contract.layers}
+        layer_weighted_sums: dict[int, float] = {
+            layer.layer_id: 0.0 for layer in self._ri_contract.layers
+        }
         for exposure in self._exposures:
             shares = self._calculate_single_exposure_share(exposure)
             ev = exposure.earned_exposure_value(analysis_date)
@@ -116,7 +127,9 @@ class ExposureModel:
 
         return {lid: val / total_earned for lid, val in layer_weighted_sums.items()}
 
-    def calculate_ilf_adjusted_rate(self, ilf_function, analysis_date) -> dict:
+    def calculate_ilf_adjusted_rate(
+        self, ilf_function: Callable[[float], float], analysis_date: date
+    ) -> dict[int, float]:
         """ILF-adjusted exposure rate per layer.
 
         Multiplies each exposure's contribution by an Increased Limit Factor
@@ -129,13 +142,13 @@ class ExposureModel:
         Returns:
             Dict mapping layer_id to ILF-adjusted exposure rate.
         """
-        total_earned = sum(
-            exp.earned_exposure_value(analysis_date) for exp in self._exposures
-        )
+        total_earned = sum(exp.earned_exposure_value(analysis_date) for exp in self._exposures)
         if total_earned == 0:
             return {layer.layer_id: 0.0 for layer in self._ri_contract.layers}
 
-        layer_weighted_sums: dict = {layer.layer_id: 0.0 for layer in self._ri_contract.layers}
+        layer_weighted_sums: dict[int, float] = {
+            layer.layer_id: 0.0 for layer in self._ri_contract.layers
+        }
         for exposure in self._exposures:
             shares = self._calculate_single_exposure_share(exposure)
             ev = exposure.earned_exposure_value(analysis_date)

@@ -9,6 +9,7 @@ from pyre.rate_monitoring.rate_change import rate_change_adjusted, rate_change_s
 # rate_change_simple
 # ---------------------------------------------------------------------------
 
+
 def test_rate_change_simple_increase():
     assert rate_change_simple(100.0, 110.0) == pytest.approx(0.10)
 
@@ -29,6 +30,7 @@ def test_rate_change_simple_zero_expiring_raises():
 # ---------------------------------------------------------------------------
 # rate_change_adjusted
 # ---------------------------------------------------------------------------
+
 
 def test_rate_change_adjusted_no_adjustment():
     assert rate_change_adjusted(100.0, 105.0) == pytest.approx(0.05)
@@ -55,6 +57,7 @@ def test_rate_change_adjusted_zero_adjusted_raises():
 # rate_adequacy
 # ---------------------------------------------------------------------------
 
+
 def test_rate_adequacy_adequate():
     assert rate_adequacy(105.0, 100.0) == pytest.approx(1.05)
 
@@ -75,6 +78,7 @@ def test_rate_adequacy_zero_indicated_raises():
 # ---------------------------------------------------------------------------
 # rate_adequacy_change
 # ---------------------------------------------------------------------------
+
 
 def test_rate_adequacy_change_improvement():
     # Prior: 90% adequate; Current: 100% adequate → change = +0.111

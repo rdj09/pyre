@@ -86,6 +86,7 @@ def test_calculate_exposure_rate_returns_rate_per_layer():
 
 def test_calculate_ilf_adjusted_rate_differs_from_base():
     from pyre.models.exposure.exposure_ILF_functions import power_ilf
+
     model = _make_exposure_model()
     analysis_date = date(2021, 1, 1)
     base_rates = model.calculate_exposure_rate(analysis_date)

@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from math import exp
+from typing import Any
 
 from ...enums import ProjectionMethods
 from ...models.experience.experience_preparer import ExperienceModelData
@@ -17,6 +19,7 @@ def chainladder_method(data: float, development_factor: float) -> float:
     """
     return data * development_factor
 
+
 def bf_method(data: float, exposure: float, development_factor: float, a_priori: float) -> float:
     """
     Apply the Bornhuetter-Ferguson method to project ultimate claims.
@@ -30,13 +33,20 @@ def bf_method(data: float, exposure: float, development_factor: float, a_priori:
     Returns:
         float: The projected ultimate claim amount.
     """
-    return data + (1 - (1/development_factor)) * a_priori * exposure
+    return data + (1 - (1 / development_factor)) * a_priori * exposure
+
 
 # Citation source: Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
 # https://www.actuaries.org.uk/documents/claims-reserving-working-party-paper
-def cape_cod_method(data: float, exposure: float, development_factor: float,
-                    trend_factors: list[float] | None = None, losses: list[float] | None = None,
-                    development_factors: list[float] | None = None, exposures: list[float] | None = None) -> float:
+def cape_cod_method(
+    data: float,
+    exposure: float,
+    development_factor: float,
+    trend_factors: list[float] | None = None,
+    losses: list[float] | None = None,
+    development_factors: list[float] | None = None,
+    exposures: list[float] | None = None,
+) -> float:
     """
     Apply the Cape Cod method to project ultimate claims.
 
@@ -56,23 +66,32 @@ def cape_cod_method(data: float, exposure: float, development_factor: float,
         ValueError: If any of the required parameters for cape_cod_prior_algo are missing.
     """
     # If any of the required parameters for cape_cod_prior_algo are missing, raise an error
-    if not all([trend_factors, losses, development_factors, exposures]):
-        raise ValueError("Cape Cod method requires trend_factors, losses, development_factors, and exposures")
+    if trend_factors is None or losses is None or development_factors is None or exposures is None:
+        raise ValueError(
+            "Cape Cod method requires trend_factors, losses, development_factors, and exposures"
+        )
 
     cape_cod_prior = cape_cod_prior_algo(
         trend_factors=trend_factors,
         losses=losses,
         development_factors=development_factors,
         exposures=exposures,
-        generalised=False
+        generalised=False,
     )
 
     return bf_method(data, exposure, development_factor, a_priori=cape_cod_prior)
 
-def generalised_cape_cod_method(data: float, exposure: float, development_factor: float,
-                               trend_factors: list[float] | None = None, losses: list[float] | None = None,
-                               development_factors: list[float] | None = None, exposures: list[float] | None = None,
-                               decay_factor: float = 0.0) -> float:
+
+def generalised_cape_cod_method(
+    data: float,
+    exposure: float,
+    development_factor: float,
+    trend_factors: list[float] | None = None,
+    losses: list[float] | None = None,
+    development_factors: list[float] | None = None,
+    exposures: list[float] | None = None,
+    decay_factor: float = 0.0,
+) -> float:
     """
     Apply the Generalised Cape Cod method to project ultimate claims.
 
@@ -93,8 +112,10 @@ def generalised_cape_cod_method(data: float, exposure: float, development_factor
         ValueError: If any of the required parameters for cape_cod_prior_algo are missing.
     """
     # If any of the required parameters for cape_cod_prior_algo are missing, raise an error
-    if not all([trend_factors, losses, development_factors, exposures]):
-        raise ValueError("Generalised Cape Cod method requires trend_factors, losses, development_factors, and exposures")
+    if trend_factors is None or losses is None or development_factors is None or exposures is None:
+        raise ValueError(
+            "Generalised Cape Cod method requires trend_factors, losses, development_factors, and exposures"
+        )
 
     generalised_cape_cod_prior = cape_cod_prior_algo(
         trend_factors=trend_factors,
@@ -102,14 +123,20 @@ def generalised_cape_cod_method(data: float, exposure: float, development_factor
         development_factors=development_factors,
         exposures=exposures,
         decay_factor=decay_factor,
-        generalised=True
+        generalised=True,
     )
 
     return bf_method(data, exposure, development_factor, a_priori=generalised_cape_cod_prior)
 
 
-def cape_cod_prior_algo(trend_factors: list[float], losses: list[float], development_factors: list[float],
-                        exposures: list[float], decay_factor: float = 0.0, generalised: bool = False) -> float:
+def cape_cod_prior_algo(
+    trend_factors: list[float],
+    losses: list[float],
+    development_factors: list[float],
+    exposures: list[float],
+    decay_factor: float = 0.0,
+    generalised: bool = False,
+) -> float:
     """
     Calculate the a priori expected loss ratio using the Cape Cod algorithm.
 
@@ -129,26 +156,32 @@ def cape_cod_prior_algo(trend_factors: list[float], losses: list[float], develop
         weights = [exp(-decay_factor * i) for i in range(len(trend_factors))]
 
         # Calculate weighted pseudo claims and exposures
-        psuedo_claims = sum(weights[i] * trend_factors[i] * losses[i] * (development_factors[i] / exposures[i])
-                            for i in range(len(trend_factors)))
-        psuedo_exposures = sum(weights[i] * exposures[i] / development_factors[i]
-                               for i in range(len(exposures)))
+        psuedo_claims = sum(
+            weights[i] * trend_factors[i] * losses[i] * (development_factors[i] / exposures[i])
+            for i in range(len(trend_factors))
+        )
+        psuedo_exposures = sum(
+            weights[i] * exposures[i] / development_factors[i] for i in range(len(exposures))
+        )
 
         return psuedo_claims / psuedo_exposures
     else:
         # Standard Cape Cod method (already implemented)
-        psuedo_claims = sum(trend_factors[i] * losses[i] * (development_factors[i] / exposures[i])
-                            for i in range(len(trend_factors)))
-        psuedo_exposures = sum(exposures[i] / development_factors[i]
-                               for i in range(len(exposures)))
+        psuedo_claims = sum(
+            trend_factors[i] * losses[i] * (development_factors[i] / exposures[i])
+            for i in range(len(trend_factors))
+        )
+        psuedo_exposures = sum(exposures[i] / development_factors[i] for i in range(len(exposures)))
         return psuedo_claims / psuedo_exposures
 
-projection_methods_fn = {
+
+projection_methods_fn: dict[ProjectionMethods, Callable[..., Any]] = {
     ProjectionMethods.CHAINLADDER: chainladder_method,
     ProjectionMethods.BF: bf_method,
     ProjectionMethods.SIMPLE_CAPE_COD: cape_cod_method,
-    ProjectionMethods.GENERALISED_CAPE_COD: generalised_cape_cod_method
+    ProjectionMethods.GENERALISED_CAPE_COD: generalised_cape_cod_method,
 }
+
 
 class BurnCostModel:
     """
@@ -166,13 +199,16 @@ class BurnCostModel:
         _data (ExperienceModelData): The claims and exposures data for the reinsurance contract.
         _layer_id (int): The identifier for the reinsurance contract layer.
     """
-    def __init__(self,
-                model_data: ExperienceModelData,
-                layer_id: int,
-                years_weighting: dict[int, float] | None = None, 
-                projection_methods: dict[int, ProjectionMethods] | None = None,
-                development_pattern: dict[int, float] | None = None,
-                a_priori_assumption: dict[int, float] | None = None) -> None:
+
+    def __init__(
+        self,
+        model_data: ExperienceModelData,
+        layer_id: int,
+        years_weighting: dict[int, float] | None = None,
+        projection_methods: dict[int, ProjectionMethods] | None = None,
+        development_pattern: dict[int, float] | None = None,
+        a_priori_assumption: dict[int, float] | None = None,
+    ) -> None:
         """
         Initialize a BurnCostModel instance.
 
@@ -189,10 +225,29 @@ class BurnCostModel:
                 If None, values of 0.0 will be used for all years (no a priori assumption). Defaults to None.
         """
         self._modelling_years = model_data.exposures.modelling_years
-        self._years_weighting = years_weighting if years_weighting else {year: 1.0 for year in model_data.exposures.modelling_years}
-        self._projection_methods = projection_methods if projection_methods else {year: ProjectionMethods.SIMPLE_CAPE_COD for year in model_data.exposures.modelling_years}  # Default to simple cape cod method
-        self._development_pattern = development_pattern if development_pattern else {year: 1.0 for year in model_data.exposures.modelling_years}  # Default to no development pattern
-        self._a_priori = a_priori_assumption if a_priori_assumption else {year: 0.0 for year in model_data.exposures.modelling_years}  # Default to no a priori assumption
+        self._years_weighting = (
+            years_weighting
+            if years_weighting
+            else {year: 1.0 for year in model_data.exposures.modelling_years}
+        )
+        self._projection_methods = (
+            projection_methods
+            if projection_methods
+            else {
+                year: ProjectionMethods.SIMPLE_CAPE_COD
+                for year in model_data.exposures.modelling_years
+            }
+        )  # Default to simple cape cod method
+        self._development_pattern = (
+            development_pattern
+            if development_pattern
+            else {year: 1.0 for year in model_data.exposures.modelling_years}
+        )  # Default to no development pattern
+        self._a_priori = (
+            a_priori_assumption
+            if a_priori_assumption
+            else {year: 0.0 for year in model_data.exposures.modelling_years}
+        )  # Default to no a priori assumption
         self._data = model_data
         self._layer_id = layer_id
 
@@ -349,9 +404,11 @@ class BurnCostModel:
         burn_costs = {}
         for year in self._modelling_years:
             # Skip years that don't have data in the aggregate claims or exposures
-            if (self._layer_id not in self._data.aggregate_subject_contract_claims or
-                year not in self._data.aggregate_subject_contract_claims[self._layer_id] or
-                year not in self._data.aggregate_exposures):
+            if (
+                self._layer_id not in self._data.aggregate_subject_contract_claims
+                or year not in self._data.aggregate_subject_contract_claims[self._layer_id]
+                or year not in self._data.aggregate_exposures
+            ):
                 continue
 
             # Get claims and exposures data for the year
@@ -374,11 +431,14 @@ class BurnCostModel:
             a_priori_value = self._a_priori.get(year, 0.0)
 
             # Apply the projection method
-            projection_fn = projection_methods_fn.get(method)
+            projection_fn = projection_methods_fn[method]
             try:
                 if method == ProjectionMethods.CHAINLADDER:
                     ultimate_claims = projection_fn(latest_incurred, dev_factor)
-                elif method in [ProjectionMethods.SIMPLE_CAPE_COD, ProjectionMethods.GENERALISED_CAPE_COD]:
+                elif method in [
+                    ProjectionMethods.SIMPLE_CAPE_COD,
+                    ProjectionMethods.GENERALISED_CAPE_COD,
+                ]:
                     # Collect data for all years to calculate the Cape Cod prior
                     trend_factors = []
                     losses = []
@@ -386,12 +446,19 @@ class BurnCostModel:
                     exposures_list = []
 
                     for yr in self._modelling_years:
-                        if (yr in self._data.aggregate_subject_contract_claims.get(self._layer_id, {}) and 
-                            yr in self._data.aggregate_exposures):
-                            yr_claims = self._data.aggregate_subject_contract_claims[self._layer_id][yr]
+                        if (
+                            yr
+                            in self._data.aggregate_subject_contract_claims.get(self._layer_id, {})
+                            and yr in self._data.aggregate_exposures
+                        ):
+                            yr_claims = self._data.aggregate_subject_contract_claims[
+                                self._layer_id
+                            ][yr]
                             yr_exposures = self._data.aggregate_exposures[yr]
 
-                            trend_factors.append(1.0)  # Default trend factor, could be replaced with actual trend factors
+                            trend_factors.append(
+                                1.0
+                            )  # Default trend factor, could be replaced with actual trend factors
                             losses.append(yr_claims.get("latest_incurred", 0.0))
                             dev_factors.append(self._development_pattern.get(yr, 1.0))
                             exposures_list.append(yr_exposures.get("earned", 0.0))
@@ -400,16 +467,29 @@ class BurnCostModel:
 
                     if method == ProjectionMethods.SIMPLE_CAPE_COD:
                         ultimate_claims = projection_fn(
-                            latest_incurred, earned_exposure, dev_factor,
-                            trend_factors, losses, dev_factors, exposures_list
+                            latest_incurred,
+                            earned_exposure,
+                            dev_factor,
+                            trend_factors,
+                            losses,
+                            dev_factors,
+                            exposures_list,
                         )
                     else:  # GENERALISED_CAPE_COD
                         ultimate_claims = projection_fn(
-                            latest_incurred, earned_exposure, dev_factor,
-                            trend_factors, losses, dev_factors, exposures_list, decay_factor
+                            latest_incurred,
+                            earned_exposure,
+                            dev_factor,
+                            trend_factors,
+                            losses,
+                            dev_factors,
+                            exposures_list,
+                            decay_factor,
                         )
                 else:  # BF
-                    ultimate_claims = projection_fn(latest_incurred, earned_exposure, dev_factor, a_priori_value)
+                    ultimate_claims = projection_fn(
+                        latest_incurred, earned_exposure, dev_factor, a_priori_value
+                    )
 
                 # Calculate burn cost as ultimate claims divided by earned exposure
                 burn_costs[year] = ultimate_claims / earned_exposure if earned_exposure > 0 else 0.0

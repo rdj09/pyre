@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from enum import Enum
 from math import exp, log
 from typing import Any
@@ -5,14 +6,44 @@ from typing import Any
 from ...enums import ExposureCurveType
 
 MIXED_EXPO_CURVE_ONE = {
-    "parameters_mus": [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0,
-                       100.0, 110.0, 120.0, 130.0, 140.0, 150.0],
+    "parameters_mus": [
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0,
+        130.0,
+        140.0,
+        150.0,
+    ],
     "parameter_weights": [1.0] * 15,
 }
 
 MIXED_EXPO_CURVE_TWO = {
-    "parameters_mus": [10.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0,
-                       100.0, 110.0, 120.0, 130.0, 140.0, 150.0],
+    "parameters_mus": [
+        10.0,
+        20.0,
+        30.0,
+        40.0,
+        50.0,
+        60.0,
+        70.0,
+        80.0,
+        90.0,
+        100.0,
+        110.0,
+        120.0,
+        130.0,
+        140.0,
+        150.0,
+    ],
     "parameter_weights": [1.0] * 15,
 }
 
@@ -21,6 +52,7 @@ class SwissReCValues(Enum):
     """
     https://www.swissre.com/dam/jcr:7137dac0-83a6-4cfa-80a4-93d33c35562f/exposure-rating-brochure.pdf
     """
+
     PERSONAL_LINES = 1.5
     COMMERCIAL_LINES_SMALL = 2.0
     COMMERCIAL_LINES_MEDIUM = 3.0
@@ -35,7 +67,9 @@ class SwissReCValues(Enum):
 swissRe_c_values = SwissReCValues
 
 
-def mixed_exponential_curve(parameters_mus: list, parameter_weights: list, curve_position: float) -> float:
+def mixed_exponential_curve(
+    parameters_mus: list[float], parameter_weights: list[float], curve_position: float
+) -> float:
     """Calculate mixed exponential curve value.
 
     Citation: https://www.casact.org/sites/default/files/database/proceed_proceed99_99578.pdf
@@ -71,7 +105,7 @@ def mbbefd_curve(curve: SwissReCValues | float, curve_position: float) -> float:
     c_value = curve.value if isinstance(curve, SwissReCValues) else curve
     b = exp(3.1 - 0.15 * (1 + c_value) * c_value)
     g = exp((0.78 + 0.12 * c_value) * c_value)
-    return log(((g - 1) * b + (1 - b * g) * b ** curve_position) / (1 - b)) / log(b * g)
+    return log(((g - 1) * b + (1 - b * g) * b**curve_position) / (1 - b)) / log(b * g)
 
 
 def riebesell_curve(attachment: float, limit: float, z_value: float, base_limit: float) -> float:
@@ -87,12 +121,12 @@ def riebesell_curve(attachment: float, limit: float, z_value: float, base_limit:
         float: Curve value.
     """
     if limit is None:
-        return ((attachment) / base_limit) ** log(1 + z_value, 2)
+        return float(((attachment) / base_limit) ** log(1 + z_value, 2))
     else:
-        return ((attachment + limit) / base_limit) ** log(1 + z_value, 2)
+        return float(((attachment + limit) / base_limit) ** log(1 + z_value, 2))
 
 
-exposure_curve_calculation = {
+exposure_curve_calculation: dict[ExposureCurveType, Callable[..., float]] = {
     ExposureCurveType.RIEBESELL: riebesell_curve,
     ExposureCurveType.MIXED_EXPONENTIAL: mixed_exponential_curve,
     ExposureCurveType.MBBEFD: mbbefd_curve,
@@ -120,4 +154,4 @@ def calculate_curve(
     if curve_type not in exposure_curve_calculation:
         raise ValueError(f"Unsupported curve type: {curve_type}")
     func = exposure_curve_calculation[curve_type]
-    return func(**parameters, curve_position=position)
+    return float(func(**parameters, curve_position=position))

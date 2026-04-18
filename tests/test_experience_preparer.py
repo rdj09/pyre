@@ -1,4 +1,5 @@
 """Tests for ExperienceModelData caching behaviour."""
+
 from datetime import date
 from functools import cached_property
 
@@ -81,21 +82,15 @@ def _make_model_data() -> ExperienceModelData:
 
 def test_trended_claims_is_cached_property():
     """trended_claims should be a functools.cached_property."""
-    assert isinstance(
-        ExperienceModelData.__dict__["trended_claims"], cached_property
-    )
+    assert isinstance(ExperienceModelData.__dict__["trended_claims"], cached_property)
 
 
 def test_trended_exposures_is_cached_property():
-    assert isinstance(
-        ExperienceModelData.__dict__["trended_exposures"], cached_property
-    )
+    assert isinstance(ExperienceModelData.__dict__["trended_exposures"], cached_property)
 
 
 def test_subject_contract_claims_is_cached_property():
-    assert isinstance(
-        ExperienceModelData.__dict__["subject_contract_claims"], cached_property
-    )
+    assert isinstance(ExperienceModelData.__dict__["subject_contract_claims"], cached_property)
 
 
 def test_aggregate_subject_contract_claims_is_cached_property():
@@ -105,9 +100,7 @@ def test_aggregate_subject_contract_claims_is_cached_property():
 
 
 def test_aggregate_exposures_is_cached_property():
-    assert isinstance(
-        ExperienceModelData.__dict__["aggregate_exposures"], cached_property
-    )
+    assert isinstance(ExperienceModelData.__dict__["aggregate_exposures"], cached_property)
 
 
 def test_cached_property_returns_same_object():

@@ -10,6 +10,7 @@ from ...models.experience.experience_preparer import ExperienceModelData
 # FitResult
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class FitResult:
     """Result of fitting a distribution to data.
@@ -20,6 +21,7 @@ class FitResult:
         log_likelihood: Log-likelihood at the estimated parameters.
         aic: Akaike Information Criterion = 2k - 2 ln(L).
     """
+
     distribution: SeverityDistribution | FrequencyDistribution
     parameters: dict[str, float]
     log_likelihood: float
@@ -29,6 +31,7 @@ class FitResult:
 # ---------------------------------------------------------------------------
 # Internal fitting functions
 # ---------------------------------------------------------------------------
+
 
 def _fit_lognormal(data: list[float]) -> dict[str, float]:
     """Fit lognormal distribution by method of moments.
@@ -55,8 +58,8 @@ def _fit_lognormal(data: list[float]) -> dict[str, float]:
     if mean <= 0 or variance <= 0:
         raise ValueError("Data must have positive mean and variance for lognormal fitting.")
 
-    sigma2 = math.log(variance / (mean ** 2) + 1.0)
-    mu = math.log(mean ** 2 / math.sqrt(variance + mean ** 2))
+    sigma2 = math.log(variance / (mean**2) + 1.0)
+    mu = math.log(mean**2 / math.sqrt(variance + mean**2))
 
     return {"mu": mu, "sigma": math.sqrt(sigma2)}
 
@@ -151,6 +154,7 @@ def _fit_negative_binomial(counts: list[int]) -> dict[str, float]:
 # SeverityFit
 # ---------------------------------------------------------------------------
 
+
 class SeverityFit:
     """Fit severity distributions to projected individual claims.
 
@@ -203,6 +207,7 @@ class SeverityFit:
 # ---------------------------------------------------------------------------
 # FrequencyFit
 # ---------------------------------------------------------------------------
+
 
 class FrequencyFit:
     """Fit frequency distributions to claim counts by modelling year.

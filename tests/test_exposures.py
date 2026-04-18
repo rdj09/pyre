@@ -35,6 +35,7 @@ class TestExposureMetaData(unittest.TestCase):
         self.meta_data.exposure_period_end = self.meta_data.exposure_period_start
         self.assertEqual(self.meta_data.exposure_term_length_days, 0)
 
+
 class TestExposureValues(unittest.TestCase):
     def setUp(self):
         self.values = ExposureValues(
@@ -50,6 +51,7 @@ class TestExposureValues(unittest.TestCase):
         self.assertEqual(self.values.attachment_point, 10000.0)
         self.values.limit = 100000.0
         self.assertEqual(self.values.limit, 100000.0)
+
 
 class TestExposure(unittest.TestCase):
     def setUp(self):
@@ -84,7 +86,9 @@ class TestExposure(unittest.TestCase):
 
     def test_earned_exposure_value(self):
         analysis_date = date(2024, 6, 30)
-        self.assertAlmostEqual(self.exposure.earned_exposure_value(analysis_date), 50000.0, delta=600.0)
+        self.assertAlmostEqual(
+            self.exposure.earned_exposure_value(analysis_date), 50000.0, delta=600.0
+        )
         # Before start
         self.assertEqual(self.exposure.earned_exposure_value(date(2023, 12, 31)), 0.0)
         # After end
@@ -94,6 +98,7 @@ class TestExposure(unittest.TestCase):
         r = repr(self.exposure)
         self.assertIn("EXP001", r)
         self.assertIn("Test Exposure", r)
+
 
 class TestExposures(unittest.TestCase):
     def setUp(self):

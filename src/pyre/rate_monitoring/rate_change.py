@@ -29,10 +29,9 @@ def rate_change_simple(expiring_premium: float, renewed_premium: float) -> float
         raise ValueError("Expiring premium cannot be zero.")
     return (renewed_premium / expiring_premium) - 1
 
+
 def rate_change_adjusted(
-    expiring_premium: float,
-    renewed_premium: float,
-    adjusted_expiring_premium: float | None = None
+    expiring_premium: float, renewed_premium: float, adjusted_expiring_premium: float | None = None
 ) -> float:
     """
     Calculate rate change, optionally adjusting expiring premium for exposure/terms.

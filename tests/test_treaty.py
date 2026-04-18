@@ -232,6 +232,7 @@ def test_loss_to_layer_fn_franchise_below_attachment():
 # Direct tests for layer_loss_functions (bring coverage above 80%)
 # ---------------------------------------------------------------------------
 
+
 def test_xol_calculation_in_layer():
     assert xol_calculation(1_500_000.0, 1_000_000.0, 1_000_000.0) == pytest.approx(500_000.0)
 

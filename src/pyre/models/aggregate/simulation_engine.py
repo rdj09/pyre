@@ -34,6 +34,7 @@ class SimulationResults:
         n_simulations: Number of Monte Carlo trials run.
         assumptions: The financial assumptions used.
     """
+
     loss_cost_by_layer: dict[int, float]
     required_capital_by_layer: dict[int, float]
     required_premium_by_layer: dict[int, float]
@@ -53,7 +54,7 @@ def _sample_pareto(alpha: float, x_m: float, rng: random.Random) -> float:
     u = rng.random()
     if u >= 1.0:
         u = 1.0 - 1e-15
-    return x_m / ((1.0 - u) ** (1.0 / alpha))
+    return float(x_m / ((1.0 - u) ** (1.0 / alpha)))
 
 
 def _sample_poisson(lambda_: float, rng: random.Random) -> int:
@@ -167,7 +168,7 @@ class Simulation:
                 if sev_dist == "lognormal":
                     gross = _sample_lognormal(mu, sigma, self._rng)
                 else:
-                    gross = _sample_pareto(alpha, x_m, self._rng)  # type: ignore[possibly-undefined]
+                    gross = _sample_pareto(alpha, x_m, self._rng)
 
                 for layer in self._ri_contract.layers:
                     try:
@@ -250,15 +251,17 @@ class Simulation:
         if self._retrocession_contract is None:
             return {layer.layer_id: 0.0 for layer in self._ri_contract.layers}
 
-        retro_premium = sum(
-            rl.signed_line_premium for rl in self._retrocession_contract.layers
-        )
+        retro_premium = sum(rl.signed_line_premium for rl in self._retrocession_contract.layers)
         self._assert_ran()
         lc = self.loss_cost()
         total_lc = sum(lc.values())
         result: dict[int, float] = {}
         for layer in self._ri_contract.layers:
-            share = lc[layer.layer_id] / total_lc if total_lc > 0 else 1.0 / len(self._ri_contract.layers)
+            share = (
+                lc[layer.layer_id] / total_lc
+                if total_lc > 0
+                else 1.0 / len(self._ri_contract.layers)
+            )
             result[layer.layer_id] = retro_premium * share
         return result
 
@@ -282,16 +285,17 @@ class Simulation:
                         ceded = 0.0
                     retro_recoveries[rl.layer_id].append(ceded)
 
-        mean_retro = sum(
-            sum(v) / len(v) if v else 0.0
-            for v in retro_recoveries.values()
-        )
+        mean_retro = sum(sum(v) / len(v) if v else 0.0 for v in retro_recoveries.values())
 
         lc = self.loss_cost()
         total_lc = sum(lc.values())
         result: dict[int, float] = {}
         for layer in self._ri_contract.layers:
-            share = lc[layer.layer_id] / total_lc if total_lc > 0 else 1.0 / len(self._ri_contract.layers)
+            share = (
+                lc[layer.layer_id] / total_lc
+                if total_lc > 0
+                else 1.0 / len(self._ri_contract.layers)
+            )
             result[layer.layer_id] = mean_retro * share
         return result
 
@@ -312,11 +316,7 @@ class Simulation:
         for layer in self._ri_contract.layers:
             lid = layer.layer_id
             net_tech_cost = (
-                lc[lid]
-                + a.cost_of_capital * rc[lid]
-                - ir[lid]
-                + retro_cost[lid]
-                - retro_ben[lid]
+                lc[lid] + a.cost_of_capital * rc[lid] - ir[lid] + retro_cost[lid] - retro_ben[lid]
             )
             result[lid] = net_tech_cost * loadings_multiplier
 
@@ -345,8 +345,12 @@ class Simulation:
         results = self.output()
         data = {
             "loss_cost_by_layer": {str(k): v for k, v in results.loss_cost_by_layer.items()},
-            "required_capital_by_layer": {str(k): v for k, v in results.required_capital_by_layer.items()},
-            "required_premium_by_layer": {str(k): v for k, v in results.required_premium_by_layer.items()},
+            "required_capital_by_layer": {
+                str(k): v for k, v in results.required_capital_by_layer.items()
+            },
+            "required_premium_by_layer": {
+                str(k): v for k, v in results.required_premium_by_layer.items()
+            },
             "required_premium_programme": results.required_premium_programme,
             "n_simulations": results.n_simulations,
             "assumptions": {

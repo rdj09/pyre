@@ -1,4 +1,4 @@
-#citation : https://pep.vse.cz/pdfs/pep/2019/02/01.pdf // https://doi.org/10.18267/j.pep.683
+# citation : https://pep.vse.cz/pdfs/pep/2019/02/01.pdf // https://doi.org/10.18267/j.pep.683
 # EXPOSURE MODELLING IN PROPERTY REINSURANCE Jan Hrevuš,1Luboš Marek
 
 
@@ -21,7 +21,7 @@ class ExposureCurveFitter:
     This class implements methods for fitting exposure curves to data,
     including Riebesell, Mixed Exponential, and MBBEFD curves.
 
-    Based on the paper: "EXPOSURE MODELLING IN PROPERTY REINSURANCE" 
+    Based on the paper: "EXPOSURE MODELLING IN PROPERTY REINSURANCE"
     by Jan Hrevuš and Luboš Marek
     """
 
@@ -57,10 +57,13 @@ class ExposureCurveFitter:
                 - z parameter
                 - R-squared value of the fit
         """
+
         def objective_function(params):
             z_value = params[0]
-            predicted_values = [riebesell_curve(0, pos, z_value, self.base_value) for pos in self.positions]
-            return np.sum((np.array(predicted_values) - self.values)**2)
+            predicted_values = [
+                riebesell_curve(0, pos, z_value, self.base_value) for pos in self.positions
+            ]
+            return np.sum((np.array(predicted_values) - self.values) ** 2)
 
         # Initial guess for parameter
         initial_guess = [1.0]
@@ -69,7 +72,9 @@ class ExposureCurveFitter:
         bounds = [(0.001, 10)]
 
         # Optimize to find the best parameter
-        result = optimize.minimize(objective_function, initial_guess, bounds=bounds, method='L-BFGS-B')
+        result = optimize.minimize(
+            objective_function, initial_guess, bounds=bounds, method="L-BFGS-B"
+        )
 
         if not result.success:
             raise RuntimeError(f"Optimization failed: {result.message}")
@@ -77,16 +82,20 @@ class ExposureCurveFitter:
         z_value = result.x[0]
 
         # Calculate predicted values
-        predicted_values = [riebesell_curve(0, pos, z_value, self.base_value) for pos in self.positions]
+        predicted_values = [
+            riebesell_curve(0, pos, z_value, self.base_value) for pos in self.positions
+        ]
 
         # Calculate R-squared
-        ss_total = np.sum((self.values - np.mean(self.values))**2)
-        ss_residual = np.sum((self.values - np.array(predicted_values))**2)
+        ss_total = np.sum((self.values - np.mean(self.values)) ** 2)
+        ss_residual = np.sum((self.values - np.array(predicted_values)) ** 2)
         r_squared = 1 - (ss_residual / ss_total)
 
         return z_value, r_squared
 
-    def fit_mixed_exponential(self, num_components: int = 3) -> tuple[list[float], list[float], float]:
+    def fit_mixed_exponential(
+        self, num_components: int = 3
+    ) -> tuple[list[float], list[float], float]:
         """
         Fit a mixed exponential curve to the observed data.
 
@@ -101,6 +110,7 @@ class ExposureCurveFitter:
                 - List of weight parameters
                 - R-squared value of the fit
         """
+
         def objective_function(params):
             # Split params into mus and weights
             mus = params[:num_components]
@@ -109,8 +119,10 @@ class ExposureCurveFitter:
             # Normalize weights to sum to 1
             weights = weights / np.sum(weights)
 
-            predicted_values = [mixed_exponential_curve(mus, weights, pos) for pos in self.positions]
-            return np.sum((np.array(predicted_values) - self.values)**2)
+            predicted_values = [
+                mixed_exponential_curve(mus, weights, pos) for pos in self.positions
+            ]
+            return np.sum((np.array(predicted_values) - self.values) ** 2)
 
         # Initial guess for parameters
         # Spread mus across a reasonable range
@@ -123,7 +135,9 @@ class ExposureCurveFitter:
         bounds = [(0.001, 10)] * num_components + [(0.001, 1)] * num_components
 
         # Optimize to find the best parameters
-        result = optimize.minimize(objective_function, initial_guess, bounds=bounds, method='L-BFGS-B')
+        result = optimize.minimize(
+            objective_function, initial_guess, bounds=bounds, method="L-BFGS-B"
+        )
 
         if not result.success:
             raise RuntimeError(f"Optimization failed: {result.message}")
@@ -137,8 +151,8 @@ class ExposureCurveFitter:
         predicted_values = [mixed_exponential_curve(mus, weights, pos) for pos in self.positions]
 
         # Calculate R-squared
-        ss_total = np.sum((self.values - np.mean(self.values))**2)
-        ss_residual = np.sum((self.values - np.array(predicted_values))**2)
+        ss_total = np.sum((self.values - np.mean(self.values)) ** 2)
+        ss_residual = np.sum((self.values - np.array(predicted_values)) ** 2)
         r_squared = 1 - (ss_residual / ss_total)
 
         return mus.tolist(), weights.tolist(), r_squared
@@ -154,10 +168,11 @@ class ExposureCurveFitter:
                 - c parameter
                 - R-squared value of the fit
         """
+
         def objective_function(params):
             c_value = params[0]
             predicted_values = [mbbefd_curve(c_value, pos) for pos in self.positions]
-            return np.sum((np.array(predicted_values) - self.values)**2)
+            return np.sum((np.array(predicted_values) - self.values) ** 2)
 
         # Initial guess for parameter
         initial_guess = [2.0]  # Middle of the typical range
@@ -166,7 +181,9 @@ class ExposureCurveFitter:
         bounds = [(0.5, 10)]
 
         # Optimize to find the best parameter
-        result = optimize.minimize(objective_function, initial_guess, bounds=bounds, method='L-BFGS-B')
+        result = optimize.minimize(
+            objective_function, initial_guess, bounds=bounds, method="L-BFGS-B"
+        )
 
         if not result.success:
             raise RuntimeError(f"Optimization failed: {result.message}")
@@ -177,8 +194,8 @@ class ExposureCurveFitter:
         predicted_values = [mbbefd_curve(c_value, pos) for pos in self.positions]
 
         # Calculate R-squared
-        ss_total = np.sum((self.values - np.mean(self.values))**2)
-        ss_residual = np.sum((self.values - np.array(predicted_values))**2)
+        ss_total = np.sum((self.values - np.mean(self.values)) ** 2)
+        ss_residual = np.sum((self.values - np.array(predicted_values)) ** 2)
         r_squared = 1 - (ss_residual / ss_total)
 
         return c_value, r_squared
@@ -193,23 +210,29 @@ class ExposureCurveFitter:
         results = {}
 
         try:
-            results['RIEBESELL'] = self.fit_riebesell()
+            results["RIEBESELL"] = self.fit_riebesell()
         except Exception as e:
             print(f"Riebesell fitting failed: {e}")
 
         try:
-            results['MIXED_EXPONENTIAL'] = self.fit_mixed_exponential()
+            results["MIXED_EXPONENTIAL"] = self.fit_mixed_exponential()
         except Exception as e:
             print(f"Mixed exponential fitting failed: {e}")
 
         try:
-            results['MBBEFD'] = self.fit_mbbefd()
+            results["MBBEFD"] = self.fit_mbbefd()
         except Exception as e:
             print(f"MBBEFD fitting failed: {e}")
 
         return results
 
-    def plot_fits(self, riebesell_params=None, mixed_expo_params=None, mbbefd_params=None, title="Exposure Curve Fitting"):
+    def plot_fits(
+        self,
+        riebesell_params=None,
+        mixed_expo_params=None,
+        mbbefd_params=None,
+        title="Exposure Curve Fitting",
+    ):
         """
         Plot the observed values and fitted curves.
 
@@ -222,7 +245,7 @@ class ExposureCurveFitter:
         plt.figure(figsize=(10, 6))
 
         # Plot observed values
-        plt.scatter(self.positions, self.values, color='black', label='Observed Values')
+        plt.scatter(self.positions, self.values, color="black", label="Observed Values")
 
         # Create a range of positions for smooth curves
         x = np.linspace(0, 1, 100)
@@ -231,29 +254,32 @@ class ExposureCurveFitter:
         if riebesell_params:
             z_value, r_squared = riebesell_params
             y_riebesell = [riebesell_curve(0, pos, z_value, self.base_value) for pos in x]
-            plt.plot(x, y_riebesell, 'r-', label=f'Riebesell (z={z_value:.3f}, R²={r_squared:.3f})')
+            plt.plot(x, y_riebesell, "r-", label=f"Riebesell (z={z_value:.3f}, R²={r_squared:.3f})")
 
         # Plot Mixed Exponential curve if parameters provided
         if mixed_expo_params:
             mus, weights, r_squared = mixed_expo_params
             y_mixed_expo = [mixed_exponential_curve(mus, weights, pos) for pos in x]
-            plt.plot(x, y_mixed_expo, 'g-', label=f'Mixed Exponential (R²={r_squared:.3f})')
+            plt.plot(x, y_mixed_expo, "g-", label=f"Mixed Exponential (R²={r_squared:.3f})")
 
         # Plot MBBEFD curve if parameters provided
         if mbbefd_params:
             c_value, r_squared = mbbefd_params
             y_mbbefd = [mbbefd_curve(c_value, pos) for pos in x]
-            plt.plot(x, y_mbbefd, 'b-', label=f'MBBEFD (c={c_value:.3f}, R²={r_squared:.3f})')
+            plt.plot(x, y_mbbefd, "b-", label=f"MBBEFD (c={c_value:.3f}, R²={r_squared:.3f})")
 
-        plt.xlabel('Position')
-        plt.ylabel('Value')
+        plt.xlabel("Position")
+        plt.ylabel("Value")
         plt.title(title)
         plt.legend()
         plt.grid(True)
 
         return plt.gcf()  # Return the figure for further customization or saving
 
-def fit_exposure_curve_from_data(positions: list[float], values: list[float]) -> ExposureCurveFitter:
+
+def fit_exposure_curve_from_data(
+    positions: list[float], values: list[float]
+) -> ExposureCurveFitter:
     """
     Fit exposure curves directly from position-value data.
 
@@ -266,7 +292,10 @@ def fit_exposure_curve_from_data(positions: list[float], values: list[float]) ->
     """
     return ExposureCurveFitter(positions, values)
 
-def generate_exposure_curve_parameters(curve_type: ExposureCurveType, data: list[tuple[float, float]]) -> dict:
+
+def generate_exposure_curve_parameters(
+    curve_type: ExposureCurveType, data: list[tuple[float, float]]
+) -> dict:
     """
     Generate parameters for an exposure curve based on data points.
 
@@ -295,7 +324,10 @@ def generate_exposure_curve_parameters(curve_type: ExposureCurveType, data: list
     else:
         raise ValueError(f"Unsupported curve type: {curve_type}")
 
-def select_best_curve(positions: list[float], values: list[float]) -> tuple[ExposureCurveType, dict, float]:
+
+def select_best_curve(
+    positions: list[float], values: list[float]
+) -> tuple[ExposureCurveType, dict, float]:
     """
     Select the best fitting curve based on R-squared values.
 
@@ -332,11 +364,11 @@ def select_best_curve(positions: list[float], values: list[float]) -> tuple[Expo
     curve_type_enum = getattr(ExposureCurveType, best_curve)
 
     # Format parameters for use with exposure_curve_calculation
-    if best_curve == 'RIEBESELL':
+    if best_curve == "RIEBESELL":
         params_dict = {"z_value": best_params[0], "base_limit": 1.0}
-    elif best_curve == 'MIXED_EXPONENTIAL':
+    elif best_curve == "MIXED_EXPONENTIAL":
         params_dict = {"paramaters_mus": best_params[0], "parameter_weights": best_params[1]}
-    elif best_curve == 'MBBEFD':
+    elif best_curve == "MBBEFD":
         params_dict = {"curve": best_params[0]}
 
     return curve_type_enum, params_dict, best_r_squared

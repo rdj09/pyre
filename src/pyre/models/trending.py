@@ -1,3 +1,5 @@
+from typing import Any
+
 from ..claims.claims import Claim, ClaimDevelopmentHistory, Claims
 from ..exposures.exposures import Exposure, Exposures, ExposureValues
 
@@ -17,7 +19,13 @@ class Trending:
         base_year (int): The year to which all data will be trended.
     """
 
-    def __init__(self, exposure_trend_factors: dict[int, float], claim_trend_factors: dict[int, float] | None = None, trend_factors: dict[int, float] | None = None, base_year: int | None = None):
+    def __init__(
+        self,
+        exposure_trend_factors: dict[int, float],
+        claim_trend_factors: dict[int, float] | None = None,
+        trend_factors: dict[int, float] | None = None,
+        base_year: int | None = None,
+    ):
         """
         Initialize the Trending class with trend factors and a base year.
 
@@ -31,8 +39,8 @@ class Trending:
             base_year (int): The year to which all data will be trended.
         """
         self.exposure_trend_factors = exposure_trend_factors
-        self.claim_trend_factors = claim_trend_factors
-        self.base_year = base_year
+        self.claim_trend_factors: dict[int, float] | None = claim_trend_factors
+        self.base_year: int | None = base_year
 
     def _validate_inputs(self) -> None:
         """
@@ -60,7 +68,9 @@ class Trending:
         Returns:
             float: The calculated trend factor.
         """
-        trend_factors = self.claim_trend_factors if for_claims else self.exposure_trend_factors
+        assert self.base_year is not None, "base_year must be set before calculating trend factors"
+        claim_factors = self.claim_trend_factors or self.exposure_trend_factors
+        trend_factors = claim_factors if for_claims else self.exposure_trend_factors
 
         if origin_year == self.base_year:
             return 1.0
@@ -76,6 +86,7 @@ class Trending:
         Returns:
             Exposures: A new Exposures object with trended values.
         """
+        assert self.base_year is not None, "base_year must be set before trending exposures"
         trended_exposures = []
 
         for exposure in exposures:
@@ -92,29 +103,27 @@ class Trending:
             new_values = ExposureValues(
                 exposure_value=trended_value,
                 attachment_point=original_values.attachment_point,
-                limit=original_values.limit
+                limit=original_values.limit,
             )
             new_exposure = Exposure(
-                exposure_meta=exposure.exposure_meta,
-                exposure_values=new_values
+                exposure_meta=exposure.exposure_meta, exposure_values=new_values
             )
 
             trended_exposures.append(new_exposure)
 
         return Exposures(trended_exposures)
 
-    def get_trend_factors(self) -> dict[str, dict[int, float]]:
+    def get_trend_factors(self) -> dict[str, Any]:
         """
         Get the trend factors from this Trending instance.
 
         Returns:
-            Dict[str, Dict[int, float]]: A dictionary with keys 'exposure' and 'claim', each mapping to
-                their respective trend factors dictionary.
+            Dict with keys 'exposure', 'claim', and 'base_year'.
         """
         return {
-            'exposure': self.exposure_trend_factors,
-            'claim': self.claim_trend_factors,
-            'base_year': self.base_year,
+            "exposure": self.exposure_trend_factors,
+            "claim": self.claim_trend_factors,
+            "base_year": self.base_year,
         }
 
     def trend_claims(self, claims: Claims) -> Claims:
@@ -127,6 +136,7 @@ class Trending:
         Returns:
             Claims: A new Claims object with trended ClaimDevelopmentHistory for each claim.
         """
+        assert self.base_year is not None, "base_year must be set before trending claims"
         trended_claims = []
 
         for claim in claims.claims:
@@ -149,8 +159,7 @@ class Trending:
                 cumulative_dev_incurred=trended_incurred,
             )
             trended_claim = Claim(
-                claims_meta_data=claim.claims_meta_data, 
-                claims_development_history=trended_dev_hist
+                claims_meta_data=claim.claims_meta_data, claims_development_history=trended_dev_hist
             )
 
             trended_claims.append(trended_claim)
@@ -159,7 +168,9 @@ class Trending:
 
 
 # For backward compatibility
-def calculate_trend_factor(origin_year: int, base_year: int, trend_factors: dict[int, float], for_claims: bool = False) -> float:
+def calculate_trend_factor(
+    origin_year: int, base_year: int, trend_factors: dict[int, float], for_claims: bool = False
+) -> float:
     """
     Calculate the trend factor between the origin year and the base year.
 
@@ -174,14 +185,24 @@ def calculate_trend_factor(origin_year: int, base_year: int, trend_factors: dict
         float: The calculated trend factor.
     """
     if for_claims:
-        trending = Trending(exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year)
+        trending = Trending(
+            exposure_trend_factors=trend_factors,
+            claim_trend_factors=trend_factors,
+            base_year=base_year,
+        )
         return trending.calculate_trend_factor(origin_year, for_claims=True)
     else:
-        trending = Trending(exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year)
+        trending = Trending(
+            exposure_trend_factors=trend_factors,
+            claim_trend_factors=trend_factors,
+            base_year=base_year,
+        )
         return trending.calculate_trend_factor(origin_year, for_claims=False)
 
 
-def trend_exposures(exposures: Exposures, trend_factors: dict[int, float], base_year: int) -> Exposures:
+def trend_exposures(
+    exposures: Exposures, trend_factors: dict[int, float], base_year: int
+) -> Exposures:
     """
     Apply trend factors to a collection of exposures.
 
@@ -193,7 +214,9 @@ def trend_exposures(exposures: Exposures, trend_factors: dict[int, float], base_
     Returns:
         Exposures: A new Exposures object with trended values.
     """
-    trending = Trending(exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year)
+    trending = Trending(
+        exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year
+    )
     return trending.trend_exposures(exposures)
 
 
@@ -209,11 +232,13 @@ def trend_claims(claims: Claims, trend_factors: dict[int, float], base_year: int
     Returns:
         Claims: A new Claims object with trended ClaimDevelopmentHistory for each claim.
     """
-    trending = Trending(exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year)
+    trending = Trending(
+        exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year
+    )
     return trending.trend_claims(claims)
 
 
-def get_trend_factors(trending_instance: Trending) -> dict[str, dict[int, float]]:
+def get_trend_factors(trending_instance: Trending) -> dict[str, Any]:
     """
     Get the trend factors from a Trending instance.
 
@@ -221,16 +246,15 @@ def get_trend_factors(trending_instance: Trending) -> dict[str, dict[int, float]
         trending_instance (Trending): The Trending instance to get trend factors from.
 
     Returns:
-        Dict[str, Dict[int, float]]: A dictionary with keys 'exposure' and 'claim', each mapping to
-            their respective trend factors dictionary.
+        Dict with keys 'exposure_trend_factors', 'claim_trend_factors', and 'base_year'.
     """
     return {
-        'exposure_trend_factors': trending_instance.exposure_trend_factors,
-        'claim_trend_factors': trending_instance.claim_trend_factors,
-        'base_year': trending_instance.base_year,
+        "exposure_trend_factors": trending_instance.exposure_trend_factors,
+        "claim_trend_factors": trending_instance.claim_trend_factors,
+        "base_year": trending_instance.base_year,
     }
 
 
-# Source citation: 
-# Deters, I. (2017). The Mathematics of On-Leveling. 
+# Source citation:
+# Deters, I. (2017). The Mathematics of On-Leveling.
 # https://www.casact.org/sites/default/files/database/forum_17spforum_03-deters.pdf

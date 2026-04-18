@@ -37,7 +37,7 @@ def test_pareto_ilf_higher_limit_greater_than_one():
 def test_power_ilf_basic():
     # (limit / basic_limit)^power = (2m / 1m)^0.5 = sqrt(2)
     result = power_ilf(2_000_000.0, 1_000_000.0, 0.5)
-    assert result == pytest.approx(2.0 ** 0.5)
+    assert result == pytest.approx(2.0**0.5)
 
 
 def test_power_ilf_none_limit():

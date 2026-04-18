@@ -9,6 +9,7 @@ from enum import Enum, auto
 
 class ClaimYearType(Enum):
     """Basis for determining which year a claim belongs to."""
+
     ACCIDENT_YEAR = auto()
     UNDERWRITING_YEAR = auto()
     REPORTED_YEAR = auto()
@@ -16,9 +17,10 @@ class ClaimYearType(Enum):
 
 class ClaimTriggerBasis(Enum):
     """Defines how claims attach to a reinsurance contract."""
-    LOD = "Losses Occurrence"   # Accident Year
-    RAD = "Risk Attaching"      # Policy Inception Year
-    CMB = "Claims Made Basis"   # Reported Year
+
+    LOD = "Losses Occurrence"  # Accident Year
+    RAD = "Risk Attaching"  # Policy Inception Year
+    CMB = "Claims Made Basis"  # Reported Year
 
     def to_claim_year_type(self) -> "ClaimYearType":
         """Map trigger basis to the corresponding ClaimYearType."""
@@ -31,12 +33,14 @@ class ClaimTriggerBasis(Enum):
 
 class ExposureBasis(Enum):
     """Whether exposure figures are earned or written."""
+
     EARNED = auto()
     WRITTEN = auto()
 
 
 class ContractType(Enum):
     """Reinsurance contract structure type."""
+
     QUOTA_SHARE = auto()
     EXCESS_OF_LOSS = auto()
     SURPLUS_SHARE = auto()
@@ -46,6 +50,7 @@ class ContractType(Enum):
 
 class IndexationClauseType(Enum):
     """Indexation clause type for a reinsurance contract."""
+
     FULL_INDEXATION = "Full Indexation"
     FIC = "Franchise - FIC"
     SIC = "Severe Inflation (also London Market) - SIC"
@@ -53,6 +58,7 @@ class IndexationClauseType(Enum):
 
 class ProjectionMethods(Enum):
     """Available ultimate loss projection methods."""
+
     CHAINLADDER = auto()
     BF = auto()
     SIMPLE_CAPE_COD = auto()
@@ -61,6 +67,7 @@ class ProjectionMethods(Enum):
 
 class SeverityDistribution(Enum):
     """Severity distribution families for fitting."""
+
     LOGNORMAL = auto()
     PARETO = auto()
     OTHER = auto()
@@ -68,6 +75,7 @@ class SeverityDistribution(Enum):
 
 class FrequencyDistribution(Enum):
     """Frequency distribution families for fitting."""
+
     POISSON = auto()
     NEGATIVE_BINOMIAL = auto()
     OTHER = auto()
@@ -75,6 +83,7 @@ class FrequencyDistribution(Enum):
 
 class ExposureCurveType(Enum):
     """Exposure curve type for exposure rating."""
+
     RIEBESELL = auto()
     MIXED_EXPONENTIAL = auto()
     MBBEFD = auto()
@@ -82,6 +91,7 @@ class ExposureCurveType(Enum):
 
 class CurveType(Enum):
     """Development curve type for triangle fitting."""
+
     EXPONENTIAL = auto()
     POWER = auto()
     WEIBULL = auto()

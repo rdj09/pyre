@@ -35,7 +35,6 @@ def test_parallelogram_returns_one_after_all_policies_expire():
 
 def test_parallelogram_midpoint():
     exp = _make_aggregate_exposure(date(2020, 1, 1), date(2020, 12, 31))
-    (date(2020, 12, 31) - date(2020, 1, 1)).days
     mid = date(2020, 1, 1) + timedelta(days=364)
     pct = exp._earned_pct(mid)
     assert 0.45 < pct < 0.55

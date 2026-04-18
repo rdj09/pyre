@@ -29,6 +29,7 @@ class ModellingAssumptions:
         acquisition_cost_ratio: Acquisition costs as proportion of premium. Defaults to 0.0.
         brokerage_cost_ratio: Brokerage as proportion of premium. Defaults to 0.0.
     """
+
     cost_of_capital: float
     required_rate_of_return: float
     capital_confidence_level: float = 0.995
@@ -86,10 +87,7 @@ class AggregateFeatures:
         severity_fit = SeverityFit(
             distributions=[SeverityDistribution.LOGNORMAL],
             data=self._experience_data,
-            ibner_dev_pattern={
-                year: 1.0
-                for year in self._experience_data.claims.modelling_years
-            },
+            ibner_dev_pattern={year: 1.0 for year in self._experience_data.claims.modelling_years},
         )
 
         simulation = Simulation(

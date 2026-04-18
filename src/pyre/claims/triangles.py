@@ -31,7 +31,7 @@ class Triangle:
 
     def __init__(
         self,
-        triangle: dict[int, dict[int, float]] | None = None,
+        triangle: dict[int, dict[int, float | None]] | None = None,
         origin_years: list[int] | None = None,
         dev_periods: list[int] | None = None,
     ):
@@ -53,7 +53,7 @@ class Triangle:
 
         # If dev_periods not provided, extract from all inner dictionaries
         if dev_periods is None:
-            all_dev_periods = set()
+            all_dev_periods: set[int] = set()
             for year_data in self.triangle.values():
                 all_dev_periods.update(year_data.keys())
             self.dev_periods = sorted(all_dev_periods) if all_dev_periods else []
@@ -77,7 +77,9 @@ class Triangle:
 
             for dev_period, value in dev_data.items():
                 if not isinstance(dev_period, int):
-                    raise ValueError(f"Development period must be an integer, got {type(dev_period)}")
+                    raise ValueError(
+                        f"Development period must be an integer, got {type(dev_period)}"
+                    )
 
                 if value is not None and not isinstance(value, (int, float)):
                     raise ValueError(f"Triangle values must be numeric or None, got {type(value)}")
@@ -180,23 +182,25 @@ class Triangle:
         Returns:
             Dictionary mapping origin years to their latest available values
         """
-        result = {}
+        result: dict[int, float] = {}
         for oy in self.origin_years:
             # Find the maximum development period with a value for this origin year
             available_devs = [dp for dp in self.dev_periods if self.get_value(oy, dp) is not None]
             if available_devs:
                 max_dev = max(available_devs)
-                result[oy] = self.get_value(oy, max_dev)
+                val = self.get_value(oy, max_dev)
+                if val is not None:
+                    result[oy] = val
         return result
 
-    def to_incremental(self) -> 'Triangle':
+    def to_incremental(self) -> "Triangle":
         """
         Convert a cumulative triangle to an incremental triangle.
 
         Returns:
             A new Triangle with incremental values
         """
-        incremental_triangle = {}
+        incremental_triangle: dict[int, dict[int, float | None]] = {}
 
         for oy in self.origin_years:
             incremental_triangle[oy] = {}
@@ -218,17 +222,17 @@ class Triangle:
         return Triangle(
             triangle=incremental_triangle,
             origin_years=self.origin_years.copy(),
-            dev_periods=self.dev_periods.copy()
+            dev_periods=self.dev_periods.copy(),
         )
 
-    def to_cumulative(self) -> 'Triangle':
+    def to_cumulative(self) -> "Triangle":
         """
         Convert an incremental triangle to a cumulative triangle.
 
         Returns:
             A new Triangle with cumulative values
         """
-        cumulative_triangle = {}
+        cumulative_triangle: dict[int, dict[int, float | None]] = {}
 
         for oy in self.origin_years:
             cumulative_triangle[oy] = {}
@@ -246,7 +250,7 @@ class Triangle:
         return Triangle(
             triangle=cumulative_triangle,
             origin_years=self.origin_years.copy(),
-            dev_periods=self.dev_periods.copy()
+            dev_periods=self.dev_periods.copy(),
         )
 
     @classmethod
@@ -275,7 +279,7 @@ class Triangle:
         dev_periods = sorted(dev_periods_set)
 
         # Build the triangle
-        triangle = {year: {} for year in origin_years}
+        triangle: dict[int, dict[int, float | None]] = {year: {} for year in origin_years}
 
         # Aggregate claims by origin year and development period
         for claim in claims:
@@ -292,8 +296,8 @@ class Triangle:
             for dev_period, value in zip(dev_hist.development_months, values, strict=False):
                 if origin_year in triangle:
                     triangle[origin_year][dev_period] = (
-                        triangle[origin_year].get(dev_period, 0.0) + value
-                    )
+                        triangle[origin_year].get(dev_period) or 0.0
+                    ) + value
 
         return cls(triangle=triangle, origin_years=origin_years, dev_periods=dev_periods)
 
@@ -308,7 +312,7 @@ class Triangle:
             Dict[int, Dict[int, float]]: A dictionary mapping origin years to dictionaries
                 mapping development periods to age-to-age factors.
         """
-        factors = {}
+        factors: dict[int, dict[int, float]] = {}
 
         for oy in self.origin_years:
             factors[oy] = {}
@@ -344,8 +348,9 @@ class Triangle:
 
             if method == "simple":
                 # Simple average
-                dev_factors = [factors[oy].get(dev) for oy in self.origin_years if dev in factors.get(oy, {})]
-                dev_factors = [f for f in dev_factors if f is not None]
+                dev_factors: list[float] = [
+                    factors[oy][dev] for oy in self.origin_years if dev in factors.get(oy, {})
+                ]
 
                 if dev_factors:
                     avg_factors[dev] = sum(dev_factors) / len(dev_factors)
@@ -368,7 +373,9 @@ class Triangle:
 
         return avg_factors
 
-    def fit_curve(self, curve_type: CurveType, c_values: list[float] | None = None) -> tuple[dict[str, float], dict[str, float]]:
+    def fit_curve(
+        self, curve_type: CurveType, c_values: list[float] | None = None
+    ) -> tuple[dict[str, float], dict[str, float]]:
         """
         Fit a curve to the average age-to-age factors.
 
@@ -393,32 +400,33 @@ class Triangle:
         avg_factors = self.get_average_age_to_age_factors()
 
         # Prepare data for curve fitting
-        dev_periods = sorted(avg_factors.keys())
-        factors = [avg_factors[dp] for dp in dev_periods]
+        dev_periods_int = sorted(avg_factors.keys())
+        dev_periods_float = [float(dp) for dp in dev_periods_int]
+        factors = [avg_factors[dp] for dp in dev_periods_int]
 
         # Fit the appropriate curve
         if curve_type == CurveType.EXPONENTIAL:
-            a, b = exponential_fit(factors, dev_periods)
+            a, b = exponential_fit(factors, dev_periods_float)
             params = {"a": a, "b": b}
-            expected = [1 + exp(a + b * dp) for dp in dev_periods]
+            expected = [1 + exp(a + b * dp) for dp in dev_periods_float]
             num_params = 2
 
         elif curve_type == CurveType.POWER:
-            a, b = power_fit(factors, dev_periods)
+            a, b = power_fit(factors, dev_periods_float)
             params = {"a": a, "b": b}
-            expected = [a * (b ** dp) for dp in dev_periods]
+            expected = [a * (b**dp) for dp in dev_periods_float]
             num_params = 2
 
         elif curve_type == CurveType.WEIBULL:
-            a, b = weibull_fit(factors, dev_periods)
+            a, b = weibull_fit(factors, dev_periods_float)
             params = {"a": a, "b": b}
-            expected = [1 / (1 - exp(-a * (dp ** b))) for dp in dev_periods]
+            expected = [1 / (1 - exp(-a * (dp**b))) for dp in dev_periods_float]
             num_params = 2
 
         elif curve_type == CurveType.INVERSE_POWER:
-            a, b, c = inverse_power_fit(factors, dev_periods, c_values)
+            a, b, c = inverse_power_fit(factors, dev_periods_float, c_values)
             params = {"a": a, "b": b, "c": c}
-            expected = [1 + a * ((dp + c) ** b) for dp in dev_periods]
+            expected = [1 + a * ((dp + c) ** b) for dp in dev_periods_float]
             num_params = 3
 
         else:
@@ -428,10 +436,7 @@ class Triangle:
         r_squared_value = r_squared(factors, expected)
         error_metrics = assess_error_assumptions(factors, expected, num_params)
 
-        metrics = {
-            "r_squared": r_squared_value,
-            **error_metrics
-        }
+        metrics = {"r_squared": r_squared_value, **error_metrics}
 
         return params, metrics
 
@@ -482,18 +487,19 @@ class Triangle:
         return cdf
 
 
-#TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
+# TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
 class IBNERPatternExtractor:
     """
     Extracts IBNER patterns from either a Claims object or a Triangle object.
     """
+
     def __init__(self, triangle: Triangle):
         self.triangle = triangle.triangle
         self.origin_years = triangle.origin_years
         self.dev_periods = triangle.dev_periods
 
-        self.N = {oy: {} for oy in self.origin_years}
-        self.D = {oy: {} for oy in self.origin_years}
+        self.N: dict[int, dict[int, float | None]] = {oy: {} for oy in self.origin_years}
+        self.D: dict[int, dict[int, float | None]] = {oy: {} for oy in self.origin_years}
         self._compute_N_and_D()
 
     def _compute_N_and_D(self) -> None:
@@ -516,12 +522,13 @@ class IBNERPatternExtractor:
             d_curr = self.dev_periods[i]
             d_next = self.dev_periods[i + 1]
             pairs = [
-                oy for oy in self.origin_years
+                oy
+                for oy in self.origin_years
                 if self.triangle[oy].get(d_curr) is not None
                 and self.triangle[oy].get(d_next) is not None
             ]
-            numerator = sum(self.triangle[oy][d_next] for oy in pairs)
-            denominator = sum(self.triangle[oy][d_curr] for oy in pairs)
+            numerator = sum(self.triangle[oy][d_next] or 0.0 for oy in pairs)
+            denominator = sum(self.triangle[oy][d_curr] or 0.0 for oy in pairs)
             ata[d_curr] = numerator / denominator if denominator > 0 else 1.0
 
         # Step 2: fill N and D triangles
@@ -543,19 +550,19 @@ class IBNERPatternExtractor:
                         self.D[oy][d] = ibner
                         self.N[oy][d] = (current - prev) - ibner
 
-    def get_N_triangle(self) -> dict[int, dict[int, float]]:
+    def get_N_triangle(self) -> dict[int, dict[int, float | None]]:
         """
         Returns the N triangle (new claims).
         """
         return self.N
 
-    def get_D_triangle(self) -> dict[int, dict[int, float]]:
+    def get_D_triangle(self) -> dict[int, dict[int, float | None]]:
         """
         Returns the D triangle (IBNER development).
         """
         return self.D
 
-    def get_IBNER_pattern(self) -> dict[int, float]:
+    def get_IBNER_pattern(self) -> dict[int, float | None]:
         """
         Returns the average D (IBNER) pattern per development year.
         """

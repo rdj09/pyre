@@ -59,8 +59,10 @@ def test_bayesian_credibility_high_prior_variance():
     cw = _cw()
     data = [100.0, 110.0, 90.0]
     result = cw.bayesian_credibility(
-        prior_mean=100.0, prior_variance=1000.0,
-        data=data, data_variance=50.0,
+        prior_mean=100.0,
+        prior_variance=1000.0,
+        data=data,
+        data_variance=50.0,
     )
     assert 0.0 <= result <= 1.0
 

@@ -26,8 +26,11 @@ from pyre.treaty.contracts import (
 
 def _make_experience_data() -> ExperienceModelData:
     meta = ClaimsMetaData(
-        claim_id="C1", currency="GBP", contract_limit=1_000_000.0,
-        contract_deductible=0.0, claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
+        claim_id="C1",
+        currency="GBP",
+        contract_limit=1_000_000.0,
+        contract_deductible=0.0,
+        claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
         loss_date=date(2020, 6, 1),
     )
     dev_hist = ClaimDevelopmentHistory(
@@ -36,8 +39,11 @@ def _make_experience_data() -> ExperienceModelData:
         cumulative_dev_incurred=[800_000.0],
     )
     meta2 = ClaimsMetaData(
-        claim_id="C2", currency="GBP", contract_limit=1_000_000.0,
-        contract_deductible=0.0, claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
+        claim_id="C2",
+        currency="GBP",
+        contract_limit=1_000_000.0,
+        contract_deductible=0.0,
+        claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
         loss_date=date(2020, 9, 1),
     )
     dev_hist2 = ClaimDevelopmentHistory(
@@ -47,28 +53,46 @@ def _make_experience_data() -> ExperienceModelData:
     )
     claims = Claims([Claim(meta, dev_hist), Claim(meta2, dev_hist2)])
     exp_meta = ExposureMetaData(
-        exposure_id="E1", exposure_name="2020",
-        exposure_period_start=date(2020, 1, 1), exposure_period_end=date(2020, 12, 31),
-        currency="GBP", exposure_type=ExposureBasis.EARNED,
+        exposure_id="E1",
+        exposure_name="2020",
+        exposure_period_start=date(2020, 1, 1),
+        exposure_period_end=date(2020, 12, 31),
+        currency="GBP",
+        exposure_type=ExposureBasis.EARNED,
     )
     exposures = Exposures([Exposure(exp_meta, ExposureValues(1_000_000.0, 0.0, 1_000_000.0))])
     layer = RILayer(
-        layer_id=1, layer_name="1m xs 0", layer_type=ContractType.EXCESS_OF_LOSS,
-        occurrence_attachment=0.0, occurrence_limit=1_000_000.0,
-        aggregate_attachment=0.0, aggregate_limit=float("inf"),
-        subject_lines_of_business=["Property"], subject_lob_exposure_amounts=[1_000_000.0],
-        full_subject_premium=100_000.0, written_line=1.0, signed_line=1.0,
-        number_of_reinstatements=1, reinstatement_cost={1: 1.0},
+        layer_id=1,
+        layer_name="1m xs 0",
+        layer_type=ContractType.EXCESS_OF_LOSS,
+        occurrence_attachment=0.0,
+        occurrence_limit=1_000_000.0,
+        aggregate_attachment=0.0,
+        aggregate_limit=float("inf"),
+        subject_lines_of_business=["Property"],
+        subject_lob_exposure_amounts=[1_000_000.0],
+        full_subject_premium=100_000.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=1,
+        reinstatement_cost={1: 1.0},
     )
     contract_meta = RIContractMetadata(
-        contract_id="C1", contract_description="Test", cedent_name="Cedent",
-        trigger_basis=ClaimTriggerBasis.LOD, indexation_clause=IndexationClauseType.FULL_INDEXATION,
-        indexation_margin=0.0, inception_date=date(2021, 1, 1), expiration_date=date(2021, 12, 31),
+        contract_id="C1",
+        contract_description="Test",
+        cedent_name="Cedent",
+        trigger_basis=ClaimTriggerBasis.LOD,
+        indexation_clause=IndexationClauseType.FULL_INDEXATION,
+        indexation_margin=0.0,
+        inception_date=date(2021, 1, 1),
+        expiration_date=date(2021, 12, 31),
         fx_rates={"GBP": 1.0},
     )
     contract = RIContract(contract_meta_data=contract_meta, layers=[layer])
     return ExperienceModelData(
-        claims=claims, exposures=exposures, ri_contract=contract,
+        claims=claims,
+        exposures=exposures,
+        ri_contract=contract,
         exposure_trend_factors={yr: 1.0 for yr in range(2010, 2022)},
         claim_trend_factors={yr: 1.0 for yr in range(2010, 2022)},
     )
@@ -77,10 +101,12 @@ def _make_experience_data() -> ExperienceModelData:
 def _make_simulation(n: int = 1_000) -> Simulation:
     data = _make_experience_data()
     freq_fit = FrequencyFit(
-        distributions=[FrequencyDistribution.POISSON], data=data,
+        distributions=[FrequencyDistribution.POISSON],
+        data=data,
     )
     sev_fit = SeverityFit(
-        distributions=[SeverityDistribution.LOGNORMAL], data=data,
+        distributions=[SeverityDistribution.LOGNORMAL],
+        data=data,
         ibner_dev_pattern={2020: 1.0},
     )
     assumptions = ModellingAssumptions(
@@ -148,6 +174,7 @@ def test_simulation_results_serialise_to_json(tmp_path):
     sim.save(str(out_path))
     assert out_path.exists()
     import json
+
     with open(out_path) as f:
         data = json.load(f)
     assert "required_premium_programme" in data

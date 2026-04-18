@@ -4,6 +4,7 @@ from math import exp, log, sqrt
 # Lyons, G., Forster, W., Kedney, P., Warren, R., & Wilkinson, H. (n.d.). Claims Reserving Working Party Paper.
 # https://www.actuaries.org.uk/system/files/documents/pdf/lyons.pdf
 
+
 def linear_regression(x: list[float], y: list[float]) -> tuple[float, float]:
     """
     Performs linear regression to calculate the slope and intercept.
@@ -27,7 +28,9 @@ def linear_regression(x: list[float], y: list[float]) -> tuple[float, float]:
     return (slope, intercept)
 
 
-def exponential_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float,float]:
+def exponential_fit(
+    age_to_age_factors: list[float], time_periods: list[float]
+) -> tuple[float, float]:
     """
     Fits an exponential curve to the given age-to-age factors using the model:
     rj = exp(a + b * t), where ln(rj) = a + b * t.
@@ -44,7 +47,7 @@ def exponential_fit(age_to_age_factors: list[float], time_periods: list[float]) 
     return (a, b)
 
 
-def power_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float,float]:
+def power_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float, float]:
     """
     Fits a power curve to the given cumulative age-to-age factors using the model:
     Rj = a * (b^t), where ln(ln(Rj)) = ln(ln(a)) + (ln(b) * t).
@@ -63,7 +66,7 @@ def power_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tup
     return (a, b)
 
 
-def weibull_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float,float]:
+def weibull_fit(age_to_age_factors: list[float], time_periods: list[float]) -> tuple[float, float]:
     """
     Fits a Weibull curve to the given cumulative age-to-age factors using the model:
     Rj = 1 / (1 - exp(-a * t^b)).
@@ -82,7 +85,9 @@ def weibull_fit(age_to_age_factors: list[float], time_periods: list[float]) -> t
     return (a, b)
 
 
-def inverse_power_fit(age_to_age_factors: list[float], time_periods: list[float], c_values: list[float]) -> tuple[float, float, float]:
+def inverse_power_fit(
+    age_to_age_factors: list[float], time_periods: list[float], c_values: list[float]
+) -> tuple[float, float, float]:
     """
     Fits a Sherman Curve (Inverse Power Curve) to the given incremental age-to-age factors using the model:
     rj = a * (t + c)^b.
@@ -95,13 +100,17 @@ def inverse_power_fit(age_to_age_factors: list[float], time_periods: list[float]
     Returns:
         List[float]: A list containing the parameters [a, b, c] of the Sherman Curve.
     """
+
     def calculate_standard_error(a: float, b: float, c: float) -> float:
         predicted_rj = [a * ((t + c) ** b) for t in time_periods]
-        errors = [(rj - pred_rj) ** 2 for rj, pred_rj in zip(age_to_age_factors, predicted_rj, strict=False)]
+        errors = [
+            (rj - pred_rj) ** 2
+            for rj, pred_rj in zip(age_to_age_factors, predicted_rj, strict=False)
+        ]
         return sqrt(sum(errors) / len(errors))
 
     best_a, best_b, best_c = 0.0, 0.0, 0.0
-    min_standard_error = float('inf')
+    min_standard_error = float("inf")
 
     for c in c_values:
         ln_rj = [log(rj - 1) for rj in age_to_age_factors]
@@ -117,10 +126,12 @@ def inverse_power_fit(age_to_age_factors: list[float], time_periods: list[float]
     return (best_a, best_b, best_c)
 
 
-def residuals_standardised(actual: list[float], expected: list[float], num_parameters: int) -> list[float]:
+def residuals_standardised(
+    actual: list[float], expected: list[float], num_parameters: int
+) -> list[float]:
     # Calculate residuals
     residuals = [a - e for a, e in zip(actual, expected, strict=False)]
-    
+
     n = len(actual)
     dof = n - num_parameters
     if dof <= 0:
@@ -153,7 +164,10 @@ def r_squared(actual: list[float], expected: list[float]) -> float:
 
     return r_squared_value
 
-def assess_error_assumptions(actual: list[float], expected: list[float], num_parameters: int) -> dict:
+
+def assess_error_assumptions(
+    actual: list[float], expected: list[float], num_parameters: int
+) -> dict[str, float]:
     """
     Assesses the error term based on standardized residuals and calculates:
     - The proportion of positive standardized residuals.
