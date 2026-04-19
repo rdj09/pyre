@@ -8,11 +8,9 @@ from pathlib import Path
 import pytest
 
 from pyre.data_injector.descriptors import FieldDescriptor
-from pyre.data_injector.exceptions import InjectionError
 from pyre.data_injector.loader import Loader
 from pyre.data_injector.schema import Schema
 from pyre.data_injector.utils import unflatten
-
 
 # ── shared models ────────────────────────────────────────────────────────────
 
@@ -168,3 +166,21 @@ class TestLoaderForClass:
         assert len(results) == 2
         assert results[0].source == "manual"
         assert results[1].factor == pytest.approx(0.97)
+
+
+class TestPublicAPI:
+    def test_top_level_imports(self):
+        from pyre.data_injector import (
+            FieldDescriptor,
+            InjectionError,
+            Injector,
+            Loader,
+            Schema,
+            unflatten,
+        )
+        assert FieldDescriptor is not None
+        assert InjectionError is not None
+        assert Injector is not None
+        assert Loader is not None
+        assert Schema is not None
+        assert unflatten is not None
