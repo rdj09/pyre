@@ -1,5 +1,5 @@
 # tests/test_data_injector/test_injector.py
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import date
 
 import pytest
@@ -8,7 +8,6 @@ from pyre.data_injector.descriptors import FieldDescriptor
 from pyre.data_injector.exceptions import InjectionError
 from pyre.data_injector.injector import Injector
 from pyre.data_injector.schema import Schema
-
 
 # ── shared fixtures ──────────────────────────────────────────────────────────
 

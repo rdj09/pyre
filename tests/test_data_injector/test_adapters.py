@@ -11,7 +11,6 @@ from pyre.data_injector.adapters.csv_adapter import CSVAdapter
 from pyre.data_injector.adapters.dict_adapter import DictAdapter
 from pyre.data_injector.adapters.json_adapter import JSONAdapter
 
-
 # ── DictAdapter ──────────────────────────────────────────────────────────────
 
 class TestDictAdapter:

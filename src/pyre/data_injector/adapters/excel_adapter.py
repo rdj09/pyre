@@ -29,4 +29,4 @@ class ExcelAdapter:
             str(h) if h is not None else f"col_{i}"
             for i, h in enumerate(rows[0])
         ]
-        return [dict(zip(headers, row)) for row in rows[1:]]
+        return [dict(zip(headers, row, strict=False)) for row in rows[1:]]
