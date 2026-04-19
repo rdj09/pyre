@@ -10,7 +10,29 @@
       "Bash(uv lock *)",
       "Bash(sort -t'%' -k1 -n)",
       "Bash(awk -F'%' '{print $1}')",
-      "Bash(awk '{print $NF, $0}')"
+      "Bash(awk '{print $NF, $0}')",
+      "Bash(python -m pytest tests/ --tb=no -q)",
+      "Bash(python -m pytest tests/ --cov=pyre --cov-report=term-missing --tb=no -q)",
+      "Bash(pip install *)",
+      "Bash(grep -v \"^src\\\\\\\\\\\\\\\\pyre\\\\\\\\\\\\\\\\models\\\\\\\\\\\\\\\\exposure\\\\\\\\\\\\\\\\exposure_ILF_fitting\")",
+      "Bash(grep -v \"^src\\\\\\\\\\\\\\\\pyre\\\\\\\\\\\\\\\\models\\\\\\\\\\\\\\\\exposure\\\\\\\\\\\\\\\\exposure_curve_fitting\")",
+      "Bash(python -m pytest tests/test_trending.py::TestTrending::test_validate_inputs tests/test_trending.py::TestTrending::test_get_trend_factors tests/test_ibner_pattern_extractor.py::test_ibner_n_and_d_are_not_both_zero -v --tb=long)",
+      "Bash(python -m pytest tests/test_ibner_pattern_extractor.py::test_ibner_n_and_d_are_not_both_zero -v --tb=long)",
+      "Bash(git push *)",
+      "Bash(gh pr *)",
+      "Bash(pytest *)",
+      "Bash(python *)",
+      "Bash(git add *)",
+      "Bash(git reset *)",
+      "Bash(git commit *)",
+      "Bash(ruff check *)",
+      "Bash(mypy src/pyre/data_injector/exceptions.py)",
+      "Bash(pip list *)",
+      "Bash(cat *)",
+      "Bash(cd \"C:\\\\\\\\Users\\\\\\\\rhysj\\\\\\\\Documents\\\\\\\\Actuarial\\\\\\\\PricingToolDev\\\\\\\\pyre\\\\\\\\.worktrees\\\\\\\\refactor\")",
+      "Bash(ls -la \"C:\\\\\\\\Users\\\\\\\\rhysj\\\\\\\\Documents\\\\\\\\Actuarial\\\\\\\\PricingToolDev\\\\\\\\pyre\\\\\\\\.worktrees\\\\\\\\refactor\\\\\\\\src\\\\\\\\pyre\\\\\\\\data_injector\\\\\\\\adapters\\\\\\\\\")",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(mypy *)"
     ]
   }
 }

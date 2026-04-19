@@ -35,7 +35,7 @@ class Loader(Generic[T]):
         self._injector = Injector(schema)
 
     @classmethod
-    def for_class(cls, target: type[T], **overrides: FieldDescriptor) -> "Loader[T]":
+    def for_class(cls, target: type[T], **overrides: FieldDescriptor) -> Loader[T]:
         """Auto-derive schema from a dataclass and return a ready Loader."""
         return cls(Schema.from_dataclass(target, **overrides))
 
