@@ -1,5 +1,6 @@
 # app/server.py
 """Shiny reactive server for the pyre data loader application."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -7,11 +8,12 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from app.services.domain_service import DomainService
 from pyre.claims.claims import Claims
 from pyre.claims.triangles import Triangle
 from pyre.data_injector.exceptions import InjectionError
 from pyre.exposures.exposures import Exposures
+
+from .services.domain_service import DomainService
 
 
 def server(input: Inputs, output: Outputs, session: Session) -> None:

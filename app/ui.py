@@ -1,5 +1,6 @@
 # app/ui.py
 """Shiny UI layout for the pyre data loader web application."""
+
 from __future__ import annotations
 
 from shiny import ui as _ui

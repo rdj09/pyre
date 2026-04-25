@@ -1,5 +1,6 @@
 # app/services/domain_service.py
 """DomainService wraps data_injector domain_schemas for use in the Shiny app."""
+
 from __future__ import annotations
 
 from pathlib import Path
