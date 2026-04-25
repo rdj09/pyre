@@ -31,6 +31,12 @@ Documentation = "https://github.com/rdj09/pyre#readme"
 Issues = "https://github.com/rdj09/pyre/issues"
 Source = "https://github.com/rdj09/pyre"
 
+[project.optional-dependencies]
+webapp = ["shiny>=1.0", "htmltools>=0.5", "pandas>=2.0"]
+excel = ["openpyxl>=3.0"]
+db-postgres = ["psycopg2-binary>=2.9"]
+yaml = ["pyyaml>=6.0"]
+
 [tool.hatch.version]
 path = "src/pyre/__about__.py"
 
@@ -53,6 +59,20 @@ docs = [
   "mkdocs-gen-files>=0.5",
   "mkdocs-literate-nav>=0.6",
   "pymdown-extensions>=10.0",
+]
+webapp = [
+  "shiny>=1.0",
+  "htmltools>=0.5",
+  "pandas>=2.0",
+]
+excel = [
+  "openpyxl>=3.0",
+]
+db-postgres = [
+  "psycopg2-binary>=2.9",
+]
+yaml = [
+  "pyyaml>=6.0",
 ]
 
 # ---------------------------------------------------------------------------
