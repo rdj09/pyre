@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Generic, TypeVar
 
 from .adapters.csv_adapter import CSVAdapter
+from .adapters.db_adapter import DBAdapter
 from .adapters.dict_adapter import DictAdapter
 from .adapters.excel_adapter import ExcelAdapter
 from .adapters.json_adapter import JSONAdapter
@@ -55,6 +56,15 @@ class Loader(Generic[T]):
 
     def from_dict(self, source: Any) -> list[T]:
         return self._injector.inject_many(DictAdapter().load(source))
+
+    def from_db(self, connection_string: str, query: str) -> list[T]:
+        """Load records from a SQL database and inject into T.
+
+        Args:
+            connection_string: sqlite:/// or postgresql:// URL.
+            query: SQL SELECT statement.
+        """
+        return self._injector.inject_many(DBAdapter(connection_string).load(query))
 
     def from_one(self, record: dict[str, Any]) -> T:
         return self._injector.inject(record)

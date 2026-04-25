@@ -1,4 +1,5 @@
 # src/pyre/data_injector/__init__.py
+from .adapters.db_adapter import DBAdapter as DBAdapter
 from .descriptors import FieldDescriptor as FieldDescriptor
 from .exceptions import InjectionError as InjectionError
 from .injector import Injector as Injector

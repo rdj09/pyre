@@ -184,3 +184,28 @@ class TestPublicAPI:
         assert Loader is not None
         assert Schema is not None
         assert unflatten is not None
+
+
+class TestLoaderFromDB:
+    def test_from_db_loads_sqlite_records(self, tmp_path: Path) -> None:
+        import sqlite3
+        from dataclasses import dataclass
+
+        db_path = tmp_path / "loader_test.db"
+        conn = sqlite3.connect(db_path)
+        conn.execute("CREATE TABLE rates (year INTEGER, factor REAL)")
+        conn.execute("INSERT INTO rates VALUES (2023, 1.05)")
+        conn.execute("INSERT INTO rates VALUES (2024, 1.10)")
+        conn.commit()
+        conn.close()
+
+        @dataclass
+        class RateChange:
+            year: int
+            factor: float
+
+        loader: Loader[RateChange] = Loader.for_class(RateChange)
+        results = loader.from_db(f"sqlite:///{db_path}", "SELECT year, factor FROM rates")
+        assert len(results) == 2
+        assert results[0].year == 2023
+        assert results[1].factor == pytest.approx(1.10)
