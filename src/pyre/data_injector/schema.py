@@ -31,9 +31,7 @@ class Schema(Generic[T]):
     post_hooks: list[Callable[[T], T]] = dataclasses.field(default_factory=list)
 
     @classmethod
-    def from_dataclass(
-        cls, dc: type[T], **overrides: FieldDescriptor
-    ) -> Schema[T]:
+    def from_dataclass(cls, dc: type[T], **overrides: FieldDescriptor) -> Schema[T]:
         """Auto-derive a Schema from a dataclass's declared fields.
 
         Pass keyword arguments named after fields to supply custom
@@ -43,13 +41,13 @@ class Schema(Generic[T]):
             raise TypeError(f"{dc!r} is not a dataclass")
 
         fields: list[FieldDescriptor] = []
-        for f in dataclasses.fields(dc):  # type: ignore[arg-type]
+        for f in dataclasses.fields(dc):
             if f.name in overrides:
                 fields.append(overrides[f.name])
                 continue
 
             has_default = f.default is not dataclasses.MISSING
-            has_factory = f.default_factory is not dataclasses.MISSING  # type: ignore[misc]
+            has_factory = f.default_factory is not dataclasses.MISSING
 
             # Build kwargs — omit 'default' entirely when there is none,
             # so FieldDescriptor's _UNSET sentinel applies automatically.
@@ -60,7 +58,7 @@ class Schema(Generic[T]):
             if has_default:
                 fd_kwargs["default"] = f.default
             if has_factory:
-                fd_kwargs["default_factory"] = f.default_factory  # type: ignore[misc]
+                fd_kwargs["default_factory"] = f.default_factory
 
             fields.append(FieldDescriptor(**fd_kwargs))
         return cls(target_class=dc, fields=fields)

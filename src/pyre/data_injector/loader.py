@@ -42,7 +42,7 @@ class Loader(Generic[T]):
 
     # ── source methods ────────────────────────────────────────────────────────
 
-    def from_json(self, source: str | Path | dict | list) -> list[T]:
+    def from_json(self, source: str | Path | dict[str, Any] | list[Any]) -> list[T]:
         return self._injector.inject_many(JSONAdapter().load(source))
 
     def from_csv(self, source: str | Path, **csv_kwargs: Any) -> list[T]:

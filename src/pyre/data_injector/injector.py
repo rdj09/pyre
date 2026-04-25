@@ -16,8 +16,8 @@ class Injector(Generic[T]):
         self._schema = schema
 
     def inject(self, record: dict[str, Any]) -> T:
-        for hook in self._schema.pre_hooks:
-            record = hook(record)
+        for pre_hook in self._schema.pre_hooks:
+            record = pre_hook(record)
 
         kwargs: dict[str, Any] = {}
         for fd in self._schema.fields:
@@ -33,8 +33,8 @@ class Injector(Generic[T]):
                 f"Could not construct {self._schema.target_class.__name__}: {exc}"
             ) from exc
 
-        for hook in self._schema.post_hooks:
-            instance = hook(instance)
+        for post_hook in self._schema.post_hooks:
+            instance = post_hook(instance)
 
         return instance
 
@@ -60,7 +60,6 @@ class Injector(Generic[T]):
             return fd._resolve_missing()
         if not isinstance(sub, dict):
             raise InjectionError(
-                f"Field '{fd.name}' expected a dict for nested injection, "
-                f"got {type(sub).__name__}"
+                f"Field '{fd.name}' expected a dict for nested injection, got {type(sub).__name__}"
             )
         return Injector(nested_schema).inject(sub)

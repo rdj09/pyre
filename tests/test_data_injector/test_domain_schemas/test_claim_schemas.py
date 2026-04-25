@@ -1,7 +1,6 @@
 # tests/test_data_injector/test_domain_schemas/test_claim_schemas.py
 from __future__ import annotations
 
-import textwrap
 from datetime import date
 from pathlib import Path
 
@@ -30,8 +29,10 @@ class TestClaimsMetaSchema:
         from pyre.data_injector.injector import Injector
 
         record = {
-            "claim_id": "CLM-001", "currency": "GBP",
-            "loss_date": "2020-06-15", "policy_inception_date": "2020-01-01",
+            "claim_id": "CLM-001",
+            "currency": "GBP",
+            "loss_date": "2020-06-15",
+            "policy_inception_date": "2020-01-01",
             "report_date": "2020-07-01",
         }
         meta = Injector(claims_meta_schema).inject(record)
@@ -49,8 +50,7 @@ class TestClaimsMetaSchema:
     def test_claim_year_type_coerced_from_string(self) -> None:
         from pyre.data_injector.injector import Injector
 
-        record = {"claim_id": "CLM-003", "currency": "EUR",
-                  "claim_year_basis": "UNDERWRITING_YEAR"}
+        record = {"claim_id": "CLM-003", "currency": "EUR", "claim_year_basis": "UNDERWRITING_YEAR"}
         meta = Injector(claims_meta_schema).inject(record)
         assert meta.claim_year_basis == ClaimYearType.UNDERWRITING_YEAR
 

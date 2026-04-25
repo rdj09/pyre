@@ -20,5 +20,5 @@ class DictAdapter:
         if isinstance(obj, dict):
             return obj
         if hasattr(obj, "__dict__"):
-            return vars(obj)
+            return dict(vars(obj))
         raise TypeError(f"DictAdapter: cannot convert {type(obj).__name__} to dict")

@@ -156,7 +156,7 @@ module = [
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = ["matplotlib.*", "numpy.*", "scipy.*"]
+module = ["matplotlib.*", "numpy.*", "scipy.*", "yaml.*", "openpyxl.*", "psycopg2.*"]
 ignore_missing_imports = true
 
 [tool.coverage.run]

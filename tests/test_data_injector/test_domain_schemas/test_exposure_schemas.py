@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import sqlite3
-import textwrap
 from datetime import date
 from pathlib import Path
 
@@ -24,17 +23,24 @@ class TestExposureMetaSchema:
 
     def test_required_fields_present(self) -> None:
         names = [f.name for f in exposure_meta_schema.fields]
-        for required in ("exposure_id", "exposure_name", "exposure_period_start",
-                         "exposure_period_end", "currency"):
+        for required in (
+            "exposure_id",
+            "exposure_name",
+            "exposure_period_start",
+            "exposure_period_end",
+            "currency",
+        ):
             assert required in names
 
     def test_dates_coerced_from_iso_strings(self) -> None:
         from pyre.data_injector.injector import Injector
 
         record = {
-            "exposure_id": "E1", "exposure_name": "Test",
+            "exposure_id": "E1",
+            "exposure_name": "Test",
             "exposure_period_start": "2024-01-01",
-            "exposure_period_end": "2024-12-31", "currency": "GBP",
+            "exposure_period_end": "2024-12-31",
+            "currency": "GBP",
         }
         meta = Injector(exposure_meta_schema).inject(record)
         assert meta.exposure_period_start == date(2024, 1, 1)
@@ -44,9 +50,11 @@ class TestExposureMetaSchema:
         from pyre.data_injector.injector import Injector
 
         record = {
-            "exposure_id": "E2", "exposure_name": "Test2",
+            "exposure_id": "E2",
+            "exposure_name": "Test2",
             "exposure_period_start": "2024-01-01",
-            "exposure_period_end": "2024-12-31", "currency": "USD",
+            "exposure_period_end": "2024-12-31",
+            "currency": "USD",
         }
         meta = Injector(exposure_meta_schema).inject(record)
         assert meta.aggregate is False
@@ -76,6 +84,7 @@ class TestExposureSchema:
 
     def test_unflatten_in_pre_hooks(self) -> None:
         from pyre.data_injector.utils import unflatten
+
         assert unflatten in exposure_schema.pre_hooks
 
     def test_injects_flat_record(self) -> None:
