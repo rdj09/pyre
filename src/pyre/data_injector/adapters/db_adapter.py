@@ -27,8 +27,7 @@ class DBAdapter:
             self._connection_string = connection_string
         else:
             raise ValueError(
-                f"Unsupported connection scheme '{scheme}'. "
-                "Supported: 'sqlite', 'postgresql'."
+                f"Unsupported connection scheme '{scheme}'. Supported: 'sqlite', 'postgresql'."
             )
 
     def load(self, source: str) -> list[dict[str, Any]]:

@@ -25,8 +25,5 @@ class ExcelAdapter:
         rows = list(ws.iter_rows(values_only=True))
         if not rows:
             return []
-        headers = [
-            str(h) if h is not None else f"col_{i}"
-            for i, h in enumerate(rows[0])
-        ]
+        headers = [str(h) if h is not None else f"col_{i}" for i, h in enumerate(rows[0])]
         return [dict(zip(headers, row, strict=False)) for row in rows[1:]]

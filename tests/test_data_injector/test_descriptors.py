@@ -65,6 +65,7 @@ class TestCoercion:
 
     def test_callable_coerce(self):
         from datetime import date
+
         fd = FieldDescriptor(name="d", type_coerce=date.fromisoformat)
         assert fd.get_value({"d": "2024-01-15"}) == date(2024, 1, 15)
 

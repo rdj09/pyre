@@ -61,9 +61,8 @@ class FieldDescriptor:
             value = self.pre_process(value)
 
         if self.type_coerce is not None:
-            already_correct = (
-                isinstance(self.type_coerce, type)
-                and isinstance(value, self.type_coerce)
+            already_correct = isinstance(self.type_coerce, type) and isinstance(
+                value, self.type_coerce
             )
             if not already_correct:
                 try:
@@ -78,8 +77,6 @@ class FieldDescriptor:
             try:
                 self.validator(value)
             except (ValueError, AssertionError) as exc:
-                raise InjectionError(
-                    f"Field '{self.name}' failed validation: {exc}"
-                ) from exc
+                raise InjectionError(f"Field '{self.name}' failed validation: {exc}") from exc
 
         return value

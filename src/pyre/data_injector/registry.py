@@ -24,15 +24,14 @@ class AdapterRegistry:
         def decorator(adapter_cls: type) -> type:
             cls._adapters[name] = adapter_cls
             return adapter_cls
+
         return decorator
 
     @classmethod
     def get(cls, name: str) -> type:
         if name not in cls._adapters:
             available = ", ".join(sorted(cls._adapters)) or "(none)"
-            raise KeyError(
-                f"No adapter registered for '{name}'. Available: {available}"
-            )
+            raise KeyError(f"No adapter registered for '{name}'. Available: {available}")
         return cls._adapters[name]
 
     @classmethod

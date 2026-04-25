@@ -33,12 +33,16 @@ class TestDomainServiceExposures:
         records = [
             {
                 "exposure_meta": {
-                    "exposure_id": "SVC-E2", "exposure_name": "Dict Test",
+                    "exposure_id": "SVC-E2",
+                    "exposure_name": "Dict Test",
                     "exposure_period_start": "2024-01-01",
-                    "exposure_period_end": "2024-12-31", "currency": "USD",
+                    "exposure_period_end": "2024-12-31",
+                    "currency": "USD",
                 },
                 "exposure_values": {
-                    "exposure_value": 200000.0, "attachment_point": 10000.0, "limit": 100000.0,
+                    "exposure_value": 200000.0,
+                    "attachment_point": 10000.0,
+                    "limit": 100000.0,
                 },
             }
         ]
@@ -86,14 +90,24 @@ class TestDomainServiceClaims:
         )
         conn.execute(
             "INSERT INTO claims VALUES (?,?,?,?,?,?,?,?)",
-            ("SVC-C2", "USD", "2021-03-01", "2021-01-01", "2021-04-01",
-             "12|24", "6000|10000", "8000|13000"),
+            (
+                "SVC-C2",
+                "USD",
+                "2021-03-01",
+                "2021-01-01",
+                "2021-04-01",
+                "12|24",
+                "6000|10000",
+                "8000|13000",
+            ),
         )
         conn.commit()
         conn.close()
         svc = DomainService()
         claims = svc.load_claims(
-            f"sqlite:///{db_path}", source_type="db", query="SELECT * FROM claims",
+            f"sqlite:///{db_path}",
+            source_type="db",
+            query="SELECT * FROM claims",
         )
         assert isinstance(claims, Claims)
         assert len(claims) == 1

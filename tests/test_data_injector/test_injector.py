@@ -11,6 +11,7 @@ from pyre.data_injector.schema import Schema
 
 # ── shared fixtures ──────────────────────────────────────────────────────────
 
+
 @dataclass
 class Policy:
     policy_id: str
@@ -89,11 +90,13 @@ class TestInjectorPostHooks:
             fields=POLICY_SCHEMA.fields,
             post_hooks=[uppercase_id],
         )
-        result = Injector(schema).inject({
-            "policy_id": "pol-004",
-            "premium": 300.0,
-            "inception_date": "2024-04-01",
-        })
+        result = Injector(schema).inject(
+            {
+                "policy_id": "pol-004",
+                "premium": 300.0,
+                "inception_date": "2024-04-01",
+            }
+        )
         assert result.policy_id == "POL-004"
 
 
@@ -110,8 +113,11 @@ class TestInjectMany:
     def test_aggregates_errors_across_all_records(self):
         records = [
             {"policy_id": "POL-001", "premium": 100.0, "inception_date": "2024-01-01"},
-            {"premium": 200.0, "inception_date": "2024-01-01"},   # missing policy_id
-            {"policy_id": "POL-003", "inception_date": "2024-01-01"},  # missing premium — wait, premium has type_coerce=float but no required=False. Actually premium IS required so this should fail on missing premium? No — premium is required=True but "premium" key is absent from this record, so it will raise on missing. BUT wait — premium has type_coerce=float but the record has no "premium" key, so get_value returns _resolve_missing which raises InjectionError.
+            {"premium": 200.0, "inception_date": "2024-01-01"},  # missing policy_id
+            {
+                "policy_id": "POL-003",
+                "inception_date": "2024-01-01",
+            },  # missing premium — wait, premium has type_coerce=float but no required=False. Actually premium IS required so this should fail on missing premium? No — premium is required=True but "premium" key is absent from this record, so it will raise on missing. BUT wait — premium has type_coerce=float but the record has no "premium" key, so get_value returns _resolve_missing which raises InjectionError.
         ]
         with pytest.raises(InjectionError) as exc_info:
             Injector(POLICY_SCHEMA).inject_many(records)

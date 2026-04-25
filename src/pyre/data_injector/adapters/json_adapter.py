@@ -16,6 +16,4 @@ class JSONAdapter:
             return raw
         if isinstance(raw, dict):
             return [raw]
-        raise ValueError(
-            f"JSONAdapter: expected dict or list at root, got {type(raw).__name__}"
-        )
+        raise ValueError(f"JSONAdapter: expected dict or list at root, got {type(raw).__name__}")

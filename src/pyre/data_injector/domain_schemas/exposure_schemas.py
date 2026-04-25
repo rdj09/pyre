@@ -1,5 +1,6 @@
 # src/pyre/data_injector/domain_schemas/exposure_schemas.py
 """Pre-built Schema objects and Loader factories for pyre Exposure domain classes."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -95,7 +96,7 @@ def _underscore_to_dotted_exposure(record: dict[str, Any]) -> dict[str, Any]:
         for prefix in prefixes:
             if key.startswith(prefix):
                 namespace = prefix.rstrip("_")
-                field_name = key[len(prefix):]
+                field_name = key[len(prefix) :]
                 result[f"{namespace}.{field_name}"] = value
                 converted = True
                 break

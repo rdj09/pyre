@@ -34,8 +34,10 @@ def parse_bool(value: Any) -> bool:
 
 def parse_list(sep: str = ",") -> Callable[[Any], list[str]]:
     """Return a callable that splits a string on *sep* into a stripped list."""
+
     def _parse(value: Any) -> list[str]:
         if isinstance(value, list):
             return value
         return [v.strip() for v in str(value).split(sep)]
+
     return _parse

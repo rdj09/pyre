@@ -1,5 +1,6 @@
 # src/pyre/data_injector/domain_schemas/triangle_schemas.py
 """Triangle loader utilities wrapping the Claims -> Triangle pipeline."""
+
 from __future__ import annotations
 
 from pathlib import Path

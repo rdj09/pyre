@@ -13,6 +13,7 @@ from pyre.data_injector.adapters.json_adapter import JSONAdapter
 
 # ── DictAdapter ──────────────────────────────────────────────────────────────
 
+
 class TestDictAdapter:
     def test_accepts_plain_dict(self):
         records = DictAdapter().load({"a": 1, "b": 2})
@@ -54,6 +55,7 @@ class TestDictAdapter:
 
 # ── JSONAdapter ──────────────────────────────────────────────────────────────
 
+
 class TestJSONAdapter:
     def test_loads_list_from_file(self, tmp_path: Path):
         data = [{"id": "A"}, {"id": "B"}]
@@ -80,6 +82,7 @@ class TestJSONAdapter:
 
 
 # ── CSVAdapter ───────────────────────────────────────────────────────────────
+
 
 class TestCSVAdapter:
     def test_loads_rows_as_list_of_dicts(self, tmp_path: Path):
@@ -109,6 +112,7 @@ class TestCSVAdapter:
 
 
 # ── Protocol check ────────────────────────────────────────────────────────────
+
 
 class TestSourceAdapterProtocol:
     def test_dict_adapter_satisfies_protocol(self):

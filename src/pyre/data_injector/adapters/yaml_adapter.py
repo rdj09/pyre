@@ -10,9 +10,7 @@ class YAMLAdapter:
         try:
             import yaml
         except ImportError as exc:
-            raise ImportError(
-                "PyYAML is required for YAML support: pip install pyyaml"
-            ) from exc
+            raise ImportError("PyYAML is required for YAML support: pip install pyyaml") from exc
         raw = yaml.safe_load(Path(source).read_text(encoding="utf-8"))
         if isinstance(raw, list):
             return raw

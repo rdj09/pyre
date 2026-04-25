@@ -32,7 +32,14 @@
       "Bash(cd \"C:\\\\\\\\Users\\\\\\\\rhysj\\\\\\\\Documents\\\\\\\\Actuarial\\\\\\\\PricingToolDev\\\\\\\\pyre\\\\\\\\.worktrees\\\\\\\\refactor\")",
       "Bash(ls -la \"C:\\\\\\\\Users\\\\\\\\rhysj\\\\\\\\Documents\\\\\\\\Actuarial\\\\\\\\PricingToolDev\\\\\\\\pyre\\\\\\\\.worktrees\\\\\\\\refactor\\\\\\\\src\\\\\\\\pyre\\\\\\\\data_injector\\\\\\\\adapters\\\\\\\\\")",
       "Bash(grep -E \"\\\\.py$\")",
-      "Bash(mypy *)"
+      "Bash(mypy *)",
+      "Bash(grep -v \"^d.*\\\\\\\\.venv\")",
+      "Bash(xargs grep *)",
+      "Bash(git *)",
+      "Bash(python3 *)",
+      "Bash(uv sync *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8765/)",
+      "Bash(timeout 6 bash -c 'PYTHONPATH=. uv run shiny run app/app.py --port 8766 2>&1')"
     ]
   }
 }

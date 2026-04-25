@@ -27,17 +27,20 @@ class TestAdapterRegistry:
     def test_available_lists_registered_names(self):
         @AdapterRegistry.register("alpha")
         class A:
-            def load(self, source: Any) -> list[dict[str, Any]]: return []
+            def load(self, source: Any) -> list[dict[str, Any]]:
+                return []
 
         @AdapterRegistry.register("beta")
         class B:
-            def load(self, source: Any) -> list[dict[str, Any]]: return []
+            def load(self, source: Any) -> list[dict[str, Any]]:
+                return []
 
         assert AdapterRegistry.available() == ["alpha", "beta"]
 
     def test_register_decorator_returns_class_unchanged(self):
         @AdapterRegistry.register("passthrough")
         class PT:
-            def load(self, source: Any) -> list[dict[str, Any]]: return []
+            def load(self, source: Any) -> list[dict[str, Any]]:
+                return []
 
         assert PT.__name__ == "PT"

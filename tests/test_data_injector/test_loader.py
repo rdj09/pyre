@@ -14,6 +14,7 @@ from pyre.data_injector.utils import unflatten
 
 # ── shared models ────────────────────────────────────────────────────────────
 
+
 @dataclass
 class Address:
     street: str
@@ -60,6 +61,7 @@ HOLDER_SCHEMA = Schema(
 
 # ── from_dict ────────────────────────────────────────────────────────────────
 
+
 class TestLoaderFromDict:
     def test_single_dict(self):
         raw = {
@@ -92,6 +94,7 @@ class TestLoaderFromDict:
 
 # ── from_json ────────────────────────────────────────────────────────────────
 
+
 class TestLoaderFromJSON:
     def test_loads_list_from_json_file(self, tmp_path: Path):
         data = [
@@ -113,6 +116,7 @@ class TestLoaderFromJSON:
 
 
 # ── from_csv ─────────────────────────────────────────────────────────────────
+
 
 class TestLoaderFromCSV:
     def test_loads_flat_csv_with_unflatten_pre_hook(self, tmp_path: Path):
@@ -152,6 +156,7 @@ class TestLoaderFromCSV:
 
 # ── Loader.for_class ──────────────────────────────────────────────────────────
 
+
 class TestLoaderForClass:
     def test_auto_derives_schema_from_dataclass(self):
         @dataclass
@@ -178,6 +183,7 @@ class TestPublicAPI:
             Schema,
             unflatten,
         )
+
         assert FieldDescriptor is not None
         assert InjectionError is not None
         assert Injector is not None
