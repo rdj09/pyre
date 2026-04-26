@@ -36,7 +36,8 @@ class ModelService:
     # Parsing helpers
     # ------------------------------------------------------------------
 
-    def parse_year_factors(self, text: str) -> dict[int, float]:
+    @staticmethod
+    def parse_year_factors(text: str) -> dict[int, float]:
         """Parse "2020:1.0,2021:1.05" -> {2020: 1.0, 2021: 1.05}."""
         result: dict[int, float] = {}
         for part in text.split(","):
@@ -47,7 +48,8 @@ class ModelService:
             result[int(year_str.strip())] = float(factor_str.strip())
         return result
 
-    def parse_fx_rates(self, text: str) -> dict[str, float]:
+    @staticmethod
+    def parse_fx_rates(text: str) -> dict[str, float]:
         """Parse "GBP:1.0,USD:1.25" -> {"GBP": 1.0, "USD": 1.25}."""
         result: dict[str, float] = {}
         for part in text.split(","):
@@ -58,15 +60,18 @@ class ModelService:
             result[ccy.strip().upper()] = float(rate_str.strip())
         return result
 
-    def parse_float_list(self, text: str) -> list[float]:
+    @staticmethod
+    def parse_float_list(text: str) -> list[float]:
         """Parse "1.0,1.05,1.10" -> [1.0, 1.05, 1.10]."""
         return [float(x.strip()) for x in text.split(",") if x.strip()]
 
-    def parse_str_list(self, text: str) -> list[str]:
+    @staticmethod
+    def parse_str_list(text: str) -> list[str]:
         """Parse "CAS,MAT" -> ["CAS", "MAT"]."""
         return [x.strip() for x in text.split(",") if x.strip()]
 
-    def parse_reinstatement_cost(self, text: str) -> dict[int, float]:
+    @staticmethod
+    def parse_reinstatement_cost(text: str) -> dict[int, float]:
         """Parse "1:1.0,2:0.5" -> {1: 1.0, 2: 0.5}."""
         result: dict[int, float] = {}
         for part in text.split(","):
@@ -94,12 +99,26 @@ class ModelService:
         fx_rates_text: str,
         layers_data: list[dict[str, Any]],
     ) -> RIContract:
+        try:
+            trigger = ClaimTriggerBasis[trigger_basis]
+        except KeyError:
+            raise ValueError(
+                f"Unknown trigger_basis {trigger_basis!r}. "
+                f"Valid values: {[e.name for e in ClaimTriggerBasis]}"
+            ) from None
+        try:
+            indexation = IndexationClauseType[indexation_clause]
+        except KeyError:
+            raise ValueError(
+                f"Unknown indexation_clause {indexation_clause!r}. "
+                f"Valid values: {[e.name for e in IndexationClauseType]}"
+            ) from None
         meta = RIContractMetadata(
             contract_id=contract_id,
             contract_description=contract_description,
             cedent_name=cedent_name,
-            trigger_basis=ClaimTriggerBasis[trigger_basis],
-            indexation_clause=IndexationClauseType[indexation_clause],
+            trigger_basis=trigger,
+            indexation_clause=indexation,
             indexation_margin=indexation_margin,
             inception_date=inception_date,
             expiration_date=expiration_date,
@@ -109,11 +128,19 @@ class ModelService:
         return RIContract(contract_meta_data=meta, layers=layers)
 
     def _build_layer(self, layer_id: int, ld: dict[str, Any]) -> RILayer:
+        layer_type_str = str(ld.get("layer_type", "EXCESS_OF_LOSS"))
+        try:
+            layer_type = ContractType[layer_type_str]
+        except KeyError:
+            raise ValueError(
+                f"Unknown layer_type {layer_type_str!r}. "
+                f"Valid values: {[e.name for e in ContractType]}"
+            ) from None
         agg_limit_raw = float(ld.get("aggregate_limit", 0))
         return RILayer(
             layer_id=layer_id,
             layer_name=str(ld.get("layer_name", f"Layer {layer_id}")),
-            layer_type=ContractType[str(ld.get("layer_type", "EXCESS_OF_LOSS"))],
+            layer_type=layer_type,
             occurrence_attachment=float(ld.get("occurrence_attachment", 0)),
             occurrence_limit=float(ld.get("occurrence_limit", 0)),
             aggregate_attachment=float(ld.get("aggregate_attachment", 0)),
@@ -135,20 +162,33 @@ class ModelService:
     def build_contract_from_json(self, json_bytes: bytes) -> RIContract:
         data = json.loads(json_bytes.decode("utf-8"))
         meta_raw = data["contract_meta_data"]
+        try:
+            trigger = ClaimTriggerBasis[meta_raw["trigger_basis"]]
+        except KeyError:
+            raise ValueError(
+                f"Unknown trigger_basis {meta_raw['trigger_basis']!r}. "
+                f"Valid values: {[e.name for e in ClaimTriggerBasis]}"
+            ) from None
+        indexation_clause_str = meta_raw.get("indexation_clause", "FULL_INDEXATION")
+        try:
+            indexation = IndexationClauseType[indexation_clause_str]
+        except KeyError:
+            raise ValueError(
+                f"Unknown indexation_clause {indexation_clause_str!r}. "
+                f"Valid values: {[e.name for e in IndexationClauseType]}"
+            ) from None
         meta = RIContractMetadata(
             contract_id=meta_raw["contract_id"],
             contract_description=meta_raw.get("contract_description", ""),
             cedent_name=meta_raw.get("cedent_name", ""),
-            trigger_basis=ClaimTriggerBasis[meta_raw["trigger_basis"]],
-            indexation_clause=IndexationClauseType[
-                meta_raw.get("indexation_clause", "FULL_INDEXATION")
-            ],
+            trigger_basis=trigger,
+            indexation_clause=indexation,
             indexation_margin=float(meta_raw.get("indexation_margin", 0.0)),
             inception_date=date.fromisoformat(meta_raw["inception_date"]),
             expiration_date=date.fromisoformat(meta_raw["expiration_date"]),
             fx_rates=meta_raw.get("fx_rates", {"GBP": 1.0}),
         )
-        layers = [self._build_layer(i + 1, ld) for i, ld in enumerate(data["layers"])]
+        layers = [self._build_layer(int(ld.get("layer_id", i + 1)), ld) for i, ld in enumerate(data["layers"])]
         return RIContract(contract_meta_data=meta, layers=layers)
 
     # ------------------------------------------------------------------
@@ -179,7 +219,13 @@ class ModelService:
         dev_pattern: dict[int, float],
         a_priori: dict[int, float] | None = None,
     ) -> dict[int, float]:
-        method_enum = ProjectionMethods[projection_method]
+        try:
+            method_enum = ProjectionMethods[projection_method]
+        except KeyError:
+            raise ValueError(
+                f"Unknown projection_method {projection_method!r}. "
+                f"Valid values: {[e.name for e in ProjectionMethods]}"
+            ) from None
         years = model_data.exposures.modelling_years
         proj_methods = {y: method_enum for y in years}
         model = BurnCostModel(
@@ -202,10 +248,17 @@ class ModelService:
         curve_type_str: str,
         curve_params: dict[str, Any],
     ) -> ExposureModel:
+        try:
+            curve_type = ExposureCurveType[curve_type_str]
+        except KeyError:
+            raise ValueError(
+                f"Unknown curve_type {curve_type_str!r}. "
+                f"Valid values: {[e.name for e in ExposureCurveType]}"
+            ) from None
         return ExposureModel(
             exposures=exposures,
             ri_contract=contract,
-            selected_curve=ExposureCurveType[curve_type_str],
+            selected_curve=curve_type,
             curve_parameters=curve_params,
         )
 
@@ -270,11 +323,11 @@ class ModelService:
                 "required_premium": results.required_premium_by_layer[lid],
             })
         df = pd.DataFrame(rows)
-        df.loc[len(df)] = {
+        total_row = pd.DataFrame([{
             "layer_id": -1,
             "layer_name": "PROGRAMME TOTAL",
             "loss_cost": sum(results.loss_cost_by_layer.values()),
             "required_capital": sum(results.required_capital_by_layer.values()),
             "required_premium": results.required_premium_programme,
-        }
-        return df
+        }])
+        return pd.concat([df, total_row], ignore_index=True)
