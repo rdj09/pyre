@@ -32,7 +32,7 @@ Issues = "https://github.com/rdj09/pyre/issues"
 Source = "https://github.com/rdj09/pyre"
 
 [project.optional-dependencies]
-webapp = ["shiny>=1.0", "htmltools>=0.5", "pandas>=2.0"]
+webapp = ["shiny>=1.0", "htmltools>=0.5", "pandas>=2.0", "matplotlib>=3.5"]
 excel = ["openpyxl>=3.0"]
 db-postgres = ["psycopg2-binary>=2.9"]
 yaml = ["pyyaml>=6.0"]
@@ -64,6 +64,7 @@ webapp = [
   "shiny>=1.0",
   "htmltools>=0.5",
   "pandas>=2.0",
+  "matplotlib>=3.5",
 ]
 excel = [
   "openpyxl>=3.0",
