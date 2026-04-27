@@ -11,6 +11,11 @@ def qs_calculation(gross_amount: float, cession: float) -> float:
     return max(gross_amount * cession, 0)
 
 
+def quota_share_calculation(gross_amount: float, attachment: float, limit: float) -> float:
+    """Calculate quota share loss. QS cedes 100% of gross loss."""
+    return gross_amount
+
+
 def franchise_calculation(gross_amount: float, attachment: float, limit: float) -> float:
     if gross_amount > attachment:
         return min(gross_amount, limit)
@@ -27,9 +32,8 @@ def surplus_share_calculation(gross_amount: float, sum_insured: float, attachmen
 
 
 layer_loss_calculation: dict[ContractType, Callable[[float, float, float], float]] = {
-    ContractType.QUOTA_SHARE: qs_calculation,  # type: ignore[dict-item]
+    ContractType.QUOTA_SHARE: quota_share_calculation,
     ContractType.FRANCHISE_DEDUCTIBLE: franchise_calculation,
     ContractType.EXCESS_OF_LOSS: xol_calculation,
     ContractType.AGGREGATE_STOP_LOSS: xol_calculation,
-    ContractType.SURPLUS_SHARE: surplus_share_calculation,
 }

@@ -52,8 +52,6 @@ class RILayer:
         """
         if self.layer_type == ContractType.SURPLUS_SHARE:
             raise NotImplementedError("Surplus share loss function not yet implemented")
-        if self.layer_type == ContractType.QUOTA_SHARE:
-            return gross_amount
         func = layer_loss_calculation[self.layer_type]
         return float(func(gross_amount, self.occurrence_attachment, self.occurrence_limit))
 

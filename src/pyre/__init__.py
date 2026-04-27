@@ -39,6 +39,7 @@ from pyre.treaty.layer_loss_functions import (
     franchise_calculation,
     layer_loss_calculation,
     qs_calculation,
+    quota_share_calculation,
     surplus_share_calculation,
     xol_calculation,
 )
@@ -79,8 +80,9 @@ __all__ = [
     "RIContract",
     "xol_calculation",
     "qs_calculation",
-    "franchise_calculation",
+    "quota_share_calculation",
     "surplus_share_calculation",
+    "franchise_calculation",
     "layer_loss_calculation",
     # Models
     "Trending",

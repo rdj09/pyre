@@ -26,6 +26,9 @@ from pyre.treaty.layer_loss_functions import (
     qs_calculation as qs_calculation,
 )
 from pyre.treaty.layer_loss_functions import (
+    quota_share_calculation as quota_share_calculation,
+)
+from pyre.treaty.layer_loss_functions import (
     surplus_share_calculation as surplus_share_calculation,
 )
 from pyre.treaty.layer_loss_functions import (
