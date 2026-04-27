@@ -1,5 +1,6 @@
 # app/features/data_loader_module.py
 """Data Loader feature — file/DB upload and domain object instantiation."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -7,11 +8,12 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from ..services.domain_service import DomainService
 from pyre.claims.claims import Claims
 from pyre.claims.triangles import Triangle
 from pyre.data_injector.exceptions import InjectionError
 from pyre.exposures.exposures import Exposures
+
+from ..services.domain_service import DomainService
 
 
 def data_loader_ui() -> Any:

@@ -1,5 +1,6 @@
 # app/features/contract_module.py
 """Contract Builder feature — form-based and JSON import."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -8,8 +9,9 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from ..services.model_service import ModelService
 from pyre.treaty.contracts import RIContract
+
+from ..services.model_service import ModelService
 
 
 def contract_ui() -> Any:
@@ -43,15 +45,21 @@ def contract_ui() -> Any:
                     choices=["FULL_INDEXATION", "FIC", "SIC"],
                     selected="FULL_INDEXATION",
                 ),
-                ui.input_numeric("ctr_indexation_margin", "Indexation Margin", value=0.0, step=0.01),
+                ui.input_numeric(
+                    "ctr_indexation_margin", "Indexation Margin", value=0.0, step=0.01
+                ),
                 ui.input_date("ctr_inception", "Inception Date", value="2024-01-01"),
                 ui.input_date("ctr_expiration", "Expiration Date", value="2024-12-31"),
-                ui.input_text("ctr_fx_rates", "FX Rates", value="GBP:1.0", placeholder="GBP:1.0,USD:1.25"),
+                ui.input_text(
+                    "ctr_fx_rates", "FX Rates", value="GBP:1.0", placeholder="GBP:1.0,USD:1.25"
+                ),
                 ui.hr(),
                 ui.input_numeric("ctr_n_layers", "Number of Layers", value=1, min=1, max=5, step=1),
                 ui.output_ui("ctr_layer_forms"),
             ),
-            ui.input_action_button("ctr_build_btn", "Build Contract", class_="btn-primary w-100 mt-2"),
+            ui.input_action_button(
+                "ctr_build_btn", "Build Contract", class_="btn-primary w-100 mt-2"
+            ),
             ui.hr(),
             ui.output_text("ctr_status"),
             width=340,
@@ -80,22 +88,31 @@ def contract_server(
         for i in range(1, n + 1):
             forms.append(ui.h6(f"Layer {i}"))
             forms.append(ui.input_text(f"ctr_l{i}_name", "Name", value=f"Layer {i}"))
-            forms.append(ui.input_select(
-                f"ctr_l{i}_type", "Type",
-                choices=["EXCESS_OF_LOSS", "QUOTA_SHARE", "AGGREGATE_STOP_LOSS"],
-                selected="EXCESS_OF_LOSS",
-            ))
+            forms.append(
+                ui.input_select(
+                    f"ctr_l{i}_type",
+                    "Type",
+                    choices=["EXCESS_OF_LOSS", "QUOTA_SHARE", "AGGREGATE_STOP_LOSS"],
+                    selected="EXCESS_OF_LOSS",
+                )
+            )
             forms.append(ui.input_numeric(f"ctr_l{i}_occ_attach", "Occurrence Attachment", value=0))
             forms.append(ui.input_numeric(f"ctr_l{i}_occ_limit", "Occurrence Limit", value=1000000))
             forms.append(ui.input_numeric(f"ctr_l{i}_agg_attach", "Agg Attachment", value=0))
-            forms.append(ui.input_numeric(f"ctr_l{i}_agg_limit", "Agg Limit (0=unlimited)", value=0))
+            forms.append(
+                ui.input_numeric(f"ctr_l{i}_agg_limit", "Agg Limit (0=unlimited)", value=0)
+            )
             forms.append(ui.input_text(f"ctr_l{i}_lob", "Subject LOBs (comma)", value="ALL"))
             forms.append(ui.input_text(f"ctr_l{i}_lob_amounts", "LOB Amounts (comma)", value="0"))
             forms.append(ui.input_numeric(f"ctr_l{i}_fsp", "Full Subject Premium", value=0))
-            forms.append(ui.input_numeric(f"ctr_l{i}_written", "Written Line", value=1.0, step=0.01))
+            forms.append(
+                ui.input_numeric(f"ctr_l{i}_written", "Written Line", value=1.0, step=0.01)
+            )
             forms.append(ui.input_numeric(f"ctr_l{i}_signed", "Signed Line", value=1.0, step=0.01))
             forms.append(ui.input_numeric(f"ctr_l{i}_reinst", "No. Reinstatements", value=1, min=0))
-            forms.append(ui.input_text(f"ctr_l{i}_reinst_cost", "Reinstatement Costs", value="1:1.0"))
+            forms.append(
+                ui.input_text(f"ctr_l{i}_reinst_cost", "Reinstatement Costs", value="1:1.0")
+            )
             forms.append(ui.hr())
         return ui.div(*forms)
 
@@ -115,21 +132,23 @@ def contract_server(
                 n = int(input.ctr_n_layers())
                 layers_data = []
                 for i in range(1, n + 1):
-                    layers_data.append({
-                        "layer_name": input[f"ctr_l{i}_name"](),
-                        "layer_type": input[f"ctr_l{i}_type"](),
-                        "occurrence_attachment": input[f"ctr_l{i}_occ_attach"](),
-                        "occurrence_limit": input[f"ctr_l{i}_occ_limit"](),
-                        "aggregate_attachment": input[f"ctr_l{i}_agg_attach"](),
-                        "aggregate_limit": input[f"ctr_l{i}_agg_limit"](),
-                        "subject_lob": input[f"ctr_l{i}_lob"](),
-                        "subject_lob_amounts": input[f"ctr_l{i}_lob_amounts"](),
-                        "full_subject_premium": input[f"ctr_l{i}_fsp"](),
-                        "written_line": input[f"ctr_l{i}_written"](),
-                        "signed_line": input[f"ctr_l{i}_signed"](),
-                        "number_of_reinstatements": input[f"ctr_l{i}_reinst"](),
-                        "reinstatement_cost": input[f"ctr_l{i}_reinst_cost"](),
-                    })
+                    layers_data.append(
+                        {
+                            "layer_name": input[f"ctr_l{i}_name"](),
+                            "layer_type": input[f"ctr_l{i}_type"](),
+                            "occurrence_attachment": input[f"ctr_l{i}_occ_attach"](),
+                            "occurrence_limit": input[f"ctr_l{i}_occ_limit"](),
+                            "aggregate_attachment": input[f"ctr_l{i}_agg_attach"](),
+                            "aggregate_limit": input[f"ctr_l{i}_agg_limit"](),
+                            "subject_lob": input[f"ctr_l{i}_lob"](),
+                            "subject_lob_amounts": input[f"ctr_l{i}_lob_amounts"](),
+                            "full_subject_premium": input[f"ctr_l{i}_fsp"](),
+                            "written_line": input[f"ctr_l{i}_written"](),
+                            "signed_line": input[f"ctr_l{i}_signed"](),
+                            "number_of_reinstatements": input[f"ctr_l{i}_reinst"](),
+                            "reinstatement_cost": input[f"ctr_l{i}_reinst_cost"](),
+                        }
+                    )
                 contract = _svc.build_contract(
                     contract_id=input.ctr_contract_id(),
                     contract_description=input.ctr_description(),
@@ -180,18 +199,20 @@ def contract_server(
         c = _contract.get()
         if c is None:
             return pd.DataFrame()
-        return pd.DataFrame([
-            {
-                "id": layer.layer_id,
-                "name": layer.layer_name,
-                "type": layer.layer_type.name,
-                "occ_attach": layer.occurrence_attachment,
-                "occ_limit": layer.occurrence_limit,
-                "agg_attach": layer.aggregate_attachment,
-                "agg_limit": layer.aggregate_limit,
-                "fsp": layer.full_subject_premium,
-                "written_line": layer.written_line,
-                "signed_line": layer.signed_line,
-            }
-            for layer in c.layers
-        ])
+        return pd.DataFrame(
+            [
+                {
+                    "id": layer.layer_id,
+                    "name": layer.layer_name,
+                    "type": layer.layer_type.name,
+                    "occ_attach": layer.occurrence_attachment,
+                    "occ_limit": layer.occurrence_limit,
+                    "agg_attach": layer.aggregate_attachment,
+                    "agg_limit": layer.aggregate_limit,
+                    "fsp": layer.full_subject_premium,
+                    "written_line": layer.written_line,
+                    "signed_line": layer.signed_line,
+                }
+                for layer in c.layers
+            ]
+        )

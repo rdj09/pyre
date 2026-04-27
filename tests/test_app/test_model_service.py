@@ -49,21 +49,23 @@ class TestBuildContract:
             inception_date=date(2024, 1, 1),
             expiration_date=date(2024, 12, 31),
             fx_rates_text="GBP:1.0",
-            layers_data=[{
-                "layer_name": "Layer 1",
-                "layer_type": "EXCESS_OF_LOSS",
-                "occurrence_attachment": 500000,
-                "occurrence_limit": 500000,
-                "aggregate_attachment": 0,
-                "aggregate_limit": 0,
-                "subject_lob": "ALL",
-                "subject_lob_amounts": "0",
-                "full_subject_premium": 1000000,
-                "written_line": 1.0,
-                "signed_line": 1.0,
-                "number_of_reinstatements": 1,
-                "reinstatement_cost": "1:1.0",
-            }],
+            layers_data=[
+                {
+                    "layer_name": "Layer 1",
+                    "layer_type": "EXCESS_OF_LOSS",
+                    "occurrence_attachment": 500000,
+                    "occurrence_limit": 500000,
+                    "aggregate_attachment": 0,
+                    "aggregate_limit": 0,
+                    "subject_lob": "ALL",
+                    "subject_lob_amounts": "0",
+                    "full_subject_premium": 1000000,
+                    "written_line": 1.0,
+                    "signed_line": 1.0,
+                    "number_of_reinstatements": 1,
+                    "reinstatement_cost": "1:1.0",
+                }
+            ],
         )
         assert contract.contract_meta_data.contract_id == "TEST-001"
         assert len(contract.layers) == 1
@@ -84,22 +86,24 @@ class TestBuildContract:
                 "expiration_date": "2024-12-31",
                 "fx_rates": {"GBP": 1.0},
             },
-            "layers": [{
-                "layer_id": 1,
-                "layer_name": "Layer 1",
-                "layer_type": "EXCESS_OF_LOSS",
-                "occurrence_attachment": 250000,
-                "occurrence_limit": 250000,
-                "aggregate_attachment": 0,
-                "aggregate_limit": 1000000,
-                "subject_lob": "ALL",
-                "subject_lob_amounts": "0",
-                "full_subject_premium": 500000,
-                "written_line": 1.0,
-                "signed_line": 1.0,
-                "number_of_reinstatements": 0,
-                "reinstatement_cost": "1:1.0",
-            }],
+            "layers": [
+                {
+                    "layer_id": 1,
+                    "layer_name": "Layer 1",
+                    "layer_type": "EXCESS_OF_LOSS",
+                    "occurrence_attachment": 250000,
+                    "occurrence_limit": 250000,
+                    "aggregate_attachment": 0,
+                    "aggregate_limit": 1000000,
+                    "subject_lob": "ALL",
+                    "subject_lob_amounts": "0",
+                    "full_subject_premium": 500000,
+                    "written_line": 1.0,
+                    "signed_line": 1.0,
+                    "number_of_reinstatements": 0,
+                    "reinstatement_cost": "1:1.0",
+                }
+            ],
         }
         contract = svc.build_contract_from_json(json.dumps(payload).encode())
         assert contract.contract_meta_data.contract_id == "JSON-001"
@@ -109,12 +113,15 @@ class TestBuildContract:
 class TestExtractIbner:
     def test_extract_ibner_returns_dict(self) -> None:
         from pyre.claims.triangles import Triangle
+
         svc = ModelService()
-        tri = Triangle(triangle={
-            2020: {12: 100.0, 24: 150.0, 36: 175.0},
-            2021: {12: 110.0, 24: 160.0},
-            2022: {12: 120.0},
-        })
+        tri = Triangle(
+            triangle={
+                2020: {12: 100.0, 24: 150.0, 36: 175.0},
+                2021: {12: 110.0, 24: 160.0},
+                2022: {12: 120.0},
+            }
+        )
         result = svc.extract_ibner(tri)
         assert isinstance(result, dict)
         assert 12 in result

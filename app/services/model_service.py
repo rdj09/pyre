@@ -1,5 +1,6 @@
 # app/services/model_service.py
 """ModelService — thin facade over pyre model APIs for the Shiny app."""
+
 from __future__ import annotations
 
 import json
@@ -188,7 +189,10 @@ class ModelService:
             expiration_date=date.fromisoformat(meta_raw["expiration_date"]),
             fx_rates=meta_raw.get("fx_rates", {"GBP": 1.0}),
         )
-        layers = [self._build_layer(int(ld.get("layer_id", i + 1)), ld) for i, ld in enumerate(data["layers"])]
+        layers = [
+            self._build_layer(int(ld.get("layer_id", i + 1)), ld)
+            for i, ld in enumerate(data["layers"])
+        ]
         return RIContract(contract_meta_data=meta, layers=layers)
 
     # ------------------------------------------------------------------
@@ -262,9 +266,7 @@ class ModelService:
             curve_parameters=curve_params,
         )
 
-    def run_exposure_rate(
-        self, model: ExposureModel, analysis_date: date
-    ) -> dict[int, float]:
+    def run_exposure_rate(self, model: ExposureModel, analysis_date: date) -> dict[int, float]:
         return model.calculate_exposure_rate(analysis_date)
 
     # ------------------------------------------------------------------
@@ -286,9 +288,7 @@ class ModelService:
         random_seed: int | None,
         ibner_pattern: dict[int, float | None],
     ) -> SimulationResults:
-        clean_ibner: dict[int, float] = {
-            k: v for k, v in ibner_pattern.items() if v is not None
-        }
+        clean_ibner: dict[int, float] = {k: v for k, v in ibner_pattern.items() if v is not None}
         freq_fit = FrequencyFit(
             distributions=[FrequencyDistribution.POISSON],
             data=experience_data,
@@ -315,19 +315,25 @@ class ModelService:
         layer_names = {layer.layer_id: layer.layer_name for layer in contract.layers}
         rows = []
         for lid in results.loss_cost_by_layer:
-            rows.append({
-                "layer_id": lid,
-                "layer_name": layer_names.get(lid, str(lid)),
-                "loss_cost": results.loss_cost_by_layer[lid],
-                "required_capital": results.required_capital_by_layer[lid],
-                "required_premium": results.required_premium_by_layer[lid],
-            })
+            rows.append(
+                {
+                    "layer_id": lid,
+                    "layer_name": layer_names.get(lid, str(lid)),
+                    "loss_cost": results.loss_cost_by_layer[lid],
+                    "required_capital": results.required_capital_by_layer[lid],
+                    "required_premium": results.required_premium_by_layer[lid],
+                }
+            )
         df = pd.DataFrame(rows)
-        total_row = pd.DataFrame([{
-            "layer_id": -1,
-            "layer_name": "PROGRAMME TOTAL",
-            "loss_cost": sum(results.loss_cost_by_layer.values()),
-            "required_capital": sum(results.required_capital_by_layer.values()),
-            "required_premium": results.required_premium_programme,
-        }])
+        total_row = pd.DataFrame(
+            [
+                {
+                    "layer_id": -1,
+                    "layer_name": "PROGRAMME TOTAL",
+                    "loss_cost": sum(results.loss_cost_by_layer.values()),
+                    "required_capital": sum(results.required_capital_by_layer.values()),
+                    "required_premium": results.required_premium_programme,
+                }
+            ]
+        )
         return pd.concat([df, total_row], ignore_index=True)

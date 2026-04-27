@@ -1,5 +1,6 @@
 # app/features/simulation_module.py
 """Monte Carlo Simulation feature — DFA via frequency/severity fitting."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -7,7 +8,6 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from ..services.model_service import ModelService
 from pyre.claims.claims import Claims
 from pyre.claims.triangles import Triangle
 from pyre.exposures.exposures import Exposures
@@ -15,25 +15,38 @@ from pyre.models.aggregate.aggregate_features import ModellingAssumptions
 from pyre.models.aggregate.simulation_engine import SimulationResults
 from pyre.treaty.contracts import RIContract
 
+from ..services.model_service import ModelService
+
 
 def simulation_ui() -> Any:
     return ui.page_sidebar(
         ui.sidebar(
             ui.h4("Monte Carlo Simulation"),
-            ui.p("Requires: Claims, Exposures, Contract (+ Triangle for IBNER).", class_="text-muted small"),
-            ui.input_numeric("sim_n_sims", "Number of Simulations", value=10000, min=100, max=100000, step=100),
+            ui.p(
+                "Requires: Claims, Exposures, Contract (+ Triangle for IBNER).",
+                class_="text-muted small",
+            ),
+            ui.input_numeric(
+                "sim_n_sims", "Number of Simulations", value=10000, min=100, max=100000, step=100
+            ),
             ui.input_numeric("sim_seed", "Random Seed (0=none)", value=42, min=0),
             ui.hr(),
             ui.h6("Financial Assumptions"),
             ui.input_numeric("sim_coc", "Cost of Capital", value=0.08, min=0, max=1, step=0.01),
-            ui.input_numeric("sim_ror", "Required Return on Equity", value=0.12, min=0, max=1, step=0.01),
-            ui.input_numeric("sim_conf", "Capital Confidence Level", value=0.995, min=0.9, max=0.9999, step=0.001),
+            ui.input_numeric(
+                "sim_ror", "Required Return on Equity", value=0.12, min=0, max=1, step=0.01
+            ),
+            ui.input_numeric(
+                "sim_conf", "Capital Confidence Level", value=0.995, min=0.9, max=0.9999, step=0.001
+            ),
             ui.input_switch("sim_use_tvar", "Use TVaR (vs VaR)", value=True),
             ui.input_numeric("sim_inv_yield", "Investment Yield", value=0.0, step=0.005),
             ui.input_numeric("sim_tax", "Tax Rate", value=0.0, step=0.01),
             ui.input_numeric("sim_acq_cost", "Acquisition Cost Ratio", value=0.0, step=0.01),
             ui.input_numeric("sim_brokerage", "Brokerage Ratio", value=0.0, step=0.01),
-            ui.input_action_button("sim_run_btn", "Run Simulation", class_="btn-primary w-100 mt-2"),
+            ui.input_action_button(
+                "sim_run_btn", "Run Simulation", class_="btn-primary w-100 mt-2"
+            ),
             ui.hr(),
             ui.output_text("sim_status"),
             width=300,
@@ -130,13 +143,18 @@ def simulation_server(
     @render.plot
     def sim_dist_plot() -> Any:
         import matplotlib.pyplot as plt
+
         r = _results.get()
         if r is None:
             fig, ax = plt.subplots()
-            ax.text(0.5, 0.5, "No simulation results", ha="center", va="center", transform=ax.transAxes)
+            ax.text(
+                0.5, 0.5, "No simulation results", ha="center", va="center", transform=ax.transAxes
+            )
             return fig
         n_layers = len(r.aggregate_loss_distribution)
-        fig, axes = plt.subplots(1, max(n_layers, 1), figsize=(5 * max(n_layers, 1), 4), squeeze=False)
+        fig, axes = plt.subplots(
+            1, max(n_layers, 1), figsize=(5 * max(n_layers, 1), 4), squeeze=False
+        )
         for idx, (lid, losses) in enumerate(sorted(r.aggregate_loss_distribution.items())):
             ax = axes[0][idx]
             ax.hist(losses, bins=50, color="steelblue", edgecolor="white", alpha=0.8)

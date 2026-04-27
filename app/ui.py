@@ -1,5 +1,6 @@
 # app/ui.py
 """Shiny UI — page_navbar with 7 feature tabs."""
+
 from __future__ import annotations
 
 from shiny import ui as _ui

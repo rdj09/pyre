@@ -1,4 +1,5 @@
 """Triangle Analysis feature — ATA factors and IBNER pattern."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -6,8 +7,9 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from ..services.model_service import ModelService
 from pyre.claims.triangles import Triangle
+
+from ..services.model_service import ModelService
 
 
 def triangle_ui() -> Any:
@@ -70,7 +72,9 @@ def triangle_server(
         tri = _triangle.get()
         if tri is None:
             return "No triangle loaded."
-        return f"Triangle: {len(tri.origin_years)} origin years x {len(tri.dev_periods)} dev periods."
+        return (
+            f"Triangle: {len(tri.origin_years)} origin years x {len(tri.dev_periods)} dev periods."
+        )
 
     @render.data_frame
     def tri_grid_table() -> pd.DataFrame:
@@ -97,6 +101,6 @@ def triangle_server(
         ibner = _ibner.get()
         if not ibner:
             return pd.DataFrame()
-        return pd.DataFrame([
-            {"dev_period": k, "ibner_pattern": v} for k, v in sorted(ibner.items())
-        ])
+        return pd.DataFrame(
+            [{"dev_period": k, "ibner_pattern": v} for k, v in sorted(ibner.items())]
+        )

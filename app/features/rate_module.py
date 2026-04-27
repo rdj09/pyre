@@ -1,5 +1,6 @@
 # app/features/rate_module.py
 """Rate Monitoring feature — adequacy and rate change calculators."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -41,7 +42,9 @@ def rate_ui() -> Any:
                 ui.card_header("Adjusted Rate Change"),
                 ui.input_numeric("rm_adj_expiring", "Expiring Premium", value=900000, step=1000),
                 ui.input_numeric("rm_adj_renewed", "Renewed Premium", value=1000000, step=1000),
-                ui.input_numeric("rm_adj_adjusted", "Adjusted Expiring (0=use expiring)", value=0, step=1000),
+                ui.input_numeric(
+                    "rm_adj_adjusted", "Adjusted Expiring (0=use expiring)", value=0, step=1000
+                ),
                 ui.input_action_button("rm_adj_btn", "Calculate", class_="btn-primary"),
                 ui.output_text("rm_adj_result"),
             ),
@@ -72,8 +75,10 @@ def rate_server(
     def rm_adq_change_result() -> str:
         try:
             result = rate_adequacy_change(
-                float(input.rm_prior_prem()), float(input.rm_prior_ind()),
-                float(input.rm_curr_prem()), float(input.rm_curr_ind()),
+                float(input.rm_prior_prem()),
+                float(input.rm_prior_ind()),
+                float(input.rm_curr_prem()),
+                float(input.rm_curr_ind()),
             )
             return f"Adequacy change: {result:+.4f} ({result * 100:+.2f}%)"
         except Exception as exc:

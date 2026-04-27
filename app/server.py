@@ -1,5 +1,6 @@
 # app/server.py
 """Shiny reactive server — delegates to feature modules via shared reactive state."""
+
 from __future__ import annotations
 
 from shiny import Inputs, Outputs, Session, reactive

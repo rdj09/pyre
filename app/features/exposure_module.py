@@ -1,5 +1,6 @@
 # app/features/exposure_module.py
 """Exposure Rating feature — MBBEFD / Mixed Exponential curve-based rating."""
+
 from __future__ import annotations
 
 from datetime import date
@@ -8,9 +9,10 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from ..services.model_service import ModelService
 from pyre.exposures.exposures import Exposures
 from pyre.treaty.contracts import RIContract
+
+from ..services.model_service import ModelService
 
 
 def exposure_ui() -> Any:
@@ -26,7 +28,9 @@ def exposure_ui() -> Any:
             ),
             ui.output_ui("expm_curve_params_ui"),
             ui.input_date("expm_analysis_date", "Analysis Date", value=str(date.today())),
-            ui.input_action_button("expm_run_btn", "Run Exposure Rate", class_="btn-primary w-100 mt-2"),
+            ui.input_action_button(
+                "expm_run_btn", "Run Exposure Rate", class_="btn-primary w-100 mt-2"
+            ),
             ui.hr(),
             ui.output_text("expm_status"),
             width=280,
@@ -123,13 +127,14 @@ def exposure_server(
         r = _results.get()
         if not r:
             return pd.DataFrame()
-        return pd.DataFrame([
-            {"layer_id": lid, "exposure_rate": rate} for lid, rate in sorted(r.items())
-        ])
+        return pd.DataFrame(
+            [{"layer_id": lid, "exposure_rate": rate} for lid, rate in sorted(r.items())]
+        )
 
     @render.plot
     def expm_rate_plot() -> Any:
         import matplotlib.pyplot as plt
+
         r = _results.get()
         if not r:
             fig, ax = plt.subplots()

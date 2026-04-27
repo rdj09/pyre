@@ -1,5 +1,6 @@
 # app/features/experience_module.py
 """Experience Pricing feature — burn cost with trending and projection methods."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -7,10 +8,11 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from ..services.model_service import ModelService
 from pyre.claims.claims import Claims
 from pyre.exposures.exposures import Exposures
 from pyre.treaty.contracts import RIContract
+
+from ..services.model_service import ModelService
 
 
 def experience_ui() -> Any:
@@ -85,7 +87,10 @@ def experience_server(
     def _update_layer_choices() -> None:
         c = _contract.get()
         if c is not None:
-            choices = {str(layer.layer_id): f"Layer {layer.layer_id}: {layer.layer_name}" for layer in c.layers}
+            choices = {
+                str(layer.layer_id): f"Layer {layer.layer_id}: {layer.layer_name}"
+                for layer in c.layers
+            }
             ui.update_select("exp_layer_id", choices=choices)
 
     @reactive.effect
@@ -150,9 +155,9 @@ def experience_server(
         r = _results.get()
         if not r:
             return pd.DataFrame()
-        return pd.DataFrame([
-            {"modelling_year": y, "burn_cost_loss_ratio": v} for y, v in sorted(r.items())
-        ])
+        return pd.DataFrame(
+            [{"modelling_year": y, "burn_cost_loss_ratio": v} for y, v in sorted(r.items())]
+        )
 
     @render.data_frame
     def exp_claims_table() -> pd.DataFrame:
@@ -161,10 +166,12 @@ def experience_server(
             return pd.DataFrame()
         rows = []
         for year, data in sorted(agg.items()):
-            rows.append({
-                "modelling_year": year,
-                "latest_incurred": data.get("latest_incurred", 0),
-                "latest_paid": data.get("latest_paid", 0),
-                "total_count": data.get("total_count", 0),
-            })
+            rows.append(
+                {
+                    "modelling_year": year,
+                    "latest_incurred": data.get("latest_incurred", 0),
+                    "latest_paid": data.get("latest_paid", 0),
+                    "total_count": data.get("total_count", 0),
+                }
+            )
         return pd.DataFrame(rows)
