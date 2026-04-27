@@ -20,4 +20,5 @@ src/pyre/Models/Experience/*
 .worktrees/
 app/__pycache__/*
 app/services/__pycache__/*
+app/features/__pycache__/*
 tests/test_app/__pycache__/*
