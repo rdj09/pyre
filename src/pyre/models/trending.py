@@ -1,3 +1,4 @@
+import warnings
 from typing import Any
 
 from ..claims.claims import Claim, ClaimDevelopmentHistory, Claims
@@ -68,7 +69,8 @@ class Trending:
         Returns:
             float: The calculated trend factor.
         """
-        assert self.base_year is not None, "base_year must be set before calculating trend factors"
+        if self.base_year is None:
+            raise ValueError("base_year must be set before calculating trend factors")
         claim_factors = self.claim_trend_factors or self.exposure_trend_factors
         trend_factors = claim_factors if for_claims else self.exposure_trend_factors
 
@@ -86,7 +88,8 @@ class Trending:
         Returns:
             Exposures: A new Exposures object with trended values.
         """
-        assert self.base_year is not None, "base_year must be set before trending exposures"
+        if self.base_year is None:
+            raise ValueError("base_year must be set before trending exposures")
         trended_exposures = []
 
         for exposure in exposures:
@@ -136,7 +139,8 @@ class Trending:
         Returns:
             Claims: A new Claims object with trended ClaimDevelopmentHistory for each claim.
         """
-        assert self.base_year is not None, "base_year must be set before trending claims"
+        if self.base_year is None:
+            raise ValueError("base_year must be set before trending claims")
         trended_claims = []
 
         for claim in claims.claims:
@@ -184,20 +188,17 @@ def calculate_trend_factor(
     Returns:
         float: The calculated trend factor.
     """
-    if for_claims:
-        trending = Trending(
-            exposure_trend_factors=trend_factors,
-            claim_trend_factors=trend_factors,
-            base_year=base_year,
-        )
-        return trending.calculate_trend_factor(origin_year, for_claims=True)
-    else:
-        trending = Trending(
-            exposure_trend_factors=trend_factors,
-            claim_trend_factors=trend_factors,
-            base_year=base_year,
-        )
-        return trending.calculate_trend_factor(origin_year, for_claims=False)
+    warnings.warn(
+        "Module-level calculate_trend_factor is deprecated; use Trending(...).calculate_trend_factor()",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    trending = Trending(
+        exposure_trend_factors=trend_factors,
+        claim_trend_factors=trend_factors,
+        base_year=base_year,
+    )
+    return trending.calculate_trend_factor(origin_year, for_claims=for_claims)
 
 
 def trend_exposures(
@@ -214,6 +215,11 @@ def trend_exposures(
     Returns:
         Exposures: A new Exposures object with trended values.
     """
+    warnings.warn(
+        "Module-level trend_exposures is deprecated; use Trending(...).trend_exposures()",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     trending = Trending(
         exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year
     )
@@ -232,6 +238,11 @@ def trend_claims(claims: Claims, trend_factors: dict[int, float], base_year: int
     Returns:
         Claims: A new Claims object with trended ClaimDevelopmentHistory for each claim.
     """
+    warnings.warn(
+        "Module-level trend_claims is deprecated; use Trending(...).trend_claims()",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     trending = Trending(
         exposure_trend_factors=trend_factors, claim_trend_factors=trend_factors, base_year=base_year
     )
@@ -248,6 +259,11 @@ def get_trend_factors(trending_instance: Trending) -> dict[str, Any]:
     Returns:
         Dict with keys 'exposure_trend_factors', 'claim_trend_factors', and 'base_year'.
     """
+    warnings.warn(
+        "Module-level get_trend_factors is deprecated; use Trending(...).get_trend_factors()",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return {
         "exposure_trend_factors": trending_instance.exposure_trend_factors,
         "claim_trend_factors": trending_instance.claim_trend_factors,

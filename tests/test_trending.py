@@ -1,6 +1,8 @@
 import unittest
 from datetime import date
 
+import pytest
+
 from pyre.claims.claims import (
     Claim,
     ClaimDevelopmentHistory,
@@ -242,16 +244,18 @@ class TestStandaloneFunctions(unittest.TestCase):
 
     def test_calculate_trend_factor_function(self):
         # Test the standalone calculate_trend_factor function
-        factor = calculate_trend_factor(2021, self.base_year, self.trend_factors)
+        with pytest.warns(DeprecationWarning):
+            factor = calculate_trend_factor(2021, self.base_year, self.trend_factors)
         self.assertEqual(factor, 1.05)
 
         # Test with year not in trend factors
-        with self.assertRaises(KeyError):
+        with pytest.warns(DeprecationWarning), self.assertRaises(KeyError):
             calculate_trend_factor(2019, self.base_year, self.trend_factors)
 
     def test_trend_exposures_function(self):
         # Test the standalone trend_exposures function
-        trended_exposures = trend_exposures(self.exposures, self.trend_factors, self.base_year)
+        with pytest.warns(DeprecationWarning):
+            trended_exposures = trend_exposures(self.exposures, self.trend_factors, self.base_year)
 
         # Check that we got an Exposures object back
         self.assertIsInstance(trended_exposures, Exposures)
@@ -262,7 +266,8 @@ class TestStandaloneFunctions(unittest.TestCase):
 
     def test_trend_claims_function(self):
         # Test the standalone trend_claims function
-        trended_claims = trend_claims(self.claims, self.trend_factors, self.base_year)
+        with pytest.warns(DeprecationWarning):
+            trended_claims = trend_claims(self.claims, self.trend_factors, self.base_year)
 
         # Check that we got a Claims object back
         self.assertIsInstance(trended_claims, Claims)
@@ -289,7 +294,8 @@ class TestStandaloneFunctions(unittest.TestCase):
 
     def test_get_trend_factors_function(self):
         # Test the standalone get_trend_factors function
-        factors = get_trend_factors(self.trending)
+        with pytest.warns(DeprecationWarning):
+            factors = get_trend_factors(self.trending)
 
         # Check that we got a dictionary back
         self.assertIsInstance(factors, dict)
@@ -307,9 +313,6 @@ class TestStandaloneFunctions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-
-import pytest
 
 
 def test_trend_exposures_returns_trended_values():
