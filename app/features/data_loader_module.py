@@ -7,7 +7,7 @@ from typing import Any
 import pandas as pd
 from shiny import Inputs, Outputs, Session, reactive, render, ui
 
-from app.services.domain_service import DomainService
+from ..services.domain_service import DomainService
 from pyre.claims.claims import Claims
 from pyre.claims.triangles import Triangle
 from pyre.data_injector.exceptions import InjectionError
@@ -83,6 +83,9 @@ def data_loader_server(
         _error_message.set("")
         _raw_records.set([])
         _domain_result.set(None)
+        _claims.set(None)
+        _exposures.set(None)
+        _triangle.set(None)
 
         source_type = input.dl_source_type()
         domain_type = input.dl_domain_type()
