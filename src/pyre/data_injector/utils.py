@@ -25,9 +25,10 @@ def parse_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
     if isinstance(value, str):
-        if value.lower() in {"true", "yes", "1"}:
+        normalised = value.strip().lower()
+        if normalised in {"true", "yes", "1"}:
             return True
-        if value.lower() in {"false", "no", "0"}:
+        if normalised in {"false", "no", "0"}:
             return False
     raise ValueError(f"Cannot parse {value!r} as bool")
 

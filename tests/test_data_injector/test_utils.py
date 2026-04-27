@@ -45,6 +45,18 @@ class TestParseBool:
         with pytest.raises(ValueError, match="Cannot parse"):
             parse_bool("maybe")
 
+    @pytest.mark.parametrize("s", ["TRUE", "True", "YES", "yes", "1"])
+    def test_parse_bool_truthy(self, s):
+        assert parse_bool(s) is True
+
+    @pytest.mark.parametrize("s", ["FALSE", "False", "NO", "no", "0"])
+    def test_parse_bool_falsy(self, s):
+        assert parse_bool(s) is False
+
+    def test_parse_bool_invalid_raises(self):
+        with pytest.raises(ValueError):
+            parse_bool("maybe")
+
 
 class TestParseList:
     def test_csv_string(self):
