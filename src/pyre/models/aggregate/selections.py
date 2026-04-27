@@ -1,8 +1,109 @@
 import math
+from dataclasses import dataclass, field
 from typing import Any
 
 from ...models.experience.experience_preparer import ExperienceModelData
 from ...models.exposure.exposure_rating_cost import ExposureModel
+
+
+@dataclass
+class CredibilityConfig:
+    """Configuration for credibility weight calculation."""
+
+    method: str = "buhlmann"
+    full_credibility_standard: int = 1082
+    claim_count: int = 0
+    expected_process_variance: float = 1.0
+    variance_of_hypothetical_means: float = 0.1
+    data_by_group: dict[Any, list[float]] = field(default_factory=dict)
+    exposures: list[float] = field(default_factory=list)
+    claim_counts: list[int] = field(default_factory=list)
+    data: list[float] = field(default_factory=list)
+    collective_mean: float = 1.0
+    prior_mean: float = 1.0
+    prior_variance: float = 0.1
+    data_variance: float = 1.0
+
+
+class _VarianceEstimator:
+    """Internal: variance calculations used by credibility methods."""
+
+    @staticmethod
+    def sample_variance(data: list[float]) -> float:
+        if len(data) < 2:
+            return 0.0
+        mean = sum(data) / len(data)
+        return sum((x - mean) ** 2 for x in data) / (len(data) - 1)
+
+    @staticmethod
+    def process_variance(claims_by_year: dict[Any, list[float]]) -> float:
+        """Estimate the process variance (within variance) from grouped data."""
+        if not claims_by_year:
+            return 0.0
+
+        total_variance = 0.0
+        total_weight = 0.0
+
+        for _group, values in claims_by_year.items():
+            if len(values) < 2:
+                continue
+
+            group_mean = sum(values) / len(values)
+            group_variance = sum((x - group_mean) ** 2 for x in values) / len(values)
+
+            weight = len(values)
+            total_variance += group_variance * weight
+            total_weight += weight
+
+        if total_weight <= 0:
+            return 0.0
+
+        return total_variance / total_weight
+
+    @staticmethod
+    def variance_of_hypothetical_means(claims_by_year: dict[Any, list[float]]) -> float:
+        """Estimate the variance of hypothetical means (between variance) from grouped data."""
+        if not claims_by_year:
+            return 0.0
+
+        all_values: list[float] = []
+        for values in claims_by_year.values():
+            all_values.extend(values)
+
+        if not all_values:
+            return 0.0
+
+        overall_mean = sum(all_values) / len(all_values)
+
+        group_means: dict[Any, float] = {}
+        group_sizes: dict[Any, int] = {}
+
+        for group, values in claims_by_year.items():
+            if not values:
+                continue
+            group_means[group] = sum(values) / len(values)
+            group_sizes[group] = len(values)
+
+        weighted_sum_squared_diff = 0.0
+        total_weight = 0.0
+
+        for group, mean in group_means.items():
+            weight = group_sizes[group]
+            weighted_sum_squared_diff += weight * ((mean - overall_mean) ** 2)
+            total_weight += weight
+
+        if total_weight <= 0:
+            return 0.0
+
+        raw_between_variance = weighted_sum_squared_diff / total_weight
+
+        pv = _VarianceEstimator.process_variance(claims_by_year)
+
+        avg_group_size = sum(group_sizes.values()) / len(group_sizes) if group_sizes else 0
+
+        adjusted_between_variance = max(0, raw_between_variance - (pv / avg_group_size))
+
+        return adjusted_between_variance
 
 
 class CredibilityWeight:
@@ -29,13 +130,7 @@ class CredibilityWeight:
         """
         if not data or len(data) < 2:
             return 0.0
-
-        mean = sum(data) / len(data)
-        variance = sum((x - mean) ** 2 for x in data) / (
-            len(data) - 1
-        )  # Using n-1 for sample variance
-
-        return variance
+        return _VarianceEstimator.sample_variance(data)
 
     def calculate_data_variance(self, data: list[float], method: str = "sample") -> float:
         """
@@ -57,14 +152,8 @@ class CredibilityWeight:
         mean = sum(data) / len(data)
 
         if method == "sample":
-            # Sample variance (unbiased estimator)
             return sum((x - mean) ** 2 for x in data) / (len(data) - 1)
-        elif method == "population":
-            # Population variance
-            return sum((x - mean) ** 2 for x in data) / len(data)
-        elif method == "process":
-            # Process variance estimate for credibility calculations
-            # This is often the within-variance component
+        elif method in ("population", "process"):
             return sum((x - mean) ** 2 for x in data) / len(data)
         else:
             raise ValueError(f"Invalid variance calculation method: {method}")
@@ -72,7 +161,6 @@ class CredibilityWeight:
     def estimate_process_variance(self, data_by_group: dict[Any, list[float]]) -> float:
         """
         Estimate the process variance (within variance) from grouped data.
-        This is useful for Bühlmann and Bühlmann-Straub credibility methods.
 
         Args:
             data_by_group: Dictionary mapping group identifiers to lists of observed values
@@ -80,36 +168,13 @@ class CredibilityWeight:
         Returns:
             Estimated process variance
         """
-        if not data_by_group:
-            return 0.0
-
-        total_variance = 0.0
-        total_weight = 0.0
-
-        for _group, values in data_by_group.items():
-            if len(values) < 2:
-                continue
-
-            # Calculate within-group variance
-            group_mean = sum(values) / len(values)
-            group_variance = sum((x - group_mean) ** 2 for x in values) / len(values)
-
-            # Weight by group size
-            weight = len(values)
-            total_variance += group_variance * weight
-            total_weight += weight
-
-        if total_weight <= 0:
-            return 0.0
-
-        return total_variance / total_weight
+        return _VarianceEstimator.process_variance(data_by_group)
 
     def estimate_variance_of_hypothetical_means(
         self, data_by_group: dict[Any, list[float]]
     ) -> float:
         """
         Estimate the variance of hypothetical means (between variance) from grouped data.
-        This is useful for Bühlmann and Bühlmann-Straub credibility methods.
 
         Args:
             data_by_group: Dictionary mapping group identifiers to lists of observed values
@@ -117,57 +182,7 @@ class CredibilityWeight:
         Returns:
             Estimated variance of hypothetical means
         """
-        if not data_by_group:
-            return 0.0
-
-        # Calculate overall mean
-        all_values = []
-        for values in data_by_group.values():
-            all_values.extend(values)
-
-        if not all_values:
-            return 0.0
-
-        overall_mean = sum(all_values) / len(all_values)
-
-        # Calculate group means
-        group_means = {}
-        group_sizes = {}
-
-        for group, values in data_by_group.items():
-            if not values:
-                continue
-
-            group_means[group] = sum(values) / len(values)
-            group_sizes[group] = len(values)
-
-        # Calculate variance of group means
-        weighted_sum_squared_diff = 0.0
-        total_weight = 0.0
-
-        for group, mean in group_means.items():
-            weight = group_sizes[group]
-            weighted_sum_squared_diff += weight * ((mean - overall_mean) ** 2)
-            total_weight += weight
-
-        if total_weight <= 0:
-            return 0.0
-
-        # Calculate raw between variance
-        raw_between_variance = weighted_sum_squared_diff / total_weight
-
-        # Adjust for within-group variance
-        process_variance = self.estimate_process_variance(data_by_group)
-
-        # Calculate average group size
-        avg_group_size = sum(group_sizes.values()) / len(group_sizes) if group_sizes else 0
-
-        # Adjust between variance by removing the expected contribution from process variance
-        adjusted_between_variance = max(
-            0, raw_between_variance - (process_variance / avg_group_size)
-        )
-
-        return adjusted_between_variance
+        return _VarianceEstimator.variance_of_hypothetical_means(data_by_group)
 
     def limited_fluctuation_credibility(
         self, claim_count: int, full_credibility_standard: int = 1082
@@ -272,18 +287,14 @@ class CredibilityWeight:
         if not data or collective_mean <= 0:
             return 0.0
 
-        # Calculate individual mean and variance
         individual_mean = sum(data) / len(data)
         if individual_mean <= 0:
             return 0.0
 
-        # Use the helper function to calculate variance
         individual_variance = self.calculate_data_variance(data, method="population")
 
-        # Calculate between variance (estimate of variance of hypothetical means)
         between_variance = max(0, individual_variance - (collective_mean / len(data)))
 
-        # Calculate credibility
         if between_variance <= 0:
             return 0.0
 
@@ -313,7 +324,6 @@ class CredibilityWeight:
         if n <= 0:
             return 0.0
 
-        # Bayesian credibility formula
         credibility = (n * prior_variance) / (n * prior_variance + data_variance)
 
         return min(max(credibility, 0.0), 1.0)
@@ -343,122 +353,99 @@ class Selections:
         self._exposure_weight = 0.5  # Default weight
 
     def calculate_experience_weight(
-        self, method: str = "limited_fluctuation", **kwargs: Any
+        self,
+        claims_by_year: dict[int, list[float]] | None = None,
+        config: CredibilityConfig | None = None,
     ) -> float:
         """
         Calculate the weight to assign to experience rating.
 
         Args:
-            method: Credibility method to use ("limited_fluctuation", "buhlmann",
-                   "buhlmann_straub", "greatest_accuracy", or "bayesian")
-            **kwargs: Additional parameters for the credibility method
+            claims_by_year: Optional dict mapping year to list of claim amounts
+            config: CredibilityConfig specifying method and parameters
 
         Returns:
             Weight for experience rating between 0 and 1
         """
-        # Get claim count if not provided
-        if "claim_count" not in kwargs and hasattr(self.experience_data, "subject_contract_claims"):
-            total_claims = sum(
+        if config is None:
+            config = CredibilityConfig()
+
+        method = config.method
+        full_credibility_standard = config.full_credibility_standard
+
+        # Derive claim_count from experience_data if not set in config
+        claim_count = config.claim_count
+        if claim_count == 0 and hasattr(self.experience_data, "subject_contract_claims"):
+            claim_count = sum(
                 len(claims_obj.claims)
                 for claims_obj in self.experience_data.subject_contract_claims.values()
             )
-            kwargs["claim_count"] = total_claims
 
-        # Calculate credibility based on the selected method
+        data_by_group: dict[Any, list[float]] = (
+            claims_by_year if claims_by_year is not None else config.data_by_group
+        )
+
         if method == "limited_fluctuation":
             weight = self.credibility_weight.limited_fluctuation_credibility(
-                kwargs.get("claim_count", 0), kwargs.get("full_credibility_standard", 1082)
+                claim_count, full_credibility_standard
             )
         elif method == "buhlmann":
-            # Get claim count if not already provided
-            claim_count = kwargs.get("claim_count", 0)
+            epv = config.expected_process_variance
+            vhm = config.variance_of_hypothetical_means
 
-            # Get or calculate process variance and variance of hypothetical means
-            if "data_by_group" in kwargs:
-                data_by_group = kwargs.get("data_by_group", {})
-
-                # Calculate variances if not provided
-                if "expected_process_variance" not in kwargs:
-                    kwargs["expected_process_variance"] = (
-                        self.credibility_weight.estimate_process_variance(data_by_group)
-                    )
-
-                if "variance_of_hypothetical_means" not in kwargs:
-                    kwargs["variance_of_hypothetical_means"] = (
-                        self.credibility_weight.estimate_variance_of_hypothetical_means(
-                            data_by_group
-                        )
-                    )
-
-            weight = self.credibility_weight.buhlmann_credibility(
-                claim_count,
-                kwargs.get("expected_process_variance", 1.0),
-                kwargs.get("variance_of_hypothetical_means", 0.1),
-            )
-        elif method == "buhlmann_straub":
-            # Get exposures and claim counts
-            exposures = kwargs.get("exposures", [])
-            claim_counts = kwargs.get("claim_counts", [])
-
-            # Get or calculate process variance and variance of hypothetical means
-            if "data_by_group" in kwargs:
-                data_by_group = kwargs.get("data_by_group", {})
-
-                # Calculate variances if not provided
-                if "expected_process_variance" not in kwargs:
-                    kwargs["expected_process_variance"] = (
-                        self.credibility_weight.estimate_process_variance(data_by_group)
-                    )
-
-                if "variance_of_hypothetical_means" not in kwargs:
-                    kwargs["variance_of_hypothetical_means"] = (
-                        self.credibility_weight.estimate_variance_of_hypothetical_means(
-                            data_by_group
-                        )
-                    )
-
-            weight = self.credibility_weight.buhlmann_straub_credibility(
-                exposures,
-                claim_counts,
-                kwargs.get("expected_process_variance", 1.0),
-                kwargs.get("variance_of_hypothetical_means", 0.1),
-            )
-        elif method == "greatest_accuracy":
-            # Get loss data if not provided
-            if "data" not in kwargs and hasattr(self.experience_data, "subject_contract_claims"):
-                kwargs["data"] = [
-                    claim.capped_claim_development_history.latest_incurred
-                    for claims_obj in self.experience_data.subject_contract_claims.values()
-                    for claim in claims_obj.claims
-                ]
-
-            # Get data for easier access
-            data = kwargs.get("data", [])
-
-            weight = self.credibility_weight.greatest_accuracy_credibility(
-                data, kwargs.get("collective_mean", 1.0)
-            )
-        elif method == "bayesian":
-            # Get loss data if not provided
-            if "data" not in kwargs and hasattr(self.experience_data, "subject_contract_claims"):
-                kwargs["data"] = [
-                    claim.capped_claim_development_history.latest_incurred
-                    for claims_obj in self.experience_data.subject_contract_claims.values()
-                    for claim in claims_obj.claims
-                ]
-
-            # Calculate data variance if not provided
-            data = kwargs.get("data", [])
-            if "data_variance" not in kwargs and data:
-                kwargs["data_variance"] = self.credibility_weight.calculate_data_variance(
-                    data, method="sample"
+            if data_by_group:
+                epv = self.credibility_weight.estimate_process_variance(data_by_group)
+                vhm = self.credibility_weight.estimate_variance_of_hypothetical_means(
+                    data_by_group
                 )
 
+            weight = self.credibility_weight.buhlmann_credibility(claim_count, epv, vhm)
+        elif method == "buhlmann_straub":
+            epv = config.expected_process_variance
+            vhm = config.variance_of_hypothetical_means
+
+            if data_by_group:
+                epv = self.credibility_weight.estimate_process_variance(data_by_group)
+                vhm = self.credibility_weight.estimate_variance_of_hypothetical_means(
+                    data_by_group
+                )
+
+            weight = self.credibility_weight.buhlmann_straub_credibility(
+                config.exposures,
+                config.claim_counts,
+                epv,
+                vhm,
+            )
+        elif method == "greatest_accuracy":
+            data = config.data
+            if not data and hasattr(self.experience_data, "subject_contract_claims"):
+                data = [
+                    claim.capped_claim_development_history.latest_incurred
+                    for claims_obj in self.experience_data.subject_contract_claims.values()
+                    for claim in claims_obj.claims
+                ]
+
+            weight = self.credibility_weight.greatest_accuracy_credibility(
+                data, config.collective_mean
+            )
+        elif method == "bayesian":
+            data = config.data
+            if not data and hasattr(self.experience_data, "subject_contract_claims"):
+                data = [
+                    claim.capped_claim_development_history.latest_incurred
+                    for claims_obj in self.experience_data.subject_contract_claims.values()
+                    for claim in claims_obj.claims
+                ]
+
+            data_variance = config.data_variance
+            if data_variance == 1.0 and data:
+                data_variance = self.credibility_weight.calculate_data_variance(data, method="sample")
+
             weight = self.credibility_weight.bayesian_credibility(
-                kwargs.get("prior_mean", 1.0),
-                kwargs.get("prior_variance", 0.1),
+                config.prior_mean,
+                config.prior_variance,
                 data,
-                kwargs.get("data_variance", 1.0),
+                data_variance,
             )
         else:
             raise ValueError(f"Invalid credibility method: {method}")
@@ -496,7 +483,7 @@ class Selections:
         experience_result: float,
         exposure_result: float,
         method: str = "limited_fluctuation",
-        **kwargs: Any,
+        config: CredibilityConfig | None = None,
     ) -> float:
         """
         Make a selection by calculating weights and combining results.
@@ -504,14 +491,15 @@ class Selections:
         Args:
             experience_result: Result from experience rating method
             exposure_result: Result from exposure rating method
-            method: Credibility method to use
-            **kwargs: Additional parameters for the credibility method
+            method: Credibility method to use (ignored if config is provided)
+            config: CredibilityConfig specifying method and parameters
 
         Returns:
             Selected result based on weighted average
         """
-        # Calculate weights
-        self.calculate_experience_weight(method, **kwargs)
+        if config is None:
+            config = CredibilityConfig(method=method)
 
-        # Return weighted average
+        self.calculate_experience_weight(config=config)
+
         return self.unlimited_selection(experience_result, exposure_result)

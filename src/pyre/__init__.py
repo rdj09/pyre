@@ -23,7 +23,7 @@ from pyre.exceptions.exceptions import (
 )
 from pyre.exposures.exposures import Exposure, ExposureMetaData, Exposures, ExposureValues
 from pyre.models.aggregate.aggregate_features import AggregateFeatures, ModellingAssumptions
-from pyre.models.aggregate.selections import CredibilityWeight, Selections
+from pyre.models.aggregate.selections import CredibilityConfig, CredibilityWeight, Selections
 from pyre.models.aggregate.simulation_engine import Simulation, SimulationResults
 from pyre.models.experience.burn_cost import BurnCostModel
 from pyre.models.experience.experience_preparer import ExperienceModelData
@@ -97,6 +97,7 @@ __all__ = [
     "swissRe_c_values",
     "Selections",
     "CredibilityWeight",
+    "CredibilityConfig",
     "AggregateFeatures",
     "ModellingAssumptions",
     "Simulation",
