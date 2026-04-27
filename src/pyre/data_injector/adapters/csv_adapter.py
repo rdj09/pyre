@@ -5,7 +5,10 @@ import csv
 from pathlib import Path
 from typing import Any
 
+from ..registry import AdapterRegistry
 
+
+@AdapterRegistry.register("csv")
 class CSVAdapter:
     def __init__(self, delimiter: str = ",", encoding: str = "utf-8") -> None:
         self._delimiter = delimiter

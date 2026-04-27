@@ -1,5 +1,10 @@
 # src/pyre/data_injector/__init__.py
-from .adapters.db_adapter import DBAdapter as DBAdapter
+from .adapters import CSVAdapter as CSVAdapter
+from .adapters import DBAdapter as DBAdapter
+from .adapters import DictAdapter as DictAdapter
+from .adapters import ExcelAdapter as ExcelAdapter
+from .adapters import JSONAdapter as JSONAdapter
+from .adapters import YAMLAdapter as YAMLAdapter
 from .descriptors import FieldDescriptor as FieldDescriptor
 from .exceptions import InjectionError as InjectionError
 from .injector import Injector as Injector

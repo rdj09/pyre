@@ -4,7 +4,10 @@ from __future__ import annotations
 import dataclasses
 from typing import Any
 
+from ..registry import AdapterRegistry
 
+
+@AdapterRegistry.register("dict")
 class DictAdapter:
     """Accepts dicts, lists, dataclass instances, or objects with __dict__."""
 

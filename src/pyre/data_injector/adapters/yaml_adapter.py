@@ -4,7 +4,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from ..registry import AdapterRegistry
 
+
+@AdapterRegistry.register("yaml")
 class YAMLAdapter:
     def load(self, source: str | Path) -> list[dict[str, Any]]:
         try:

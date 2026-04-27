@@ -4,7 +4,10 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from ..registry import AdapterRegistry
 
+
+@AdapterRegistry.register("excel")
 class ExcelAdapter:
     def __init__(self, sheet_name: str | int = 0) -> None:
         self._sheet_name = sheet_name

@@ -5,7 +5,10 @@ import json
 from pathlib import Path
 from typing import Any
 
+from ..registry import AdapterRegistry
 
+
+@AdapterRegistry.register("json")
 class JSONAdapter:
     def load(self, source: str | Path | dict[str, Any] | list[Any]) -> list[dict[str, Any]]:
         if isinstance(source, (str, Path)):
