@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 from scipy import optimize
 
+from ..experience.curve_fitting import r_squared
 from .exposure_ILF_functions import pareto_ilf, power_ilf
 
 
@@ -66,11 +67,9 @@ class ILFFitter:
         predicted_ilfs = power_ilf(self.limits, self.base_limit, slope)
 
         # Calculate R-squared
-        ss_total = np.sum((self.ilfs - np.mean(self.ilfs)) ** 2)
-        ss_residual = np.sum((self.ilfs - predicted_ilfs) ** 2)
-        r_squared = 1 - (ss_residual / ss_total)
+        r_squared_value = r_squared(self.ilfs.tolist(), predicted_ilfs.tolist())
 
-        return slope, r_squared
+        return slope, r_squared_value
 
     def fit_pareto(self) -> tuple[float, float, float]:
         """
@@ -114,11 +113,9 @@ class ILFFitter:
         predicted_ilfs = [pareto_ilf(self.base_limit, limit, alpha) for limit in self.limits]
 
         # Calculate R-squared
-        ss_total = np.sum((self.ilfs - np.mean(self.ilfs)) ** 2)
-        ss_residual = np.sum((self.ilfs - np.array(predicted_ilfs)) ** 2)
-        r_squared = 1 - (ss_residual / ss_total)
+        r_squared_value = r_squared(self.ilfs.tolist(), predicted_ilfs)
 
-        return alpha, x_m, r_squared
+        return alpha, x_m, r_squared_value
 
     def fit_empirical(self) -> dict[float, float]:
         """

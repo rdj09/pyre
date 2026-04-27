@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
 
+from ..experience.curve_fitting import r_squared
 from .exposure_curve_functions import (
     ExposureCurveType,
     mbbefd_curve,
@@ -87,11 +88,9 @@ class ExposureCurveFitter:
         ]
 
         # Calculate R-squared
-        ss_total = np.sum((self.values - np.mean(self.values)) ** 2)
-        ss_residual = np.sum((self.values - np.array(predicted_values)) ** 2)
-        r_squared = 1 - (ss_residual / ss_total)
+        r_squared_value = r_squared(self.values.tolist(), predicted_values)
 
-        return z_value, r_squared
+        return z_value, r_squared_value
 
     def fit_mixed_exponential(
         self, num_components: int = 3
@@ -151,11 +150,9 @@ class ExposureCurveFitter:
         predicted_values = [mixed_exponential_curve(mus, weights, pos) for pos in self.positions]
 
         # Calculate R-squared
-        ss_total = np.sum((self.values - np.mean(self.values)) ** 2)
-        ss_residual = np.sum((self.values - np.array(predicted_values)) ** 2)
-        r_squared = 1 - (ss_residual / ss_total)
+        r_squared_value = r_squared(self.values.tolist(), predicted_values)
 
-        return mus.tolist(), weights.tolist(), r_squared
+        return mus.tolist(), weights.tolist(), r_squared_value
 
     def fit_mbbefd(self) -> tuple[float, float]:
         """
@@ -194,11 +191,9 @@ class ExposureCurveFitter:
         predicted_values = [mbbefd_curve(c_value, pos) for pos in self.positions]
 
         # Calculate R-squared
-        ss_total = np.sum((self.values - np.mean(self.values)) ** 2)
-        ss_residual = np.sum((self.values - np.array(predicted_values)) ** 2)
-        r_squared = 1 - (ss_residual / ss_total)
+        r_squared_value = r_squared(self.values.tolist(), predicted_values)
 
-        return c_value, r_squared
+        return c_value, r_squared_value
 
     def fit_all_curves(self) -> dict[str, tuple]:
         """
