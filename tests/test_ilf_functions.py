@@ -10,27 +10,27 @@ from pyre.models.exposure.exposure_ILF_functions import (
 
 
 def test_pareto_limited_severity_zero_x():
-    assert pareto_limited_severity(0, alpha=2.0, x_m=100.0) == pytest.approx(0.0)
+    assert pareto_limited_severity(0, alpha=2.0) == pytest.approx(0.0)
 
 
 def test_pareto_limited_severity_positive():
-    result = pareto_limited_severity(100.0, alpha=2.0, x_m=100.0)
+    result = pareto_limited_severity(100.0, alpha=2.0)
     assert 0.0 < result < 1.0
 
 
 def test_pareto_limited_severity_negative_x():
     # x <= 0 → return 0.0
-    assert pareto_limited_severity(-10.0, alpha=2.0, x_m=100.0) == pytest.approx(0.0)
+    assert pareto_limited_severity(-10.0, alpha=2.0) == pytest.approx(0.0)
 
 
 def test_pareto_ilf_same_limits():
     # Ratio of the same limit = 1.0
-    result = pareto_ilf(limit_1=500_000.0, limit_2=500_000.0, alpha=2.0, x_m=100.0)
+    result = pareto_ilf(limit_1=500_000.0, limit_2=500_000.0, alpha=2.0)
     assert result == pytest.approx(1.0)
 
 
 def test_pareto_ilf_higher_limit_greater_than_one():
-    result = pareto_ilf(limit_1=500_000.0, limit_2=1_000_000.0, alpha=2.0, x_m=100.0)
+    result = pareto_ilf(limit_1=500_000.0, limit_2=1_000_000.0, alpha=2.0)
     assert result > 1.0
 
 

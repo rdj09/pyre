@@ -18,7 +18,7 @@ def average_layer_loss(alpha: float, deductible: float, excess: float) -> float:
         return float((deductible / (alpha + 1)) * (1 - ((1 + excess / deductible) ** (1 - alpha))))
 
 
-def risk_premium_extropolate(
+def risk_premium_extrapolate(
     risk_premium_lower_layer: float,
     excess_lower: float,
     deductible_lower: float,
@@ -54,3 +54,7 @@ def risk_premium_extropolate(
                 )
             )
         )
+
+
+# backward-compat alias — remove in next major version
+risk_premium_extropolate = risk_premium_extrapolate

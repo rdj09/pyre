@@ -108,22 +108,18 @@ def mbbefd_curve(curve: SwissReCValues | float, curve_position: float) -> float:
     return log(((g - 1) * b + (1 - b * g) * b**curve_position) / (1 - b)) / log(b * g)
 
 
-def riebesell_curve(attachment: float, limit: float, z_value: float, base_limit: float) -> float:
+def riebesell_curve(curve_position: float, z_value: float, base_limit: float, **_: Any) -> float:
     """Calculate Riebesell curve value.
 
     Args:
-        attachment (float): Policy attachment point.
-        limit (float): Policy limit.
+        curve_position (float): Position on the curve.
         z_value (float): Riebesell z parameter.
         base_limit (float): Base limit for normalisation.
 
     Returns:
         float: Curve value.
     """
-    if limit is None:
-        return float(((attachment) / base_limit) ** log(1 + z_value, 2))
-    else:
-        return float(((attachment + limit) / base_limit) ** log(1 + z_value, 2))
+    return float((curve_position / base_limit) ** log(1 + z_value, 2))
 
 
 exposure_curve_calculation: dict[ExposureCurveType, Callable[..., float]] = {

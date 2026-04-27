@@ -61,7 +61,7 @@ class ExposureCurveFitter:
         def objective_function(params):
             z_value = params[0]
             predicted_values = [
-                riebesell_curve(0, pos, z_value, self.base_value) for pos in self.positions
+                riebesell_curve(pos, z_value, self.base_value) for pos in self.positions
             ]
             return np.sum((np.array(predicted_values) - self.values) ** 2)
 
@@ -83,7 +83,7 @@ class ExposureCurveFitter:
 
         # Calculate predicted values
         predicted_values = [
-            riebesell_curve(0, pos, z_value, self.base_value) for pos in self.positions
+            riebesell_curve(pos, z_value, self.base_value) for pos in self.positions
         ]
 
         # Calculate R-squared
@@ -253,7 +253,7 @@ class ExposureCurveFitter:
         # Plot Riebesell curve if parameters provided
         if riebesell_params:
             z_value, r_squared = riebesell_params
-            y_riebesell = [riebesell_curve(0, pos, z_value, self.base_value) for pos in x]
+            y_riebesell = [riebesell_curve(pos, z_value, self.base_value) for pos in x]
             plt.plot(x, y_riebesell, "r-", label=f"Riebesell (z={z_value:.3f}, R²={r_squared:.3f})")
 
         # Plot Mixed Exponential curve if parameters provided
@@ -315,7 +315,7 @@ def generate_exposure_curve_parameters(
 
     elif curve_type == ExposureCurveType.MIXED_EXPONENTIAL:
         mus, weights, _ = fitter.fit_mixed_exponential()
-        return {"paramaters_mus": mus, "parameter_weights": weights}
+        return {"parameters_mus": mus, "parameter_weights": weights}
 
     elif curve_type == ExposureCurveType.MBBEFD:
         c_value, _ = fitter.fit_mbbefd()
@@ -367,7 +367,7 @@ def select_best_curve(
     if best_curve == "RIEBESELL":
         params_dict = {"z_value": best_params[0], "base_limit": 1.0}
     elif best_curve == "MIXED_EXPONENTIAL":
-        params_dict = {"paramaters_mus": best_params[0], "parameter_weights": best_params[1]}
+        params_dict = {"parameters_mus": best_params[0], "parameter_weights": best_params[1]}
     elif best_curve == "MBBEFD":
         params_dict = {"curve": best_params[0]}
 

@@ -7,7 +7,7 @@ import pytest
 from pyre.models.experience.pareto_rating import (
     average_layer_loss,
     frequency_extrapolate,
-    risk_premium_extropolate,
+    risk_premium_extrapolate,
 )
 
 
@@ -35,9 +35,9 @@ def test_average_layer_loss_unity_alpha():
     assert result == pytest.approx(expected)
 
 
-def test_risk_premium_extropolate_non_unity_alpha():
+def test_risk_premium_extrapolate_non_unity_alpha():
     # Simple sanity check: result should be positive and finite
-    result = risk_premium_extropolate(
+    result = risk_premium_extrapolate(
         risk_premium_lower_layer=1000.0,
         excess_lower=100.0,
         deductible_lower=100.0,
@@ -48,8 +48,8 @@ def test_risk_premium_extropolate_non_unity_alpha():
     assert result > 0
 
 
-def test_risk_premium_extropolate_unity_alpha():
-    result = risk_premium_extropolate(
+def test_risk_premium_extrapolate_unity_alpha():
+    result = risk_premium_extrapolate(
         risk_premium_lower_layer=1000.0,
         excess_lower=100.0,
         deductible_lower=100.0,

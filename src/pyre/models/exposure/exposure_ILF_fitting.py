@@ -90,7 +90,7 @@ class ILFFitter:
         def objective_function(params):
             alpha, x_m = params
             predicted_ilfs = [
-                pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in self.limits
+                pareto_ilf(self.base_limit, limit, alpha) for limit in self.limits
             ]
             return np.sum((np.array(predicted_ilfs) - self.ilfs) ** 2)
 
@@ -111,7 +111,7 @@ class ILFFitter:
         alpha, x_m = result.x
 
         # Calculate predicted values
-        predicted_ilfs = [pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in self.limits]
+        predicted_ilfs = [pareto_ilf(self.base_limit, limit, alpha) for limit in self.limits]
 
         # Calculate R-squared
         ss_total = np.sum((self.ilfs - np.mean(self.ilfs)) ** 2)
@@ -157,7 +157,7 @@ class ILFFitter:
         # Plot Pareto curve if parameters provided
         if pareto_params:
             alpha, x_m, r_squared = pareto_params
-            y_pareto = [pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in x]
+            y_pareto = [pareto_ilf(self.base_limit, limit, alpha) for limit in x]
             plt.plot(
                 x,
                 y_pareto,
@@ -221,19 +221,18 @@ def fit_ilf_from_severity_curve(
 
 
 def calculate_ilf_table(
-    alpha: float, x_m: float, base_limit: float, limits: list[float]
+    alpha: float, base_limit: float, limits: list[float]
 ) -> pd.DataFrame:
     """
     Calculate an ILF table using the Pareto distribution.
 
     Args:
         alpha: Pareto alpha parameter
-        x_m: Pareto scale parameter
         base_limit: Base limit for ILF calculation
         limits: List of limits to calculate ILFs for
 
     Returns:
         DataFrame with limits and corresponding ILFs
     """
-    ilfs = [pareto_ilf(base_limit, limit, alpha, x_m) for limit in limits]
+    ilfs = [pareto_ilf(base_limit, limit, alpha) for limit in limits]
     return pd.DataFrame({"Limit": limits, "ILF": ilfs})
