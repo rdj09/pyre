@@ -395,9 +395,7 @@ class Selections:
 
             if data_by_group:
                 epv = self.credibility_weight.estimate_process_variance(data_by_group)
-                vhm = self.credibility_weight.estimate_variance_of_hypothetical_means(
-                    data_by_group
-                )
+                vhm = self.credibility_weight.estimate_variance_of_hypothetical_means(data_by_group)
 
             weight = self.credibility_weight.buhlmann_credibility(claim_count, epv, vhm)
         elif method == "buhlmann_straub":
@@ -406,9 +404,7 @@ class Selections:
 
             if data_by_group:
                 epv = self.credibility_weight.estimate_process_variance(data_by_group)
-                vhm = self.credibility_weight.estimate_variance_of_hypothetical_means(
-                    data_by_group
-                )
+                vhm = self.credibility_weight.estimate_variance_of_hypothetical_means(data_by_group)
 
             weight = self.credibility_weight.buhlmann_straub_credibility(
                 config.exposures,
@@ -439,7 +435,9 @@ class Selections:
 
             data_variance = config.data_variance
             if data_variance == 1.0 and data:
-                data_variance = self.credibility_weight.calculate_data_variance(data, method="sample")
+                data_variance = self.credibility_weight.calculate_data_variance(
+                    data, method="sample"
+                )
 
             weight = self.credibility_weight.bayesian_credibility(
                 config.prior_mean,

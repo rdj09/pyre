@@ -88,9 +88,7 @@ class ILFFitter:
 
         def objective_function(params):
             alpha, x_m = params
-            predicted_ilfs = [
-                pareto_ilf(self.base_limit, limit, alpha) for limit in self.limits
-            ]
+            predicted_ilfs = [pareto_ilf(self.base_limit, limit, alpha) for limit in self.limits]
             return np.sum((np.array(predicted_ilfs) - self.ilfs) ** 2)
 
         # Initial guess for parameters
@@ -217,9 +215,7 @@ def fit_ilf_from_severity_curve(
     return ILFFitter(limits, ilfs, base_limit)
 
 
-def calculate_ilf_table(
-    alpha: float, base_limit: float, limits: list[float]
-) -> pd.DataFrame:
+def calculate_ilf_table(alpha: float, base_limit: float, limits: list[float]) -> pd.DataFrame:
     """
     Calculate an ILF table using the Pareto distribution.
 

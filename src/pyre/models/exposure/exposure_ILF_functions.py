@@ -6,9 +6,7 @@ def pareto_limited_severity(x: float, alpha: float) -> float:
 
 
 def pareto_ilf(limit_1: float, limit_2: float, alpha: float) -> float:
-    return pareto_limited_severity(limit_2, alpha) / pareto_limited_severity(
-        limit_1, alpha
-    )
+    return pareto_limited_severity(limit_2, alpha) / pareto_limited_severity(limit_1, alpha)
 
 
 def power_ilf(limit: float | None, basic_limit: float, power_parameter: float) -> float:
