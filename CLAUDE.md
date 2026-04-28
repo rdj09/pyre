@@ -8,7 +8,7 @@
 - **Domain classes**: `Exposure(exposure_meta, exposure_values)`, `Claim(claims_meta_data, claims_development_history)`, `Triangle(triangle, origin_years, dev_periods)`
 - **app/** — Shiny for Python 7-tab actuarial pricing tool; `page_navbar` layout; modular feature pattern; outside `src/pyre/` so not covered by mypy strict
 
-## Recent Changes (refactor/pyre-v1 — full app expansion)
+## Recent Changes (feature/shiny-webapp-data-injection — library refactor, 11 tasks)
 
 ### New Files
 - `src/pyre/data_injector/adapters/db_adapter.py` — `DBAdapter`; SQLite (stdlib) + PostgreSQL (psycopg2)
@@ -78,12 +78,34 @@ uv run python -m shiny run app.app          # correct — module-path form
 
 ## Current Test Status
 
-- 329/329 tests pass
-- 84.67% coverage (threshold: ≥80%)
+- 340/340 tests pass (329 baseline + 11 new parametrized parse_bool tests)
+- 84.88% coverage (threshold: ≥80%)
 - 0 ruff errors, 0 mypy errors
+
+## Refactoring Completed (Tasks 1–11)
+
+| Task | What changed |
+|------|-------------|
+| T1 | Fixed `risk_premium_extropolate` typo (alias kept); removed unused `attachment`/`x_m` params; fixed `power_ilf` type hint; fixed `"paramaters_mus"` typo |
+| T2 | `inverse_power_fit` already canonical in `curve_fitting.py` — no change needed |
+| T3 | Replaced `assert` with `raise ValueError` in `Trending`; added `DeprecationWarning` to 4 module-level shims |
+| T4 | Moved 4 exception classes into `exceptions/__init__.py`; `exceptions/exceptions.py` → thin re-export |
+| T5 | `parse_bool` now case-insensitive (`.strip().lower()`); added parametrized tests |
+| T6 | `Loader` now uses `AdapterRegistry.get(source_type)` via `from_source()`; removed 6 hard-coded adapter imports |
+| T7 | `quota_share_calculation` added to dispatch dict; `loss_to_layer_fn` simplified; `surplus_share_calculation` kept public |
+| T8 | `r_squared` imported from `curve_fitting` in both exposure fitters; 5 inline duplicates removed |
+| T9 | Tests reorganized into subdirs mirroring `src/pyre/`; `tests/conftest.py` with 6 shared fixtures |
+| T10 | `_VarianceEstimator` extracted from `CredibilityWeight`; `CredibilityConfig` replaces `**kwargs` |
+| T11 | `Resampling` accepts `random_seed`; `BurnCostModel` bare `except` narrowed to specific types |
+
+## Backward Compat Aliases Still Active (remove in next major version)
+
+- `risk_premium_extropolate` → alias for `risk_premium_extrapolate`
+- `pyre.exceptions.exceptions` → re-exports from `pyre.exceptions`
+- Module-level `calculate_trend_factor`, `trend_exposures`, `trend_claims`, `get_trend_factors` → DeprecationWarning shims
 
 ## Next Steps
 
-- Create PR: `refactor/pyre-v1` → `main`
+- Create PR: `feature/shiny-webapp-data-injection` → `main`
 - Optional: add Excel/YAML/JSON round-trip tests for domain schemas
 - Optional: extend `DomainService.build_triangle` to support `source_type="excel"`
