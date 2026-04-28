@@ -494,7 +494,7 @@ class BurnCostModel:
                 # Calculate burn cost as ultimate claims divided by earned exposure
                 burn_costs[year] = ultimate_claims / earned_exposure if earned_exposure > 0 else 0.0
 
-            except Exception as e:
+            except (ValueError, ZeroDivisionError, ArithmeticError, RuntimeError, TypeError) as e:
                 raise ValueError(
                     f"Projection failed for year {year}, layer {self._layer_id}: {e}"
                 ) from e
