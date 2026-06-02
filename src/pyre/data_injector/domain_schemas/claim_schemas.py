@@ -12,7 +12,7 @@ from pyre.enums import ClaimYearType
 from ..descriptors import FieldDescriptor
 from ..loader import Loader
 from ..schema import Schema
-from ..utils import parse_bool, unflatten
+from ..utils import parse_bool, underscore_to_dotted, unflatten
 
 
 def _parse_claim_year_type(value: Any) -> ClaimYearType:
@@ -132,22 +132,12 @@ def claims_loader() -> Loader[Claim]:
     return Loader(claim_schema)
 
 
+_CLAIM_DB_PREFIXES = ("claims_meta_data_", "claims_development_history_")
+
+
 def _underscore_to_dotted_claim(record: dict[str, Any]) -> dict[str, Any]:
     """Convert DB underscore-namespaced columns to dot-notation for unflatten."""
-    prefixes = ("claims_meta_data_", "claims_development_history_")
-    result: dict[str, Any] = {}
-    for key, value in record.items():
-        converted = False
-        for prefix in prefixes:
-            if key.startswith(prefix):
-                namespace = prefix.rstrip("_")
-                field_name = key[len(prefix) :]
-                result[f"{namespace}.{field_name}"] = value
-                converted = True
-                break
-        if not converted:
-            result[key] = value
-    return result
+    return underscore_to_dotted(record, _CLAIM_DB_PREFIXES)
 
 
 _claim_db_schema: Schema[Claim] = Schema(

@@ -12,7 +12,7 @@ from pyre.exposures.exposures import Exposure, ExposureMetaData, ExposureValues
 from ..descriptors import FieldDescriptor
 from ..loader import Loader
 from ..schema import Schema
-from ..utils import parse_bool, unflatten
+from ..utils import parse_bool, underscore_to_dotted, unflatten
 
 
 def _parse_exposure_basis(value: Any) -> ExposureBasis:
@@ -84,25 +84,12 @@ def exposures_loader() -> Loader[Exposure]:
     return Loader(exposure_schema)
 
 
-def _underscore_to_dotted_exposure(record: dict[str, Any]) -> dict[str, Any]:
-    """Convert DB underscore-namespaced columns to dot-notation for unflatten.
+_EXPOSURE_DB_PREFIXES = ("exposure_meta_", "exposure_values_")
 
-    exposure_meta_exposure_id -> exposure_meta.exposure_id
-    """
-    prefixes = ("exposure_meta_", "exposure_values_")
-    result: dict[str, Any] = {}
-    for key, value in record.items():
-        converted = False
-        for prefix in prefixes:
-            if key.startswith(prefix):
-                namespace = prefix.rstrip("_")
-                field_name = key[len(prefix) :]
-                result[f"{namespace}.{field_name}"] = value
-                converted = True
-                break
-        if not converted:
-            result[key] = value
-    return result
+
+def _underscore_to_dotted_exposure(record: dict[str, Any]) -> dict[str, Any]:
+    """Convert DB underscore-namespaced columns to dot-notation for unflatten."""
+    return underscore_to_dotted(record, _EXPOSURE_DB_PREFIXES)
 
 
 _exposure_db_schema: Schema[Exposure] = Schema(
