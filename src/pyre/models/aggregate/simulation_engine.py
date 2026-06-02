@@ -84,6 +84,28 @@ def _tvar(sorted_losses: list[float], confidence: float) -> float:
     return sum(tail) / len(tail)
 
 
+def _resolve_freq_params(
+    freq_params: dict[str, dict[str, float]],
+) -> tuple[str, dict[str, float]]:
+    """Return (dist_name, params_dict) for the first supported frequency distribution."""
+    if "poisson" in freq_params:
+        return "poisson", freq_params["poisson"]
+    if "negative_binomial" in freq_params:
+        return "negative_binomial", freq_params["negative_binomial"]
+    raise ValueError("No supported frequency distribution fitted.")
+
+
+def _resolve_sev_params(
+    sev_params: dict[str, dict[str, float]],
+) -> tuple[str, dict[str, float]]:
+    """Return (dist_name, params_dict) for the first supported severity distribution."""
+    if "lognormal" in sev_params:
+        return "lognormal", sev_params["lognormal"]
+    if "pareto" in sev_params:
+        return "pareto", sev_params["pareto"]
+    raise ValueError("No supported severity distribution fitted.")
+
+
 def _var(sorted_losses: list[float], confidence: float) -> float:
     """Value at Risk at given confidence level."""
     n = len(sorted_losses)
@@ -131,44 +153,24 @@ class Simulation:
 
     def run(self) -> None:
         """Execute the Monte Carlo simulation."""
-        freq_params = self._frequency_fit.fit()
-        sev_params = self._severity_fit.fit()
-
-        if "poisson" in freq_params:
-            lambda_ = freq_params["poisson"]["lambda_"]
-            freq_dist = "poisson"
-        elif "negative_binomial" in freq_params:
-            freq_dist = "negative_binomial"
-        else:
-            raise ValueError("No supported frequency distribution fitted.")
-
-        if "lognormal" in sev_params:
-            sev_dist = "lognormal"
-            mu = sev_params["lognormal"]["mu"]
-            sigma = sev_params["lognormal"]["sigma"]
-        elif "pareto" in sev_params:
-            sev_dist = "pareto"
-            alpha = sev_params["pareto"]["alpha"]
-            x_m = sev_params["pareto"]["x_m"]
-        else:
-            raise ValueError("No supported severity distribution fitted.")
+        freq_dist, freq_p = _resolve_freq_params(self._frequency_fit.fit())
+        sev_dist, sev_p = _resolve_sev_params(self._severity_fit.fit())
 
         layer_ids = [layer.layer_id for layer in self._ri_contract.layers]
         raw: dict[int, list[float]] = {lid: [] for lid in layer_ids}
 
         for _ in range(self._n_simulations):
             if freq_dist == "poisson":
-                n_claims = _sample_poisson(lambda_, self._rng)
+                n_claims = _sample_poisson(freq_p["lambda_"], self._rng)
             else:
-                nb = freq_params["negative_binomial"]
-                n_claims = _sample_negative_binomial(nb["r"], nb["p"], self._rng)
+                n_claims = _sample_negative_binomial(freq_p["r"], freq_p["p"], self._rng)
 
             per_layer_aggregate: dict[int, float] = {lid: 0.0 for lid in layer_ids}
             for _ in range(n_claims):
                 if sev_dist == "lognormal":
-                    gross = _sample_lognormal(mu, sigma, self._rng)
+                    gross = _sample_lognormal(sev_p["mu"], sev_p["sigma"], self._rng)
                 else:
-                    gross = _sample_pareto(alpha, x_m, self._rng)
+                    gross = _sample_pareto(sev_p["alpha"], sev_p["x_m"], self._rng)
 
                 for layer in self._ri_contract.layers:
                     try:
