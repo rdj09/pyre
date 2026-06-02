@@ -8,29 +8,44 @@
 - **Domain classes**: `Exposure(exposure_meta, exposure_values)`, `Claim(claims_meta_data, claims_development_history)`, `Triangle(triangle, origin_years, dev_periods)`
 - **app/** — Shiny for Python 7-tab actuarial pricing tool; `page_navbar` layout; modular feature pattern; outside `src/pyre/` so not covered by mypy strict
 
-## Recent Changes (feature/shiny-webapp-data-injection — library refactor, 11 tasks)
+## Completed Work (feature/shiny-webapp-data-injection)
 
-### New Files
+### app/ File Map
+
+| File | Responsibility |
+|------|---------------|
+| `app/db/__init__.py` | Package marker |
+| `app/db/database.py` | `init_db(db_path)` — `CREATE TABLE IF NOT EXISTS` for `exposures` + `claims` |
+| `app/services/storage_service.py` | `StorageService` — serialize domain objects → SQLite rows; `list_stored` |
+| `app/services/domain_service.py` | `DomainService` — stateless facade; file/DB → domain objects |
+| `app/services/model_service.py` | `ModelService` — stateless facade over pyre model APIs |
+| `app/features/data_loader_module.py` | `dl_` prefix; file/DB upload → domain objects; Save to DB; Database viewer tab |
+| `app/features/triangle_module.py` | `tri_` prefix; ATA factors + IBNER pattern |
+| `app/features/contract_module.py` | `ctr_` prefix; form (1–5 layers) + JSON upload; writes `_contract` |
+| `app/features/experience_module.py` | `exp_` prefix; burn cost via `BurnCostModel`; dynamic layer select from `_contract` |
+| `app/features/exposure_module.py` | `expm_` prefix; MBBEFD/MIXED_EXPONENTIAL/RIEBESELL curves; matplotlib bar chart |
+| `app/features/rate_module.py` | `rm_` prefix; 4-card adequacy + rate change calculators |
+| `app/features/simulation_module.py` | `sim_` prefix; Monte Carlo DFA; loss distribution histogram |
+| `app/server.py` | Shared `_claims/_exposures/_triangle/_contract` reactive values; delegates to all feature servers |
+| `app/ui.py` | `page_navbar` with 7 `nav_panel` tabs |
+| `run_app.py` | Repo-root launcher; `shiny.run_app("app.app:app")`; avoids `__main__` import breakage |
+
+### src/pyre/ Notable Additions
+
 - `src/pyre/data_injector/adapters/db_adapter.py` — `DBAdapter`; SQLite (stdlib) + PostgreSQL (psycopg2)
-- `src/pyre/data_injector/domain_schemas/` — exposure, claim, triangle schemas + loader factories
-- `app/features/__init__.py` — empty package marker
-- `app/features/data_loader_module.py` — `data_loader_ui/server`; `dl_` prefix; writes shared `_claims/_exposures/_triangle`; clears siblings on each load
-- `app/features/triangle_module.py` — `triangle_ui/server`; `tri_` prefix; ATA factors + IBNER pattern
-- `app/features/contract_module.py` — `contract_ui/server`; `ctr_` prefix; form (1–5 layers) + JSON upload; writes `_contract`
-- `app/features/experience_module.py` — `experience_ui/server`; `exp_` prefix; burn cost via `BurnCostModel`; dynamic layer select from `_contract`
-- `app/features/exposure_module.py` — `exposure_ui/server`; `expm_` prefix; MBBEFD/MIXED_EXPONENTIAL/RIEBESELL curves; matplotlib bar chart
-- `app/features/rate_module.py` — `rate_ui/server`; `rm_` prefix; 4-card adequacy + rate change calculators
-- `app/features/simulation_module.py` — `simulation_ui/server`; `sim_` prefix; Monte Carlo DFA; loss distribution histogram
-- `app/services/model_service.py` — `ModelService`; stateless facade over pyre model APIs (parsers, contract, experience, burn cost, exposure, IBNER, simulation, results→df)
-- `tests/test_app/test_model_service.py` — 8 tests (parsers, contract form+JSON, IBNER extraction)
+- `src/pyre/data_injector/domain_schemas/` — exposure, claim, triangle schemas + loader factories (`exposures_loader`, `claims_loader`, `exposures_db_loader`, `claims_db_loader`, `triangle_loader`)
 
-### Modified Files
-- `app/server.py` — shared `_claims/_exposures/_triangle/_contract` reactive values; delegates to all 7 feature servers
-- `app/ui.py` — `page_navbar` with 7 `nav_panel` tabs
-- `app/services/domain_service.py` — unchanged (existing DomainService)
-- `pyproject.toml` — added `matplotlib>=3.5` to webapp dep group; `pythonpath = ["."]` in pytest opts; added `[project.scripts] pyre-app = "run_app:main"` console entry point
-- `.gitignore` — added `app/features/__pycache__/*`
-- `run_app.py` (repo root, new) — convenience launcher; calls `shiny.run_app("app.app:app", host="127.0.0.1", port=8000, reload=True)`; avoids `__main__` issue that breaks relative imports when using `shiny run app/app.py`
+### SQLite Backend (completed 2026-06-02)
+
+**Design:** explicit Save button; user-specified DB path (`./pyre_data.db` default); upsert semantics (`INSERT OR REPLACE`); Triangle rebuilt from stored claims via `Triangle.from_claims()` — not stored directly.
+
+**Column naming:** underscore-namespaced (`exposure_meta_exposure_id`) to match `_underscore_to_dotted_exposure`/`_underscore_to_dotted_claim` pre-hooks in `pyre` library — no library changes needed.
+
+**Key behaviours:**
+- `list_stored()` checks `Path(db_path).exists()` — returns `[]` for non-existent file; does NOT call `init_db` (navigating to Database tab won't create an empty file)
+- `_claim_to_row` uses `uncapped_claim_development_history` so `contract_limit` doesn't corrupt stored values
+- Dev history stored as pipe-separated strings (`"12|24|36"`); `_parse_int_list`/`_parse_float_list` in claim schemas handle round-trip
+- `build_triangle(source_type="db")` receives plain file path, constructs `sqlite:///` internally, loads via `claims_db_loader().from_db()`
 
 ## Current Interfaces / APIs
 
@@ -54,11 +69,26 @@ svc.simulation_results_to_df(results, contract) -> pd.DataFrame
 ```python
 svc.load_exposures(source, source_type, *, query="", sheet_name=0) -> Exposures
 svc.load_claims(source, source_type, *, query="", sheet_name=0) -> Claims
-svc.build_triangle(source, source_type, value_type="incurred") -> Triangle  # csv only
+svc.build_triangle(source, source_type, value_type="incurred") -> Triangle  # csv | db
 svc.exposure_summary(exposures) -> dict[str, Any]
 svc.claim_summary(claims) -> dict[str, Any]
 ```
-`source_type` values: `"csv"`, `"excel"`, `"json"`, `"yaml"`, `"dict"`, `"db"`
+`source_type` for load_exposures/load_claims: `"csv"`, `"excel"`, `"json"`, `"yaml"`, `"dict"`, `"db"`
+`source_type` for build_triangle: `"csv"` (file path) | `"db"` (SQLite file path, no `sqlite:///` prefix)
+
+### StorageService (app/services/storage_service.py)
+```python
+svc = StorageService()
+svc.save_exposures(exposures: list[Exposure], db_path: str) -> None   # noop if empty
+svc.save_claims(claims: list[Claim], db_path: str) -> None             # noop if empty
+svc.list_stored(db_path: str, table: Literal["exposures","claims"]) -> list[str]  # returns PKs; [] if file missing
+```
+
+### database module (app/db/database.py)
+```python
+init_db(db_path: str) -> None  # CREATE TABLE IF NOT EXISTS; idempotent
+```
+Tables: `exposures` (PK: `exposure_meta_exposure_id`) · `claims` (PK: `claims_meta_data_claim_id`)
 
 ### App startup
 
@@ -97,31 +127,25 @@ change `port=8000` in `run_app.py` to any free port (e.g. 8080).
 - `aggregate_limit=0` in layer form → `float("inf")` (unlimited); non-zero value taken as-is
 - Triangle IBNER optional for simulation — falls back to `{}` (SeverityFit uses factor 1.0 for all years)
 - `ClaimDevelopmentHistory.__post_init__` raises `ValueError` for mismatched list lengths — not caught by `Injector`
-- SQLite returns integers `0`/`1` for booleans — handle with `pre_process=lambda v: str(v) if isinstance(v, int) else v`
-- Triangle building only supports `source_type="csv"` in `DomainService.build_triangle`
+- SQLite returns integers `0`/`1` for booleans — `claims_db_loader` / `exposures_db_loader` handle via `pre_process=lambda v: str(v) if isinstance(v, int) else v` in field descriptors
+- `build_triangle(source_type="db")` takes a plain file path (no `sqlite:///` prefix); the method constructs the connection string internally
 - `pytest pythonpath = ["."]` required for `app` package importable from repo root
+- **No new external deps** — SQLite backend uses stdlib `sqlite3` only
 
 ## Current Test Status
 
-- 340/340 tests pass (329 baseline + 11 new parametrized parse_bool tests)
-- 84.88% coverage (threshold: ≥80%)
+- 366/366 tests pass (340 prior + 26 new: 24 storage_service + 2 domain_service triangle tests)
+- Coverage ≥84.88% (threshold: ≥80%)
 - 0 ruff errors, 0 mypy errors
 
-## Refactoring Completed (Tasks 1–11)
+## Refactoring & Feature History
 
-| Task | What changed |
+| Area | What changed |
 |------|-------------|
-| T1 | Fixed `risk_premium_extropolate` typo (alias kept); removed unused `attachment`/`x_m` params; fixed `power_ilf` type hint; fixed `"paramaters_mus"` typo |
-| T2 | `inverse_power_fit` already canonical in `curve_fitting.py` — no change needed |
-| T3 | Replaced `assert` with `raise ValueError` in `Trending`; added `DeprecationWarning` to 4 module-level shims |
-| T4 | Moved 4 exception classes into `exceptions/__init__.py`; `exceptions/exceptions.py` → thin re-export |
-| T5 | `parse_bool` now case-insensitive (`.strip().lower()`); added parametrized tests |
-| T6 | `Loader` now uses `AdapterRegistry.get(source_type)` via `from_source()`; removed 6 hard-coded adapter imports |
-| T7 | `quota_share_calculation` added to dispatch dict; `loss_to_layer_fn` simplified; `surplus_share_calculation` kept public |
-| T8 | `r_squared` imported from `curve_fitting` in both exposure fitters; 5 inline duplicates removed |
-| T9 | Tests reorganized into subdirs mirroring `src/pyre/`; `tests/conftest.py` with 6 shared fixtures |
-| T10 | `_VarianceEstimator` extracted from `CredibilityWeight`; `CredibilityConfig` replaces `**kwargs` |
-| T11 | `Resampling` accepts `random_seed`; `BurnCostModel` bare `except` narrowed to specific types |
+| pyre lib T1–T11 | Typo fixes; `parse_bool` case-insensitive; `Loader` uses `AdapterRegistry`; `quota_share_calculation` dispatched; `r_squared` de-duped; tests into subdirs; `_VarianceEstimator` extracted; `Resampling` random_seed; `BurnCostModel` bare-except narrowed |
+| Shiny webapp | 7-tab `page_navbar` app; `data_loader`, `triangle`, `contract`, `experience`, `exposure`, `rate`, `simulation` feature modules; `ModelService` + `DomainService` service layer |
+| SQLite backend | `app/db/database.py` DDL; `StorageService` serialise/upsert/list; `DomainService.build_triangle` extended to `source_type="db"`; Data Loader Save button + Database viewer tab |
+| Demo data | `examples/webapp_demo/exposures.csv` (6 rows) + `claims.csv` (12 claims) + walk-through README |
 
 ## Backward Compat Aliases Still Active (remove in next major version)
 
@@ -152,20 +176,12 @@ change `port=8000` in `run_app.py` to any free port (e.g. 8080).
 
 **Claims:** `claims_meta_data.{claim_id, currency, loss_date, policy_inception_date, report_date, contract_limit, contract_deductible, claim_in_xs_of_deductible, claim_year_basis, line_of_business, status}` + `claims_development_history.{development_months, cumulative_dev_paid, cumulative_dev_incurred}` (pipe-separated integers/floats)
 
-**Triangle:** Same CSV format as Claims — `DomainService.build_triangle` calls `triangle_loader` which aggregates claims by origin year and dev period. No separate triangle CSV format; `source_type="csv"` only.
+**Triangle:** Same CSV format as Claims — `DomainService.build_triangle` calls `triangle_loader` which aggregates claims by origin year and dev period. No separate triangle CSV format; `source_type` is `"csv"` (file path) or `"db"` (SQLite file path).
 
 ## Next Steps
 
-- **Create PR**: `feature/shiny-webapp-data-injection` → `main` (all work complete; 340/340 tests pass)
+- **Create PR**: `feature/shiny-webapp-data-injection` → `main` (all work complete; 366/366 tests pass)
 - Optional: add Excel/YAML/JSON round-trip tests for domain schemas
 - Optional: extend `DomainService.build_triangle` to support `source_type="excel"`
 
-## App Launch Fix (completed 2026-06-02)
-
-Root cause: `shiny run app/app.py` (file-path form) sets `__package__ = None` → relative imports in `app/` fail.
-Fix: `run_app.py` at repo root uses `shiny.run_app("app.app:app")` (module-path form) — imports `app.app` as a
-proper package so all `from .x import y` and `from ..services.x import y` resolve correctly. No files under `app/`
-were changed. App confirmed running at `http://127.0.0.1:8000`.
-
-**CRITICAL — webapp deps**: Always use `uv sync --group webapp` (not plain `uv sync`) to install dependencies for
-this project. Plain `uv sync` drops the webapp optional group (shiny, pandas, matplotlib, etc.).
+**CRITICAL — webapp deps**: Always use `uv sync --group webapp` (not plain `uv sync`). Plain `uv sync` drops the webapp optional group (shiny, pandas, matplotlib, etc.).
