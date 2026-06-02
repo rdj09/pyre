@@ -90,13 +90,29 @@ class DomainService:
         source_type: str,
         value_type: str = "incurred",
     ) -> Triangle:
-        """Build a Triangle from a claims CSV source."""
-        if source_type.lower() != "csv":
+        """Build a Triangle from a claims source.
+
+        Args:
+            source: File path for 'csv'; SQLite file path for 'db'.
+            source_type: 'csv' or 'db'.
+            value_type: 'incurred' or 'paid'.
+        """
+        if value_type not in ("incurred", "paid"):
             raise ValueError(
-                f"Triangle building from source_type='{source_type}' is not supported. "
-                "Only 'csv' is supported."
+                f"Invalid value_type '{value_type}'. Expected: 'incurred' or 'paid'."
             )
-        return triangle_loader(Path(str(source)), value_type=value_type)
+        match source_type.lower():
+            case "csv":
+                return triangle_loader(Path(str(source)), value_type=value_type)
+            case "db":
+                conn_str = f"sqlite:///{source}"
+                items = claims_db_loader().from_db(conn_str, "SELECT * FROM claims")
+                return Triangle.from_claims(Claims(items), value_type=value_type)
+            case _:
+                raise ValueError(
+                    f"Triangle building from source_type='{source_type}' is not supported. "
+                    "Supported: 'csv', 'db'."
+                )
 
     def exposure_summary(self, exposures: Exposures) -> dict[str, Any]:
         """Return summary statistics for an Exposures container."""

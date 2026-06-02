@@ -148,6 +148,44 @@ class TestDomainServiceTriangle:
         assert summary["count"] == 1
         assert summary["total_exposure_value"] == pytest.approx(300000.0)
 
+    def test_build_triangle_from_db(self, tmp_path: Path) -> None:
+        from datetime import date
+
+        from app.services.storage_service import StorageService
+        from pyre.claims.claims import Claim, ClaimDevelopmentHistory, ClaimsMetaData
+        from pyre.enums import ClaimYearType
+
+        c = Claim(
+            claims_meta_data=ClaimsMetaData(
+                claim_id="DB-TRI-01",
+                currency="GBP",
+                contract_limit=15000.0,
+                contract_deductible=0.0,
+                claim_in_xs_of_deductible=False,
+                claim_year_basis=ClaimYearType.ACCIDENT_YEAR,
+                loss_date=date(2021, 6, 1),
+                policy_inception_date=date(2021, 1, 1),
+                report_date=date(2021, 7, 1),
+            ),
+            claims_development_history=ClaimDevelopmentHistory(
+                development_months=[12, 24],
+                cumulative_dev_paid=[3000.0, 7000.0],
+                cumulative_dev_incurred=[5000.0, 9000.0],
+            ),
+        )
+        db = str(tmp_path / "tri.db")
+        StorageService().save_claims([c], db)
+        svc = DomainService()
+        triangle = svc.build_triangle(db, source_type="db", value_type="incurred")
+        assert isinstance(triangle, Triangle)
+        assert triangle[2021, 12] == pytest.approx(5000.0)
+        assert triangle[2021, 24] == pytest.approx(9000.0)
+
+    def test_build_triangle_unsupported_source_type_raises(self) -> None:
+        svc = DomainService()
+        with pytest.raises(ValueError, match="not supported"):
+            svc.build_triangle("anything", source_type="excel")
+
     def test_claim_summary_returns_dict(self, tmp_path: Path) -> None:
         csv_text = (
             "claims_meta_data.claim_id,claims_meta_data.currency,"
