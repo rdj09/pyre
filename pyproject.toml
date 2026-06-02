@@ -31,6 +31,9 @@ Documentation = "https://github.com/rdj09/pyre#readme"
 Issues = "https://github.com/rdj09/pyre/issues"
 Source = "https://github.com/rdj09/pyre"
 
+[project.scripts]
+pyre-app = "run_app:main"
+
 [project.optional-dependencies]
 webapp = ["shiny>=1.0", "htmltools>=0.5", "pandas>=2.0", "matplotlib>=3.5"]
 excel = ["openpyxl>=3.0"]

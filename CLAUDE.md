@@ -28,8 +28,9 @@
 - `app/server.py` — shared `_claims/_exposures/_triangle/_contract` reactive values; delegates to all 7 feature servers
 - `app/ui.py` — `page_navbar` with 7 `nav_panel` tabs
 - `app/services/domain_service.py` — unchanged (existing DomainService)
-- `pyproject.toml` — added `matplotlib>=3.5` to webapp dep group; `pythonpath = ["."]` in pytest opts
+- `pyproject.toml` — added `matplotlib>=3.5` to webapp dep group; `pythonpath = ["."]` in pytest opts; added `[project.scripts] pyre-app = "run_app:main"` console entry point
 - `.gitignore` — added `app/features/__pycache__/*`
+- `run_app.py` (repo root, new) — convenience launcher; calls `shiny.run_app("app.app:app", host="127.0.0.1", port=8000, reload=True)`; avoids `__main__` issue that breaks relative imports when using `shiny run app/app.py`
 
 ## Current Interfaces / APIs
 
@@ -60,10 +61,34 @@ svc.claim_summary(claims) -> dict[str, Any]
 `source_type` values: `"csv"`, `"excel"`, `"json"`, `"yaml"`, `"dict"`, `"db"`
 
 ### App startup
-```bash
-uv run python -m shiny run app.app          # correct — module-path form
-# NOT: shiny run app/app.py                 # broken — relative imports fail as __main__
+
+**Prerequisites** — install webapp dependencies (safe to re-run, no-op if already present):
+```powershell
+uv sync --group webapp
 ```
+
+**Option A — convenience script (recommended):**
+```powershell
+uv run python run_app.py
+```
+
+**Option B — direct module path:**
+```powershell
+uv run python -m shiny run app.app
+```
+
+**Option C — installed console script (after `uv sync`):**
+```powershell
+uv run pyre-app
+```
+
+**Browser URL:** `http://127.0.0.1:8000`
+
+Shiny prints `Listening on http://127.0.0.1:8000` once ready. If port 8000 is taken,
+change `port=8000` in `run_app.py` to any free port (e.g. 8080).
+
+> **Do NOT use:** `shiny run app/app.py` — file-path form sets `__main__` and breaks
+> the relative imports inside `app/`.
 
 ## Active Constraints / Assumptions
 
@@ -104,8 +129,43 @@ uv run python -m shiny run app.app          # correct — module-path form
 - `pyre.exceptions.exceptions` → re-exports from `pyre.exceptions`
 - Module-level `calculate_trend_factor`, `trend_exposures`, `trend_claims`, `get_trend_factors` → DeprecationWarning shims
 
+## Demo Data (completed 2026-06-02)
+
+`examples/webapp_demo/` — end-to-end demo dataset for the Shiny app:
+
+| File | Contents |
+|------|----------|
+| `exposures.csv` | 6 rows, 2019–2024, UK Property GWP (£45k–£55k), attachment 2,000 / limit 3,000 |
+| `claims.csv` | 12 claims, accident years 2019–2024, dev periods 12–72 months, pipe-separated lists |
+| `README.md` | Tab-by-tab walk-through with exact UI field values for all 7 tabs |
+
+**Key data design facts:**
+- All values in **£000s** — consistent with existing `examples/0x_*.py` scripts
+- `contract_limit = 15000` on all claims (prevents cedant-level cap; XL layer caps applied separately by BurnCostModel)
+- `claims.csv` serves double duty: load as **Claim** for experience/simulation tabs; load as **Triangle** for the triangle tab
+- Triangle ATA factors: 12→24: 1.1919 | 24→36: 1.0778 | 36→48: 1.0275 | 48→60+: 1.0000
+- Matching contract to enter in UI: Layer 1 XL 3,000 xs 2,000 / Layer 2 XL 5,000 xs 5,000
+
+## CSV Column Format Reference (dot-notation)
+
+**Exposures:** `exposure_meta.{exposure_id, exposure_name, exposure_period_start, exposure_period_end, currency, aggregate, line_of_business, exposure_type, location, peril}` + `exposure_values.{exposure_value, attachment_point, limit}`
+
+**Claims:** `claims_meta_data.{claim_id, currency, loss_date, policy_inception_date, report_date, contract_limit, contract_deductible, claim_in_xs_of_deductible, claim_year_basis, line_of_business, status}` + `claims_development_history.{development_months, cumulative_dev_paid, cumulative_dev_incurred}` (pipe-separated integers/floats)
+
+**Triangle:** Same CSV format as Claims — `DomainService.build_triangle` calls `triangle_loader` which aggregates claims by origin year and dev period. No separate triangle CSV format; `source_type="csv"` only.
+
 ## Next Steps
 
-- Create PR: `feature/shiny-webapp-data-injection` → `main`
+- **Create PR**: `feature/shiny-webapp-data-injection` → `main` (all work complete; 340/340 tests pass)
 - Optional: add Excel/YAML/JSON round-trip tests for domain schemas
 - Optional: extend `DomainService.build_triangle` to support `source_type="excel"`
+
+## App Launch Fix (completed 2026-06-02)
+
+Root cause: `shiny run app/app.py` (file-path form) sets `__package__ = None` → relative imports in `app/` fail.
+Fix: `run_app.py` at repo root uses `shiny.run_app("app.app:app")` (module-path form) — imports `app.app` as a
+proper package so all `from .x import y` and `from ..services.x import y` resolve correctly. No files under `app/`
+were changed. App confirmed running at `http://127.0.0.1:8000`.
+
+**CRITICAL — webapp deps**: Always use `uv sync --group webapp` (not plain `uv sync`) to install dependencies for
+this project. Plain `uv sync` drops the webapp optional group (shiny, pandas, matplotlib, etc.).

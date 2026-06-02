@@ -1,0 +1,7 @@
+exposure_meta.exposure_id,exposure_meta.exposure_name,exposure_meta.exposure_period_start,exposure_meta.exposure_period_end,exposure_meta.currency,exposure_meta.aggregate,exposure_meta.line_of_business,exposure_meta.exposure_type,exposure_meta.location,exposure_meta.peril,exposure_values.exposure_value,exposure_values.attachment_point,exposure_values.limit
+EXP-2019,Property Portfolio 2019,2019-01-01,2019-12-31,GBP,false,Property,WRITTEN,United Kingdom,Property,45000,2000,3000
+EXP-2020,Property Portfolio 2020,2020-01-01,2020-12-31,GBP,false,Property,WRITTEN,United Kingdom,Property,47000,2000,3000
+EXP-2021,Property Portfolio 2021,2021-01-01,2021-12-31,GBP,false,Property,WRITTEN,United Kingdom,Property,49000,2000,3000
+EXP-2022,Property Portfolio 2022,2022-01-01,2022-12-31,GBP,false,Property,WRITTEN,United Kingdom,Property,51000,2000,3000
+EXP-2023,Property Portfolio 2023,2023-01-01,2023-12-31,GBP,false,Property,WRITTEN,United Kingdom,Property,53000,2000,3000
+EXP-2024,Property Portfolio 2024,2024-01-01,2024-12-31,GBP,false,Property,WRITTEN,United Kingdom,Property,55000,2000,3000
