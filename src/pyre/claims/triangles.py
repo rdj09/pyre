@@ -1,4 +1,5 @@
 from math import exp
+from math import pow as mpow
 
 from ..claims.claims import Claims
 from ..enums import CurveType
@@ -10,6 +11,19 @@ from ..models.experience.curve_fitting import (
     r_squared,
     weibull_fit,
 )
+
+
+def _ata_formula(dp: float, curve_type: CurveType, params: dict[str, float]) -> float:
+    """Compute a single age-to-age factor from fitted curve parameters."""
+    if curve_type == CurveType.EXPONENTIAL:
+        return 1.0 + exp(params["a"] + params["b"] * dp)
+    if curve_type == CurveType.POWER:
+        return params["a"] * mpow(params["b"], dp)
+    if curve_type == CurveType.WEIBULL:
+        return 1.0 / (1.0 - exp(-params["a"] * mpow(dp, params["b"])))
+    if curve_type == CurveType.INVERSE_POWER:
+        return 1.0 + params["a"] * mpow(dp + params["c"], params["b"])
+    raise ValueError(f"Unknown curve type: {curve_type}")
 
 
 class Triangle:
@@ -408,29 +422,23 @@ class Triangle:
         if curve_type == CurveType.EXPONENTIAL:
             a, b = exponential_fit(factors, dev_periods_float)
             params = {"a": a, "b": b}
-            expected = [1 + exp(a + b * dp) for dp in dev_periods_float]
             num_params = 2
-
         elif curve_type == CurveType.POWER:
             a, b = power_fit(factors, dev_periods_float)
             params = {"a": a, "b": b}
-            expected = [a * (b**dp) for dp in dev_periods_float]
             num_params = 2
-
         elif curve_type == CurveType.WEIBULL:
             a, b = weibull_fit(factors, dev_periods_float)
             params = {"a": a, "b": b}
-            expected = [1 / (1 - exp(-a * (dp**b))) for dp in dev_periods_float]
             num_params = 2
-
         elif curve_type == CurveType.INVERSE_POWER:
             a, b, c = inverse_power_fit(factors, dev_periods_float, c_values)
             params = {"a": a, "b": b, "c": c}
-            expected = [1 + a * ((dp + c) ** b) for dp in dev_periods_float]
             num_params = 3
-
         else:
             raise ValueError(f"Unknown curve type: {curve_type}")
+
+        expected = [_ata_formula(dp, curve_type, params) for dp in dev_periods_float]
 
         # Calculate fit metrics
         r_squared_value = r_squared(factors, expected)
@@ -460,28 +468,13 @@ class Triangle:
         Returns:
             Dict mapping development period to cumulative-to-ultimate factor.
         """
-        from math import exp as _exp
-
         params, _ = self.fit_curve(curve_type, c_values)
         dev_sorted = sorted(self.dev_periods)
 
-        ata: dict[int, float] = {}
-        for dp in dev_sorted[:-1]:
-            if curve_type == CurveType.EXPONENTIAL:
-                ata[dp] = 1.0 + _exp(params["a"] + params["b"] * dp)
-            elif curve_type == CurveType.POWER:
-                ata[dp] = params["a"] * (params["b"] ** dp)
-            elif curve_type == CurveType.WEIBULL:
-                ata[dp] = 1.0 / (1.0 - _exp(-params["a"] * (dp ** params["b"])))
-            elif curve_type == CurveType.INVERSE_POWER:
-                ata[dp] = 1.0 + params["a"] * ((dp + params["c"]) ** params["b"])
-            else:
-                raise ValueError(f"Unknown curve type: {curve_type}")
+        ata = {dp: _ata_formula(float(dp), curve_type, params) for dp in dev_sorted[:-1]}
 
-        cdf: dict[int, float] = {}
-        cdf[dev_sorted[-1]] = tail_factor
-        for dp in reversed(dev_sorted[:-1]):
-            next_dp = dev_sorted[dev_sorted.index(dp) + 1]
+        cdf: dict[int, float] = {dev_sorted[-1]: tail_factor}
+        for dp, next_dp in zip(reversed(dev_sorted[:-1]), reversed(dev_sorted[1:]), strict=True):
             cdf[dp] = ata[dp] * cdf[next_dp]
 
         return cdf
