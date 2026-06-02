@@ -7,32 +7,12 @@ from ...models.experience.experience_preparer import ExperienceModelData
 
 
 def chainladder_method(data: float, development_factor: float) -> float:
-    """
-    Apply the Chain Ladder method to project ultimate claims.
-
-    Args:
-        data (float): The current claim amount.
-        development_factor (float): The development factor to apply.
-
-    Returns:
-        float: The projected ultimate claim amount.
-    """
+    """Apply the Chain Ladder method to project ultimate claims."""
     return data * development_factor
 
 
 def bf_method(data: float, exposure: float, development_factor: float, a_priori: float) -> float:
-    """
-    Apply the Bornhuetter-Ferguson method to project ultimate claims.
-
-    Args:
-        data (float): The current claim amount.
-        exposure (float): The exposure amount.
-        development_factor (float): The development factor to apply.
-        a_priori (float): The a priori expected loss ratio.
-
-    Returns:
-        float: The projected ultimate claim amount.
-    """
+    """Apply the Bornhuetter-Ferguson method to project ultimate claims."""
     return data + (1 - (1 / development_factor)) * a_priori * exposure
 
 
@@ -47,30 +27,11 @@ def cape_cod_method(
     development_factors: list[float] | None = None,
     exposures: list[float] | None = None,
 ) -> float:
-    """
-    Apply the Cape Cod method to project ultimate claims.
-
-    Args:
-        data (float): The current claim amount.
-        exposure (float): The exposure amount.
-        development_factor (float): The development factor to apply.
-        trend_factors (List[float], optional): List of trend factors for each year.
-        losses (List[float], optional): List of losses for each year.
-        development_factors (List[float], optional): List of development factors for each year.
-        exposures (List[float], optional): List of exposures for each year.
-
-    Returns:
-        float: The projected ultimate claim amount.
-
-    Raises:
-        ValueError: If any of the required parameters for cape_cod_prior_algo are missing.
-    """
-    # If any of the required parameters for cape_cod_prior_algo are missing, raise an error
+    """Apply the Cape Cod method to project ultimate claims."""
     if trend_factors is None or losses is None or development_factors is None or exposures is None:
         raise ValueError(
             "Cape Cod method requires trend_factors, losses, development_factors, and exposures"
         )
-
     cape_cod_prior = cape_cod_prior_algo(
         trend_factors=trend_factors,
         losses=losses,
@@ -78,7 +39,6 @@ def cape_cod_method(
         exposures=exposures,
         generalised=False,
     )
-
     return bf_method(data, exposure, development_factor, a_priori=cape_cod_prior)
 
 
@@ -92,31 +52,11 @@ def generalised_cape_cod_method(
     exposures: list[float] | None = None,
     decay_factor: float = 0.0,
 ) -> float:
-    """
-    Apply the Generalised Cape Cod method to project ultimate claims.
-
-    Args:
-        data (float): The current claim amount.
-        exposure (float): The exposure amount.
-        development_factor (float): The development factor to apply.
-        trend_factors (List[float], optional): List of trend factors for each year.
-        losses (List[float], optional): List of losses for each year.
-        development_factors (List[float], optional): List of development factors for each year.
-        exposures (List[float], optional): List of exposures for each year.
-        decay_factor (float, optional): Decay factor for the generalised method. Defaults to 0.0.
-
-    Returns:
-        float: The projected ultimate claim amount.
-
-    Raises:
-        ValueError: If any of the required parameters for cape_cod_prior_algo are missing.
-    """
-    # If any of the required parameters for cape_cod_prior_algo are missing, raise an error
+    """Apply the Generalised Cape Cod method to project ultimate claims."""
     if trend_factors is None or losses is None or development_factors is None or exposures is None:
         raise ValueError(
             "Generalised Cape Cod method requires trend_factors, losses, development_factors, and exposures"
         )
-
     generalised_cape_cod_prior = cape_cod_prior_algo(
         trend_factors=trend_factors,
         losses=losses,
@@ -125,7 +65,6 @@ def generalised_cape_cod_method(
         decay_factor=decay_factor,
         generalised=True,
     )
-
     return bf_method(data, exposure, development_factor, a_priori=generalised_cape_cod_prior)
 
 
@@ -137,42 +76,23 @@ def cape_cod_prior_algo(
     decay_factor: float = 0.0,
     generalised: bool = False,
 ) -> float:
-    """
-    Calculate the a priori expected loss ratio using the Cape Cod algorithm.
-
-    Args:
-        trend_factors (List[float]): List of trend factors for each year.
-        losses (List[float]): List of losses for each year.
-        development_factors (List[float]): List of development factors for each year.
-        exposures (List[float]): List of exposures for each year.
-        decay_factor (float, optional): Decay factor for the generalised method. Defaults to 0.0.
-        generalised (bool, optional): Whether to use the generalised method. Defaults to False.
-
-    Returns:
-        Union[Any, float]: The a priori expected loss ratio.
-    """
+    """Calculate the a priori expected loss ratio using the Cape Cod algorithm."""
     if generalised:
-        # For the generalized method, we apply a decay factor to give different weights to different years
         weights = [exp(-decay_factor * i) for i in range(len(trend_factors))]
-
-        # Calculate weighted pseudo claims and exposures
-        psuedo_claims = sum(
+        pseudo_claims = sum(
             weights[i] * trend_factors[i] * losses[i] * (development_factors[i] / exposures[i])
             for i in range(len(trend_factors))
         )
-        psuedo_exposures = sum(
+        pseudo_exposures = sum(
             weights[i] * exposures[i] / development_factors[i] for i in range(len(exposures))
         )
-
-        return psuedo_claims / psuedo_exposures
     else:
-        # Standard Cape Cod method (already implemented)
-        psuedo_claims = sum(
+        pseudo_claims = sum(
             trend_factors[i] * losses[i] * (development_factors[i] / exposures[i])
             for i in range(len(trend_factors))
         )
-        psuedo_exposures = sum(exposures[i] / development_factors[i] for i in range(len(exposures)))
-        return psuedo_claims / psuedo_exposures
+        pseudo_exposures = sum(exposures[i] / development_factors[i] for i in range(len(exposures)))
+    return pseudo_claims / pseudo_exposures
 
 
 projection_methods_fn: dict[ProjectionMethods, Callable[..., Any]] = {
@@ -184,20 +104,19 @@ projection_methods_fn: dict[ProjectionMethods, Callable[..., Any]] = {
 
 
 class BurnCostModel:
-    """
-    BurnCostModel is a class that calculates burn costs for a reinsurance contract layer.
+    """Calculates burn costs for a reinsurance contract layer.
 
-    It uses various projection methods to estimate ultimate claims and calculate burn costs
-    based on historical claims and exposures data.
+    Uses various projection methods (Chain Ladder, BF, Cape Cod) to estimate
+    ultimate claims and compute burn costs from historical claims and exposures.
 
     Attributes:
-        _modelling_years (List[int]): The years to be used in the modelling.
-        _years_weighting (Dict[int, float]): Weighting factors for each modelling year.
-        _projection_methods (Dict[int, ProjectionMethods]): Projection method to use for each modelling year.
-        _development_pattern (Dict[int, float]): Development factors for each modelling year.
-        _a_priori (Dict[int, float]): A priori expected loss ratios for each modelling year.
-        _data (ExperienceModelData): The claims and exposures data for the reinsurance contract.
-        _layer_id (int): The identifier for the reinsurance contract layer.
+        modelling_years: Years used in the modelling.
+        years_weighting: Weighting factor per modelling year.
+        projection_methods: Projection method per modelling year.
+        development_pattern: Development factor per modelling year.
+        a_priori: A priori expected loss ratio per modelling year.
+        data: Claims and exposures data for the contract.
+        layer_id: Identifier for the reinsurance contract layer.
     """
 
     def __init__(
@@ -209,294 +128,95 @@ class BurnCostModel:
         development_pattern: dict[int, float] | None = None,
         a_priori_assumption: dict[int, float] | None = None,
     ) -> None:
-        """
-        Initialize a BurnCostModel instance.
-
-        Args:
-            model_data (ExperienceModelData): The claims and exposures data for the reinsurance contract.
-            layer_id (Any): The identifier for the reinsurance contract layer.
-            years_weighting (Optional[Dict[int, float]], optional): Weighting factors for each modelling year.
-                If None, equal weights of 1.0 will be used for all years. Defaults to None.
-            projection_methods (Optional[Dict[int, ProjectionMethods]], optional): Projection method to use for each modelling year.
-                If None, SIMPLE_CAPE_COD will be used for all years. Defaults to None.
-            development_pattern (Optional[Dict[int, float]], optional): Development factors for each modelling year.
-                If None, factors of 1.0 will be used for all years (no development). Defaults to None.
-            a_priori_assumption (Optional[Dict[int, float]], optional): A priori expected loss ratios for each modelling year.
-                If None, values of 0.0 will be used for all years (no a priori assumption). Defaults to None.
-        """
-        self._modelling_years = model_data.exposures.modelling_years
-        self._years_weighting = (
-            years_weighting
-            if years_weighting
-            else {year: 1.0 for year in model_data.exposures.modelling_years}
+        years = model_data.exposures.modelling_years
+        self.modelling_years: list[int] = years
+        self.years_weighting: dict[int, float] = (
+            years_weighting if years_weighting else {yr: 1.0 for yr in years}
         )
-        self._projection_methods = (
+        self.projection_methods: dict[int, ProjectionMethods] = (
             projection_methods
             if projection_methods
-            else {
-                year: ProjectionMethods.SIMPLE_CAPE_COD
-                for year in model_data.exposures.modelling_years
-            }
-        )  # Default to simple cape cod method
-        self._development_pattern = (
-            development_pattern
-            if development_pattern
-            else {year: 1.0 for year in model_data.exposures.modelling_years}
-        )  # Default to no development pattern
-        self._a_priori = (
-            a_priori_assumption
-            if a_priori_assumption
-            else {year: 0.0 for year in model_data.exposures.modelling_years}
-        )  # Default to no a priori assumption
-        self._data = model_data
-        self._layer_id = layer_id
+            else {yr: ProjectionMethods.SIMPLE_CAPE_COD for yr in years}
+        )
+        self.development_pattern: dict[int, float] = (
+            development_pattern if development_pattern else {yr: 1.0 for yr in years}
+        )
+        self.a_priori: dict[int, float] = (
+            a_priori_assumption if a_priori_assumption else {yr: 0.0 for yr in years}
+        )
+        self.data: ExperienceModelData = model_data
+        self.layer_id: int = layer_id
 
-    @property
-    def modelling_years(self) -> list[int]:
-        """
-        Get the years to be used in the modelling.
-
-        Returns:
-            List[int]: The modelling years.
-        """
-        return self._modelling_years
-
-    @modelling_years.setter
-    def modelling_years(self, years: list[int]) -> None:
-        """
-        Set the years to be used in the modelling.
-
-        Args:
-            years (List[int]): The new modelling years.
-        """
-        self._modelling_years = years
-
-    @property
-    def years_weighting(self) -> dict[int, float]:
-        """
-        Get the weighting factors for each modelling year.
-
-        Returns:
-            Dict[int, float]: Mapping of modelling year to weighting factor.
-        """
-        return self._years_weighting
-
-    @years_weighting.setter
-    def years_weighting(self, weighting: dict[int, float]) -> None:
-        """
-        Set the weighting factors for each modelling year.
-
-        Args:
-            weighting (Dict[int, float]): Mapping of modelling year to weighting factor.
-        """
-        self._years_weighting = weighting
-
-    @property
-    def projection_methods(self) -> dict[int, ProjectionMethods]:
-        """
-        Get the projection method to use for each modelling year.
-
-        Returns:
-            Dict[int, ProjectionMethods]: Mapping of modelling year to projection method.
-        """
-        return self._projection_methods
-
-    @projection_methods.setter
-    def projection_methods(self, methods: dict[int, ProjectionMethods]) -> None:
-        """
-        Set the projection method to use for each modelling year.
-
-        Args:
-            methods (Dict[int, ProjectionMethods]): Mapping of modelling year to projection method.
-        """
-        self._projection_methods = methods
-
-    @property
-    def development_pattern(self) -> dict[int, float]:
-        """
-        Get the development factors for each modelling year.
-
-        Returns:
-            Dict[int, float]: Mapping of modelling year to development factor.
-        """
-        return self._development_pattern
-
-    @development_pattern.setter
-    def development_pattern(self, pattern: dict[int, float]) -> None:
-        """
-        Set the development factors for each modelling year.
-
-        Args:
-            pattern (Dict[int, float]): Mapping of modelling year to development factor.
-        """
-        self._development_pattern = pattern
-
-    @property
-    def data(self) -> ExperienceModelData:
-        """
-        Get the claims and exposures data for the reinsurance contract.
-
-        Returns:
-            ExperienceModelData: The claims and exposures data.
-        """
-        return self._data
-
-    @data.setter
-    def data(self, model_data: ExperienceModelData) -> None:
-        """
-        Set the claims and exposures data for the reinsurance contract.
-
-        Args:
-            model_data (ExperienceModelData): The new claims and exposures data.
-        """
-        self._data = model_data
-
-    @property
-    def layer_id(self) -> int:
-        """
-        Get the identifier for the reinsurance contract layer.
-
-        Returns:
-            int: The layer identifier.
-        """
-        return self._layer_id
-
-    @layer_id.setter
-    def layer_id(self, lid: int) -> None:
-        """
-        Set the identifier for the reinsurance contract layer.
-
-        Args:
-            lid (int): The new layer identifier.
-        """
-        self._layer_id = lid
-
-    @property
-    def a_priori(self) -> dict[int, float]:
-        """
-        Get the a priori expected loss ratios for each modelling year.
-
-        Returns:
-            Dict[int, float]: Mapping of modelling year to a priori expected loss ratio.
-        """
-        return self._a_priori
-
-    @a_priori.setter
-    def a_priori(self, prior: dict[int, float]) -> None:
-        """
-        Set the a priori expected loss ratios for each modelling year.
-
-        Args:
-            prior (Dict[int, float]): Mapping of modelling year to a priori expected loss ratio.
-        """
-        self._a_priori = prior
+    def _collect_cape_cod_data(
+        self,
+    ) -> tuple[list[float], list[float], list[float], list[float]]:
+        """Gather per-year arrays needed by the Cape Cod prior algorithm."""
+        trend_factors: list[float] = []
+        losses: list[float] = []
+        dev_factors: list[float] = []
+        exposures_list: list[float] = []
+        for yr in self.modelling_years:
+            yr_claims = self.data.aggregate_subject_contract_claims.get(self.layer_id, {}).get(yr)
+            yr_exposures = self.data.aggregate_exposures.get(yr)
+            if yr_claims is None or yr_exposures is None:
+                continue
+            trend_factors.append(1.0)
+            losses.append(yr_claims.get("latest_incurred", 0.0))
+            dev_factors.append(self.development_pattern.get(yr, 1.0))
+            exposures_list.append(yr_exposures.get("earned", 0.0))
+        return trend_factors, losses, dev_factors, exposures_list
 
     def calculate_burn_cost(self) -> dict[int, float]:
-        """
-        Calculate the burn cost for each modelling year.
-
-        This method applies the specified projection method for each modelling year
-        to calculate the burn cost based on the claims and exposures data.
+        """Calculate the burn cost for each modelling year.
 
         Returns:
-            Dict[int, float]: Mapping of modelling year to calculated burn cost.
+            Mapping of modelling year to burn cost (ultimate claims / earned exposure).
         """
-        burn_costs = {}
-        for year in self._modelling_years:
-            # Skip years that don't have data in the aggregate claims or exposures
-            if (
-                self._layer_id not in self._data.aggregate_subject_contract_claims
-                or year not in self._data.aggregate_subject_contract_claims[self._layer_id]
-                or year not in self._data.aggregate_exposures
-            ):
+        burn_costs: dict[int, float] = {}
+        cc_data: tuple[list[float], list[float], list[float], list[float]] | None = None
+
+        for year in self.modelling_years:
+            layer_claims = self.data.aggregate_subject_contract_claims.get(self.layer_id, {})
+            if year not in layer_claims or year not in self.data.aggregate_exposures:
                 continue
 
-            # Get claims and exposures data for the year
-            claims_data = self._data.aggregate_subject_contract_claims[self._layer_id][year]
-            exposures_data = self._data.aggregate_exposures[year]
-
-            # Get the latest incurred claims amount
+            claims_data = layer_claims[year]
+            exposures_data = self.data.aggregate_exposures[year]
             latest_incurred = claims_data.get("latest_incurred", 0.0)
-
-            # Get the earned exposure value
             earned_exposure = exposures_data.get("earned", 0.0)
 
-            # Skip years with zero exposure to avoid division by zero
             if earned_exposure == 0.0:
                 continue
 
-            # Get the projection method, development factor, and a priori for the year
-            method = self._projection_methods.get(year, ProjectionMethods.SIMPLE_CAPE_COD)
-            dev_factor = self._development_pattern.get(year, 1.0)
-            a_priori_value = self._a_priori.get(year, 0.0)
+            method = self.projection_methods.get(year, ProjectionMethods.SIMPLE_CAPE_COD)
+            dev_factor = self.development_pattern.get(year, 1.0)
+            a_priori_value = self.a_priori.get(year, 0.0)
 
-            # Apply the projection method
             projection_fn = projection_methods_fn[method]
             try:
                 if method == ProjectionMethods.CHAINLADDER:
-                    ultimate_claims = projection_fn(latest_incurred, dev_factor)
-                elif method in [
-                    ProjectionMethods.SIMPLE_CAPE_COD,
-                    ProjectionMethods.GENERALISED_CAPE_COD,
-                ]:
-                    # Collect data for all years to calculate the Cape Cod prior
-                    trend_factors = []
-                    losses = []
-                    dev_factors = []
-                    exposures_list = []
-
-                    for yr in self._modelling_years:
-                        if (
-                            yr
-                            in self._data.aggregate_subject_contract_claims.get(self._layer_id, {})
-                            and yr in self._data.aggregate_exposures
-                        ):
-                            yr_claims = self._data.aggregate_subject_contract_claims[
-                                self._layer_id
-                            ][yr]
-                            yr_exposures = self._data.aggregate_exposures[yr]
-
-                            trend_factors.append(
-                                1.0
-                            )  # Default trend factor, could be replaced with actual trend factors
-                            losses.append(yr_claims.get("latest_incurred", 0.0))
-                            dev_factors.append(self._development_pattern.get(yr, 1.0))
-                            exposures_list.append(yr_exposures.get("earned", 0.0))
-
-                    decay_factor = 0.0  # Default decay factor, could be a parameter of the model
-
+                    ultimate = projection_fn(latest_incurred, dev_factor)
+                elif method == ProjectionMethods.BF:
+                    ultimate = projection_fn(latest_incurred, earned_exposure, dev_factor, a_priori_value)
+                else:
+                    # SIMPLE_CAPE_COD or GENERALISED_CAPE_COD — build shared data once
+                    if cc_data is None:
+                        cc_data = self._collect_cape_cod_data()
+                    tf, lo, df, ex = cc_data
                     if method == ProjectionMethods.SIMPLE_CAPE_COD:
-                        ultimate_claims = projection_fn(
-                            latest_incurred,
-                            earned_exposure,
-                            dev_factor,
-                            trend_factors,
-                            losses,
-                            dev_factors,
-                            exposures_list,
+                        ultimate = projection_fn(
+                            latest_incurred, earned_exposure, dev_factor, tf, lo, df, ex
                         )
-                    else:  # GENERALISED_CAPE_COD
-                        ultimate_claims = projection_fn(
-                            latest_incurred,
-                            earned_exposure,
-                            dev_factor,
-                            trend_factors,
-                            losses,
-                            dev_factors,
-                            exposures_list,
-                            decay_factor,
+                    else:
+                        ultimate = projection_fn(
+                            latest_incurred, earned_exposure, dev_factor, tf, lo, df, ex
                         )
-                else:  # BF
-                    ultimate_claims = projection_fn(
-                        latest_incurred, earned_exposure, dev_factor, a_priori_value
-                    )
 
-                # Calculate burn cost as ultimate claims divided by earned exposure
-                burn_costs[year] = ultimate_claims / earned_exposure if earned_exposure > 0 else 0.0
+                burn_costs[year] = ultimate / earned_exposure
 
-            except (ValueError, ZeroDivisionError, ArithmeticError, RuntimeError, TypeError) as e:
+            except (ValueError, ZeroDivisionError, ArithmeticError, RuntimeError) as e:
                 raise ValueError(
-                    f"Projection failed for year {year}, layer {self._layer_id}: {e}"
+                    f"Projection failed for year {year}, layer {self.layer_id}: {e}"
                 ) from e
 
         return burn_costs
