@@ -62,7 +62,12 @@ def _claim_to_row(c: Claim) -> dict[str, object]:
     }
 
 
+_ALLOWED_TABLES: frozenset[str] = frozenset({"exposures", "claims"})
+
+
 def _upsert(rows: list[dict[str, object]], table: str, db_path: str) -> None:
+    if table not in _ALLOWED_TABLES:
+        raise ValueError(f"Invalid table name: {table!r}")
     columns = list(rows[0].keys())
     placeholders = ", ".join("?" * len(columns))
     sql = f"INSERT OR REPLACE INTO {table} ({', '.join(columns)}) VALUES ({placeholders})"
