@@ -5,6 +5,19 @@ from ..claims.claims import Claim, ClaimDevelopmentHistory, Claims
 from ..exposures.exposures import Exposure, Exposures, ExposureValues
 
 
+def _scale(value: float, factor: float, origin_year: int, base_year: int) -> float:
+    """Apply a trend factor relative to base_year.
+
+    Years before base_year are multiplied (trending forward); years after are
+    divided (deflating back); the base year is returned unchanged.
+    """
+    if origin_year < base_year:
+        return value * factor
+    if origin_year > base_year:
+        return value / factor
+    return value
+
+
 class Trending:
     """
     A class for trending insurance data (claims and exposures) to a common base year.
@@ -44,12 +57,6 @@ class Trending:
         self.base_year: int | None = base_year
 
     def _validate_inputs(self) -> None:
-        """
-        Validate the trend factors and base year.
-
-        Raises:
-            ValueError: If trend factors dictionaries are empty or base_year is not an integer.
-        """
         if not self.exposure_trend_factors:
             raise ValueError("Exposure trend factors dictionary cannot be empty")
         if not self.claim_trend_factors:
@@ -96,13 +103,9 @@ class Trending:
             origin_year = exposure.modelling_year
             trend_factor = self.calculate_trend_factor(origin_year, for_claims=False)
             original_values = exposure.exposure_values
-            if origin_year < self.base_year:
-                trended_value = original_values.exposure_value * trend_factor
-            elif origin_year > self.base_year:
-                trended_value = original_values.exposure_value / trend_factor
-            else:
-                trended_value = original_values.exposure_value
-
+            trended_value = _scale(
+                original_values.exposure_value, trend_factor, origin_year, self.base_year
+            )
             new_values = ExposureValues(
                 exposure_value=trended_value,
                 attachment_point=original_values.attachment_point,
@@ -147,15 +150,14 @@ class Trending:
             origin_year = claim.claims_meta_data.modelling_year
             trend_factor = self.calculate_trend_factor(origin_year, for_claims=True)
             dev_hist = claim.uncapped_claim_development_history
-            if origin_year < self.base_year:
-                trended_paid = [x * trend_factor for x in dev_hist.cumulative_dev_paid]
-                trended_incurred = [x * trend_factor for x in dev_hist.cumulative_dev_incurred]
-            elif origin_year > self.base_year:
-                trended_paid = [x / trend_factor for x in dev_hist.cumulative_dev_paid]
-                trended_incurred = [x / trend_factor for x in dev_hist.cumulative_dev_incurred]
-            else:
-                trended_paid = list(dev_hist.cumulative_dev_paid)
-                trended_incurred = list(dev_hist.cumulative_dev_incurred)
+            trended_paid = [
+                _scale(x, trend_factor, origin_year, self.base_year)
+                for x in dev_hist.cumulative_dev_paid
+            ]
+            trended_incurred = [
+                _scale(x, trend_factor, origin_year, self.base_year)
+                for x in dev_hist.cumulative_dev_incurred
+            ]
 
             trended_dev_hist = ClaimDevelopmentHistory(
                 development_months=dev_hist.development_months,
