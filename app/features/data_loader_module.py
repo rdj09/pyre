@@ -14,6 +14,7 @@ from pyre.data_injector.exceptions import InjectionError
 from pyre.exposures.exposures import Exposures
 
 from ..services.domain_service import DomainService
+from ..services.storage_service import StorageService
 
 
 def data_loader_ui() -> Any:
@@ -38,29 +39,24 @@ def data_loader_ui() -> Any:
                 choices=["Exposure", "Claim", "Triangle"],
                 selected="Exposure",
             ),
-            ui.panel_conditional(
-                "input.dl_source_type === 'db'",
-                ui.input_text(
-                    "dl_db_connection_string",
-                    "DB Connection String",
-                    placeholder="sqlite:///path/to/file.db",
-                ),
-                ui.input_text_area(
-                    "dl_db_query",
-                    "SQL Query",
-                    placeholder="SELECT * FROM exposures",
-                    rows=3,
-                ),
+            ui.input_text(
+                "dl_db_path",
+                "SQLite Database Path",
+                value="./pyre_data.db",
             ),
             ui.input_action_button("dl_load_btn", "Load Data", class_="btn-primary w-100 mt-2"),
             ui.hr(),
             ui.output_text("dl_status_message"),
+            ui.hr(),
+            ui.input_action_button("dl_save_btn", "Save to DB", class_="btn-secondary w-100"),
+            ui.output_text("dl_save_status"),
             width=320,
         ),
         ui.navset_tab(
             ui.nav_panel("Data Preview", ui.output_data_frame("dl_raw_records_table")),
             ui.nav_panel("Domain Objects", ui.output_data_frame("dl_domain_objects_table")),
             ui.nav_panel("Summary Statistics", ui.output_ui("dl_summary_ui")),
+            ui.nav_panel("Database", ui.output_ui("dl_db_status_ui")),
         ),
         fillable=True,
     )
@@ -75,9 +71,11 @@ def data_loader_server(
     _triangle: reactive.Value[Triangle | None],
 ) -> None:
     _svc = DomainService()
+    _storage_svc = StorageService()
     _raw_records: reactive.Value[list[dict[str, Any]]] = reactive.Value([])
     _domain_result: reactive.Value[Exposures | Claims | Triangle | None] = reactive.Value(None)
     _error_message: reactive.Value[str] = reactive.Value("")
+    _save_message: reactive.Value[str] = reactive.Value("")
 
     @reactive.effect
     @reactive.event(input.dl_load_btn)
@@ -93,11 +91,19 @@ def data_loader_server(
         domain_type = input.dl_domain_type()
 
         if source_type == "db":
-            source: Any = input.dl_db_connection_string()
-            query = input.dl_db_query()
-            if not source:
-                _error_message.set("Please enter a DB connection string.")
+            db_path = input.dl_db_path().strip()
+            if not db_path:
+                _error_message.set("Please enter a SQLite database path.")
                 return
+            if domain_type == "Exposure":
+                source: Any = f"sqlite:///{db_path}"
+                query = "SELECT * FROM exposures"
+            elif domain_type == "Claim":
+                source = f"sqlite:///{db_path}"
+                query = "SELECT * FROM claims"
+            else:  # Triangle — build_triangle constructs sqlite:/// internally
+                source = db_path
+                query = ""
         else:
             file_info = input.dl_file_upload()
             if file_info is None or len(file_info) == 0:
@@ -124,6 +130,34 @@ def data_loader_server(
                 _triangle.set(result_tri)
         except (InjectionError, ValueError, RuntimeError) as exc:
             _error_message.set(f"Error: {exc}")
+
+    @reactive.effect
+    @reactive.event(input.dl_save_btn)
+    def _on_save() -> None:
+        _save_message.set("")
+        result = _domain_result.get()
+        db_path = input.dl_db_path().strip()
+        if result is None:
+            _save_message.set("Nothing to save — load data first.")
+            return
+        if not db_path:
+            _save_message.set("Please enter a SQLite database path.")
+            return
+        if isinstance(result, Triangle):
+            _save_message.set(
+                "Triangle cannot be saved directly. Load Claims first, save those, "
+                "then rebuild Triangle from DB."
+            )
+            return
+        try:
+            if isinstance(result, Exposures):
+                _storage_svc.save_exposures(list(result), db_path)
+                _save_message.set(f"Saved {len(result)} exposure(s) to {db_path}")
+            elif isinstance(result, Claims):
+                _storage_svc.save_claims(list(result), db_path)
+                _save_message.set(f"Saved {len(result)} claim(s) to {db_path}")
+        except Exception as exc:
+            _save_message.set(f"Save failed: {exc}")
 
     @render.text
     def dl_status_message() -> str:
@@ -180,6 +214,27 @@ def data_loader_server(
                 ),
             )
         return ui.p("No summary available.")
+
+    @render.text
+    def dl_save_status() -> str:
+        return _save_message.get()
+
+    @render.ui
+    def dl_db_status_ui() -> Any:
+        _save_message.get()  # invalidate when save completes
+        db_path = input.dl_db_path()
+        if not db_path or not db_path.strip():
+            return ui.p("Enter a SQLite database path in the sidebar.")
+        path = db_path.strip()
+        exp_ids = _storage_svc.list_stored(path, "exposures")
+        claim_ids = _storage_svc.list_stored(path, "claims")
+        return ui.div(
+            ui.h5(f"Stored records in: {path}"),
+            ui.h6(f"Exposures ({len(exp_ids)})"),
+            ui.tags.ul(*[ui.tags.li(eid) for eid in exp_ids]) if exp_ids else ui.p("None"),
+            ui.h6(f"Claims ({len(claim_ids)})"),
+            ui.tags.ul(*[ui.tags.li(cid) for cid in claim_ids]) if claim_ids else ui.p("None"),
+        )
 
 
 def _exposures_to_records(exposures: Exposures) -> list[dict[str, Any]]:
