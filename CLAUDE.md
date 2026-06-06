@@ -1,233 +1,127 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository.
 
 ## Project Overview
 
-**pyRE** (Python Reinsurance) is a comprehensive Python package for non-life reinsurance pricing and analysis. It provides actuarial and statistical tools for analyzing claims data, managing exposures, pricing reinsurance contracts, and monitoring rates.
+**pyRE** — Python package for non-life reinsurance pricing and analysis. Pure Python 3.10+, no external runtime dependencies. Build system: Hatch. Docs: MkDocs/Material → GitHub Pages. License: MIT. Version: 0.0.1 (Beta).
 
-- **Language & Framework**: Pure Python (3.10+), no external dependencies in core package
-- **Build System**: Hatch (with pyproject.toml configuration)
-- **Documentation**: MkDocs with Material theme (deployed to GitHub Pages)
-- **License**: MIT
-- **Current Version**: 0.0.1 (Beta)
+## Commands
 
-## Build & Test Commands
-
-### Testing
 ```bash
-# Run all tests using pytest
-pytest
+pytest                          # run all tests (src-layout: pythonpath=["src"] set in pyproject.toml)
+pytest tests/test_claims.py -v  # module-specific
+pytest -q --ignore=tests/test_exposure_curve_fitting.py  # skip scipy-dependent test
 
-# Run tests for a specific module
-pytest tests/test_claims.py
-pytest tests/test_treaty.py
+hatch run types:check           # mypy across src/pyre and tests
+ruff check src/pyre/            # lint (E, F, I, N, W, B rules; N999 ignored for Models/)
+ruff format src/pyre/           # auto-format
 
-# Run a specific test class or function
-pytest tests/test_claims.py::TestClaimDevelopmentHistory
-pytest tests/test_claims.py::TestClaimDevelopmentHistory::test_latest_paid
+hatch run docs:serve            # local docs at localhost:8000
+hatch run docs:deploy           # publish to gh-pages
 
-# Run tests with verbose output
-pytest -v
+pip install -e .                # editable install for development
 ```
 
-### Type Checking
-```bash
-# Check type hints across the codebase
-hatch run types:check
+## Architecture
 
-# Check specific modules
-mypy --install-types --non-interactive src/pyre tests
+### Module map (`src/pyre/`)
+
+| Path | Purpose |
+|------|---------|
+| `enums.py` | **Single home for all enums** — `ClaimYearType`, `ExposureBasis`, `ClaimTriggerBasis`, `IndexationClauseType`, `ContractType`, `SeverityDistribution`, `FrequencyDistribution` |
+| `_container.py` | Generic `ItemContainer[T]` base — provides `append`, `__iter__`, `__len__`, `__getitem__` (slice returns typed subclass), `__repr__` |
+| `claims/` | `Claim`, `ClaimDevelopmentHistory`, `ClaimsMetaData`, `Claims`, `Triangle`, `IBNERPatternExtractor` |
+| `exposures/` | `Exposure`, `ExposureMetaData`, `ExposureValues`, `Exposures` |
+| `treaty/` | `RILayer`, `RIContractMetadata`, `RIContract`, layer loss functions |
+| `Models/` | `Experience/`, `Exposure/`, `AggregateFeatures/` submodules + `trending.py` |
+| `rate_monitoring/` | Rate adequacy and rate change tracking |
+| `exceptions/` | `GeneralException`, `ExposureException`, `ClaimsException`, `ContractException` |
+
+### Key design patterns (post-refactor, develop branch)
+
+**`@dataclass` for data-holding classes.** `ClaimDevelopmentHistory`, `ClaimsMetaData`, `ExposureMetaData`, `ExposureValues`, `RILayer`, `RIContractMetadata` are `@dataclass`. Follow this pattern for new data classes.
+- Required fields first (no default), optional fields after.
+- Cross-field validation in `__post_init__`.
+- Post-construction mutation validation via `__setattr__` override where needed (e.g., `ExposureMetaData` date ordering, `ExposureValues` non-negative check).
+- Computed read-only values stay as `@property` (never removed by dataclass conversion).
+- **Exception**: `ClaimDevelopmentHistory` validates list lengths lazily (only in `cumulative_reserved_amount`) — do not add construction-time validation.
+
+**Centralized enums.** All enums live in `src/pyre/enums.py`. Never define enums in domain modules — always `from pyre.enums import X`.
+
+**`ItemContainer[T]`.** `Claims` and `Exposures` inherit from `ItemContainer`. Both take a `list[T]` in `__init__` and expose a domain alias property (`claims`, `exposures`) with a setter. Domain-specific properties (`modelling_years`, `currencies`, `exposure_ids`, etc.) live on the subclass, not the base.
+
+**Public API.** `from pyre import Claims` works. All public names are re-exported from `src/pyre/__init__.py` via subpackage `__init__.py` files. Add new public classes there when creating them.
+
+### Data flow
+
+```
+Claims + Exposures + RIContract → ExperienceModelData (with Trending) → Model calculations
 ```
 
-### Documentation
-```bash
-# Install docs dependencies and serve locally
-pip install -e ".[docs]"
-hatch run docs:serve
-
-# Build documentation
-hatch run docs:build
-
-# Deploy documentation to GitHub Pages
-hatch run docs:deploy
-```
-
-### Installation
-```bash
-# Install in editable mode (for development)
-pip install -e .
-
-# Install with documentation dependencies
-pip install -e ".[docs]"
-```
-
-## High-Level Architecture
-
-### Module Organization
-
-The codebase is organized into six primary modules under `src/pyre/`:
-
-#### 1. **Claims Module** (src/pyre/claims/)
-Manages claim data and claims development analysis.
-- `ClaimYearType` (Enum): Defines claim year bases (ACCIDENT_YEAR, UNDERWRITING_YEAR, REPORTED_YEAR)
-- `ClaimDevelopmentHistory`: Tracks cumulative/incremental paid and incurred amounts over development months
-- `ClaimsMetaData`: Metadata for individual claims (ID, dates, currency, limits, LOB)
-- `Claim`: Combines metadata and development history
-- `Claims`: Collection of claims with aggregation methods
-- `Triangle`: Claims development triangles with curve fitting and age-to-age factor calculations
-- `IBNERPatternExtractor`: Extracts IBNER (Incurred But Not Enough Reported) patterns
-
-Key concept: Claims are structured hierarchically with metadata separate from development data, allowing flexible analysis by different year types and development periods.
-
-#### 2. **Exposures Module** (src/pyre/exposures/)
-Handles insurance exposure data management.
-- `ExposureBasis` (Enum): EARNED or WRITTEN basis
-- `ExposureMetaData`: Exposure identification, period, classification, location, peril, occupancy
-- `ExposureValues`: Holds premium, limit, and exposure count values
-- `Exposure`: Single exposure unit with metadata and values
-- `Exposures`: Collection of exposures with aggregation and filtering capabilities
-
-Key concept: Exposures are modeled with a base year derived from the policy inception or period dates, enabling exposure trending and classification.
-
-#### 3. **Treaty Module** (src/pyre/treaty/)
-Models reinsurance contracts and layers.
-- `ContractType` (Enum): Contract types (QUOTA_SHARE, EXCESS_OF_LOSS, SURPLUS_SHARE, FRANCHISE, etc.)
-- `ClaimTriggerBasis` (Enum): Defines how claims attach to contracts (LOD=Accident Year, RAD=Underwriting Year, CMB=Reported Year)
-- `RILayer`: Individual reinsurance layer with attachment, limit, reinstatement terms, and participation percentages
-- `RIContractMetadata`: Contract-level metadata (inception, effective dates, currency, counterparty)
-- `RIContract`: Container holding metadata and multiple layers
-- Layer loss functions: `xol_calculation`, `qs_calculation`, `surplus_share_calculation`, `franchise_calculation`, `layer_loss_calculation`
-
-Key concept: Contracts are composed of layers, each with specific limits and attachments. Claims attach based on trigger basis, and losses are calculated through layer-specific loss functions.
-
-#### 4. **Models Module** (src/pyre/Models/)
-Contains pricing and rating models organized into submodules:
-
-**Experience Submodule** (Models/Experience/):
-- `burn_cost.py`: Burn cost analysis with chainladder, Bornhuetter-Ferguson, Cape Cod, and generalized Cape Cod methods
-- `frequency_severity.py`: Frequency and severity distribution modeling
-- `curve_fitting.py`: Regression and distribution fitting utilities
-- `pareto_rating.py`: Pareto-based rating methods
-- `resampling.py`: Simulation and resampling techniques
-- `experience_preparer.py`: `ExperienceModelData` class that combines claims, exposures, and contracts with trending
-
-**Exposure Submodule** (Models/Exposure/):
-- `exposure_curve_fitting.py`: Curve fitting for exposure data
-- `exposure_ILF_fitting.py`: Increased Limit Factor (ILF) fitting
-- `exposure_rating_cost.py`: Premium calculations based on exposure characteristics
-- `exposure_curve_functions.py` and `exposure_ILF_functions.py`: Supporting functions for curve and ILF models
-
-**Aggregate Features Submodule** (Models/AggregateFeatures/):
-- `aggregate_features.py`: Aggregate feature calculations
-- `selections.py`: Feature selection and filtering
-- `simulation_engine.py`: Simulation and aggregation engine
-
-- `trending.py`: `Trending` class for applying trend factors to claims and exposures to a common base year
-
-Key concept: Models work with `ExperienceModelData` which holds claims, exposures, and a reinsurance contract. Trending is applied consistently across all data before analysis.
-
-#### 5. **Rate Monitoring Module** (src/pyre/rate_monitoring/)
-Tools for tracking rate changes and adequacy.
-- `rate_adequacy.py`: Assesses if current rates are adequate
-- `rate_change.py`: Calculates and tracks rate changes over time
-
-#### 6. **Exceptions Module** (src/pyre/exceptions/)
-Custom exception hierarchy:
-- `GeneralException`: Base exception with identifier support
-- `ExposureException`: For exposure-related errors
-- `ClaimsException`: For claims-related errors
-- `ContractException`: For contract-related errors
-
-### Data Flow Pattern
-
-The typical workflow follows this pattern:
-1. Create `Claim`/`Claims` objects from claims data
-2. Create `Exposure`/`Exposures` objects from exposure data
-3. Define a `RIContract` with `RILayer`s
-4. Combine into `ExperienceModelData` with trending factors
-5. Apply model calculations (burn cost, frequency-severity, etc.)
-6. Extract results and insights
-
-### Design Patterns
-
-- **Enumerations**: Used extensively for type-safe constants (ClaimYearType, ContractType, ExposureBasis, etc.)
-- **Properties**: Extensive use of Python properties for validation and computed values
-- **Metadata Separation**: Metadata (metadata classes) is separate from operational data, enabling flexible analysis
-- **Collection Classes**: Similar to "List" pattern but with domain-specific methods (Claims, Exposures)
-- **Year-Based Organization**: Much of the codebase works with origin years and development periods as nested dictionary structures
+Triangles: `{origin_year: {dev_period: value}}` nested dicts. Claims organised by `ClaimYearType`.
 
 ## Project Structure
 
 ```
 pyre/
-├── src/pyre/              # Main source code
-│   ├── __init__.py
-│   ├── __about__.py       # Version info (0.0.1)
-│   ├── claims/            # Claims analysis
-│   ├── exposures/         # Exposure management
-│   ├── Models/            # Pricing models (Experience, Exposure, AggregateFeatures)
-│   ├── treaty/            # Reinsurance contracts
-│   ├── rate_monitoring/   # Rate tracking and adequacy
-│   └── exceptions/        # Custom exceptions
-├── tests/                 # Test suite (~2,191 lines of code)
-├── docs/                  # MkDocs documentation
-│   ├── index.md
-│   ├── about.md
-│   ├── claims.md
-│   ├── exposures.md
-│   ├── models.md
-│   ├── treaty.md
-│   └── rate_monitoring.md
-├── pyproject.toml         # Hatch configuration, dependencies, tool configs
-├── mkdocs.yml             # MkDocs configuration
-├── README.md              # Package overview
-└── LICENSE.txt            # MIT License
+├── src/pyre/
+│   ├── __init__.py            # public API surface (from pyre import ...)
+│   ├── __about__.py           # version = "0.0.1"
+│   ├── enums.py               # ALL enums live here
+│   ├── _container.py          # ItemContainer[T] generic base
+│   ├── claims/
+│   ├── exposures/
+│   ├── treaty/
+│   ├── Models/                # uppercase — non-Pythonic, rename deferred
+│   │   ├── Experience/
+│   │   ├── Exposure/
+│   │   └── AggregateFeatures/
+│   ├── rate_monitoring/
+│   └── exceptions/
+├── tests/                     # unittest.TestCase style; ~84 tests collected
+├── docs/                      # MkDocs source
+├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
+└── mkdocs.yml
 ```
 
-## Key Implementation Details
+## Known Test State (develop, as of Pythonic refactor)
 
-### Trending and Year-Based Analysis
+**Expected: 22 failed, 62 passed** (when ignoring `test_exposure_curve_fitting.py`).
 
-The `Trending` class is fundamental to the models. It applies year-to-year trend factors to convert data to a common base year. Trend factors are maintained separately for claims and exposures, allowing different inflation assumptions.
+All 22 failures are **pre-existing** — not caused by the refactor. Do not attempt to fix them without understanding they pre-date the refactor:
 
-### Claims Development
+| Failure group | Count | Root cause |
+|---|---|---|
+| `test_trending.py` | 9 | `trending.py` calls `exposure.modelling_year()` as method but it's a `@property`; also mismatched API expectations |
+| `test_ibner_pattern_extractor.py` | 4 | `IBNERPatternExtractor` internal API diverged from test expectations |
+| `test_claims.py` modelling year | 4 | Test expects years set by a *different* test method (broken test isolation — data in setUp doesn't match expected values) |
+| `test_claims.py` + `test_exposures.py` append/len | 2 | Tests expect `append` not to mutate in place (tests written incorrectly) |
+| `test_triangles.py` fit_curve | 1 | ZeroDivisionError in curve fitting |
+| `test_exposures.py` earned_pct/earned_value | 2 | `exposure_type` defaults to `ExposureBasis.EARNED` so the method returns full value, not prorated |
 
-Claims are organized by origin year (accident, underwriting, or reported depending on `ClaimYearType`) and development months. Triangles are stored as nested dictionaries: `{origin_year: {dev_period: value}}`. This structure supports easy extraction of rows (origin years) and columns (development periods) for triangle analysis.
+`tests/test_exposure_curve_fitting.py` causes a **collection error** (requires `scipy`, not installed). Always `--ignore` it or skip it.
 
-### Contract Layer Application
+**Double-import trap**: `test_claims.py` imports from `src.pyre.claims.claims` (explicit src path) while also importing from `pyre.exceptions.exceptions`. With `pythonpath=["src"]`, both `src.pyre.*` and `pyre.*` are importable and produce distinct module objects. `assertRaises(ClaimsException)` will fail if the exception is raised by a module loaded under the other path.
 
-`RILayer` objects define attachment and limit terms. The `layer_loss_calculation` function applies contract terms to loss amounts, respecting both occurrence and aggregate limits with reinstatement provisions.
+## Tooling (configured in pyproject.toml)
 
-### Type Safety
-
-The codebase uses Python's `Enum` classes heavily for type-safe categorizations rather than strings or integers. This prevents errors from typos and provides IDE autocomplete support.
-
-## Important Notes
-
-- **No external dependencies** in the core package (as of v0.0.1)
-- **Tests use pytest** (configured in `.vscode/settings.json`)
-- **Docstring coverage is extensive** - most classes and methods have detailed docstrings explaining parameters and return values
-- **GitHub Pages deployment** of docs is automated through `hatch run docs:deploy`
-- **Relative imports within pyre package** ensure modules reference each other correctly
-- **Python 3.10+ required** for all features (f-strings, type hints, etc.)
+- **ruff**: `line-length=100`, `target-version=py310`, rules E/F/I/N/W/B, `N999` ignored (for `Models/`)
+- **mypy**: non-strict, `python_version=3.10`, `ignore_missing_imports=true`
+- **pytest**: `addopts="--tb=short"`, `pythonpath=["src"]`
+- **pytest-cov**: `source_pkgs=["pyre","tests"]`, branch coverage
 
 ## Git Branches
 
-- **main**: Production/stable branch
-- **develop**: Development branch
-- **gh-pages**: Documentation hosting
+- **main**: stable/production
+- **develop**: active development (12 commits ahead of origin — Pythonic refactor complete)
+- **gh-pages**: docs hosting
 
-## Current Development Branch: develop
+Active development on `develop`. The `refactor/pyre-v1` branch is abandoned (superseded by refactor applied directly to `develop`). The worktree at `.worktrees/refactor` can be removed: `git worktree remove .worktrees/refactor`
 
-Active development happens on `develop`. A previous `refactor/pyre-v1` branch
-(Phases 1–5 complete, never merged) has been superseded by a Pythonic refactor
-applied directly to `develop` (see `docs/superpowers/plans/`).
+## Important Notes
 
-The worktree at `.worktrees/refactor` can be removed once no longer needed:
-`git worktree remove .worktrees/refactor`
-
-## Documentation
-
-Full documentation available at https://rdj09.github.io/pyre/ and locally via `hatch run docs:serve`. The docs include detailed API references, usage examples, and explanations of actuarial methodologies implemented in the package.
-
+- `Models/` uses an uppercase directory name — rename to `models/` is a follow-up task (affects all imports and docs).
+- `Models/Experience/frequency_severity.py`: class is `SeverityFit` (was `severity_fit`).
+- Relative imports within `pyre` package — always use `from ..enums import X` style, not absolute `from pyre.enums import X`, inside `src/pyre/`.
+- Full docs: https://rdj09.github.io/pyre/ — `hatch run docs:serve` locally.
