@@ -19,7 +19,7 @@
 | `app/services/storage_service.py` | `StorageService` — serialize domain objects → SQLite rows; `list_stored` |
 | `app/services/domain_service.py` | `DomainService` — stateless facade; file/DB → domain objects |
 | `app/services/model_service.py` | `ModelService` — stateless facade over pyre model APIs |
-| `app/features/data_loader_module.py` | `dl_` prefix; file/DB upload → domain objects; Save to DB; Database viewer tab |
+| `app/features/data_loader_module.py` | `dl_` prefix; file/DB upload → domain objects; Save to DB; Database viewer tab; startup modal to load all DB data |
 | `app/features/triangle_module.py` | `tri_` prefix; ATA factors + IBNER pattern |
 | `app/features/contract_module.py` | `ctr_` prefix; form (1–5 layers) + JSON upload; writes `_contract` |
 | `app/features/experience_module.py` | `exp_` prefix; burn cost via `BurnCostModel`; dynamic layer select from `_contract` |
@@ -46,6 +46,8 @@
 - `_claim_to_row` uses `uncapped_claim_development_history` so `contract_limit` doesn't corrupt stored values
 - Dev history stored as pipe-separated strings (`"12|24|36"`); `_parse_int_list`/`_parse_float_list` in claim schemas handle round-trip
 - `build_triangle(source_type="db")` receives plain file path, constructs `sqlite:///` internally, loads via `claims_db_loader().from_db()`
+- **Startup modal (2026-06-02)**: `_check_db_on_startup` runs once at session init (all reads wrapped in `reactive.isolate()` → no reactive deps → fires once). If DB has records, shows modal: "Load All" (`dl_modal_load_btn`) → `_on_modal_load` populates `_exposures`, `_claims`, `_triangle`; "Skip" dismisses.
+- **Wipe-bug fixed**: `_on_load()` no longer blanket-clears all three reactive values on each load. Each branch only sets its own value — loading Claims leaves Exposures intact and vice versa.
 
 ## Current Interfaces / APIs
 
@@ -92,33 +94,12 @@ Tables: `exposures` (PK: `exposure_meta_exposure_id`) · `claims` (PK: `claims_m
 
 ### App startup
 
-**Prerequisites** — install webapp dependencies (safe to re-run, no-op if already present):
 ```powershell
-uv sync --group webapp
+uv sync --group webapp   # install deps (always use --group webapp, never plain uv sync)
+uv run python run_app.py # launch; browser: http://127.0.0.1:8000
 ```
 
-**Option A — convenience script (recommended):**
-```powershell
-uv run python run_app.py
-```
-
-**Option B — direct module path:**
-```powershell
-uv run python -m shiny run app.app
-```
-
-**Option C — installed console script (after `uv sync`):**
-```powershell
-uv run pyre-app
-```
-
-**Browser URL:** `http://127.0.0.1:8000`
-
-Shiny prints `Listening on http://127.0.0.1:8000` once ready. If port 8000 is taken,
-change `port=8000` in `run_app.py` to any free port (e.g. 8080).
-
-> **Do NOT use:** `shiny run app/app.py` — file-path form sets `__main__` and breaks
-> the relative imports inside `app/`.
+> **Do NOT use** `shiny run app/app.py` — file-path form sets `__main__` and breaks relative imports.
 
 ## Active Constraints / Assumptions
 
@@ -145,13 +126,8 @@ change `port=8000` in `run_app.py` to any free port (e.g. 8080).
 | pyre lib T1–T11 | Typo fixes; `parse_bool` case-insensitive; `Loader` uses `AdapterRegistry`; `quota_share_calculation` dispatched; `r_squared` de-duped; tests into subdirs; `_VarianceEstimator` extracted; `Resampling` random_seed; `BurnCostModel` bare-except narrowed |
 | Shiny webapp | 7-tab `page_navbar` app; `data_loader`, `triangle`, `contract`, `experience`, `exposure`, `rate`, `simulation` feature modules; `ModelService` + `DomainService` service layer |
 | SQLite backend | `app/db/database.py` DDL; `StorageService` serialise/upsert/list; `DomainService.build_triangle` extended to `source_type="db"`; Data Loader Save button + Database viewer tab |
+| DB-aware reactive state | `_on_load()` wipe bug fixed (no longer clears all reactive values); `_check_db_on_startup` session-once effect; startup modal (Load All / Skip) populates `_exposures`, `_claims`, `_triangle` from DB |
 | Demo data | `examples/webapp_demo/exposures.csv` (6 rows) + `claims.csv` (12 claims) + walk-through README |
-
-## Backward Compat Aliases Still Active (remove in next major version)
-
-- `risk_premium_extropolate` → alias for `risk_premium_extrapolate`
-- `pyre.exceptions.exceptions` → re-exports from `pyre.exceptions`
-- Module-level `calculate_trend_factor`, `trend_exposures`, `trend_claims`, `get_trend_factors` → DeprecationWarning shims
 
 ## Demo Data (completed 2026-06-02)
 
@@ -163,12 +139,7 @@ change `port=8000` in `run_app.py` to any free port (e.g. 8080).
 | `claims.csv` | 12 claims, accident years 2019–2024, dev periods 12–72 months, pipe-separated lists |
 | `README.md` | Tab-by-tab walk-through with exact UI field values for all 7 tabs |
 
-**Key data design facts:**
-- All values in **£000s** — consistent with existing `examples/0x_*.py` scripts
-- `contract_limit = 15000` on all claims (prevents cedant-level cap; XL layer caps applied separately by BurnCostModel)
-- `claims.csv` serves double duty: load as **Claim** for experience/simulation tabs; load as **Triangle** for the triangle tab
-- Triangle ATA factors: 12→24: 1.1919 | 24→36: 1.0778 | 36→48: 1.0275 | 48→60+: 1.0000
-- Matching contract to enter in UI: Layer 1 XL 3,000 xs 2,000 / Layer 2 XL 5,000 xs 5,000
+**Key facts:** values in £000s; `contract_limit=15000` on all claims; `claims.csv` doubles as Triangle source; matching contract: Layer 1 XL 3,000 xs 2,000 / Layer 2 XL 5,000 xs 5,000.
 
 ## CSV Column Format Reference (dot-notation)
 
@@ -180,7 +151,7 @@ change `port=8000` in `run_app.py` to any free port (e.g. 8080).
 
 ## Next Steps
 
-- **Create PR**: `feature/shiny-webapp-data-injection` → `main` (all work complete; 366/366 tests pass)
+- **Create PR**: `feature/shiny-webapp-data-injection` → `main` (all work complete; 366/366 tests pass; DB-aware reactive state done)
 - Optional: add Excel/YAML/JSON round-trip tests for domain schemas
 - Optional: extend `DomainService.build_triangle` to support `source_type="excel"`
 

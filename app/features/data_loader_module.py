@@ -83,9 +83,6 @@ def data_loader_server(
         _error_message.set("")
         _raw_records.set([])
         _domain_result.set(None)
-        _claims.set(None)
-        _exposures.set(None)
-        _triangle.set(None)
 
         source_type = input.dl_source_type()
         domain_type = input.dl_domain_type()
@@ -158,6 +155,77 @@ def data_loader_server(
                 _save_message.set(f"Saved {len(result)} claim(s) to {db_path}")
         except Exception as exc:
             _save_message.set(f"Save failed: {exc}")
+
+    @reactive.effect
+    def _check_db_on_startup() -> None:
+        with reactive.isolate():
+            db_path = input.dl_db_path().strip()
+        if not db_path:
+            return
+        exp_ids = _storage_svc.list_stored(db_path, "exposures")
+        claim_ids = _storage_svc.list_stored(db_path, "claims")
+        if not exp_ids and not claim_ids:
+            return
+        parts: list[str] = []
+        if exp_ids:
+            parts.append(f"{len(exp_ids)} exposure(s)")
+        if claim_ids:
+            parts.append(f"{len(claim_ids)} claim(s)")
+        summary = " and ".join(parts)
+        ui.modal_show(
+            ui.modal(
+                ui.p(f"Found {summary} in {db_path}."),
+                ui.p("Load all data from the database now?"),
+                title="Database data found",
+                footer=ui.TagList(
+                    ui.input_action_button(
+                        "dl_modal_load_btn", "Load All", class_="btn-primary"
+                    ),
+                    ui.modal_button("Skip"),
+                ),
+                easy_close=True,
+            )
+        )
+
+    @reactive.effect
+    @reactive.event(input.dl_modal_load_btn)
+    def _on_modal_load() -> None:
+        ui.modal_remove()
+        db_path = input.dl_db_path().strip()
+        if not db_path:
+            return
+        errors: list[str] = []
+
+        try:
+            exp_ids = _storage_svc.list_stored(db_path, "exposures")
+            if exp_ids:
+                exposures = _svc.load_exposures(
+                    f"sqlite:///{db_path}", "db", query="SELECT * FROM exposures"
+                )
+                _exposures.set(exposures)
+        except Exception as exc:
+            errors.append(f"Exposures: {exc}")
+
+        try:
+            claim_ids = _storage_svc.list_stored(db_path, "claims")
+            if claim_ids:
+                claims = _svc.load_claims(
+                    f"sqlite:///{db_path}", "db", query="SELECT * FROM claims"
+                )
+                _claims.set(claims)
+                triangle = _svc.build_triangle(db_path, "db")
+                _triangle.set(triangle)
+        except Exception as exc:
+            errors.append(f"Claims/Triangle: {exc}")
+
+        if errors:
+            ui.notification_show(
+                f"Partial load errors: {'; '.join(errors)}", type="warning", duration=6
+            )
+        else:
+            ui.notification_show(
+                "All data loaded from database.", type="success", duration=3
+            )
 
     @render.text
     def dl_status_message() -> str:
