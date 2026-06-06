@@ -1,9 +1,9 @@
-import operator
 from dataclasses import dataclass, field
 from typing import List, Optional
 from datetime import date
 
 from ..enums import ExposureBasis
+from .._container import ItemContainer
 
 
 @dataclass
@@ -213,7 +213,7 @@ class Exposure:
         else:
             return self._exposure_values.exposure_value
 
-class Exposures:
+class Exposures(ItemContainer["Exposure"]):
     """A container class for managing a collection of Exposure objects.
 
     This class provides list-like behavior for storing and manipulating multiple
@@ -233,21 +233,22 @@ class Exposures:
         __len__(): Returns the number of exposures in the collection.
     """
 
-    def __init__(self, exposures: List[Exposure])->None:
-        self._exposures = exposures
+    def __init__(self, exposures: List["Exposure"]) -> None:
+        super().__init__()
+        self._items = exposures
 
     @property
-    def exposures(self) -> List[Exposure]:
+    def exposures(self) -> List["Exposure"]:
         """Returns the list of Exposure objects managed by this container."""
-        return self._exposures
+        return self._items
 
     @exposures.setter
-    def exposures(self, list_of_exposure_classes: List[Exposure]) -> None:
+    def exposures(self, list_of_exposure_classes: List["Exposure"]) -> None:
         """Sets the list of Exposure objects managed by this container."""
-        self._exposures = list_of_exposure_classes
+        self._items = list_of_exposure_classes
 
     @property
-    def modelling_years(self) -> List[int]: 
+    def modelling_years(self) -> List[int]:
         """
         Returns a sorted list of unique modelling years for all exposures.
 
@@ -256,43 +257,3 @@ class Exposures:
         """
         years = {exposure.modelling_year for exposure in self.exposures}
         return sorted(years)
-
-    def append(self, exposure: Exposure) -> None:
-        """Append an Exposure object to the collection.
-
-        Args:
-            exposure (Exposure): The Exposure object to append.
-        """
-        self._exposures.append(exposure)
-
-    def __getitem__(self, key):
-        """Get an Exposure object by index or a slice of Exposures.
-
-        Args:
-            key: An integer index or a slice object.
-
-        Returns:
-            Union[Exposure, 'Exposures']: An Exposure object if key is an integer,
-                                         or a new Exposures instance if key is a slice.
-        """
-        if isinstance(key, slice):
-            cls = type(self)
-            return cls(self._exposures[key])
-        index = operator.index(key)
-        return self._exposures[index]
-
-    def __iter__(self):
-        """Return an iterator over the exposures.
-
-        Returns:
-            Iterator[Exposure]: An iterator over the Exposure objects.
-        """
-        return iter(self._exposures)
-
-    def __len__(self) -> int:
-        """Return the number of exposures in the collection.
-
-        Returns:
-            int: The number of Exposure objects.
-        """
-        return len(self._exposures)

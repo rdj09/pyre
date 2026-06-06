@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 from datetime import date
-import operator
 from typing import Optional, List, Sequence, Set
 
 from ..enums import ClaimYearType
 from ..exceptions.exceptions import ClaimsException
+from .._container import ItemContainer
 
 @dataclass
 class ClaimDevelopmentHistory:
@@ -211,7 +211,7 @@ class Claim:
 
 
 
-class Claims:
+class Claims(ItemContainer["Claim"]):
     """A container class for managing a collection of Claim objects.
 
     This class provides convenient accessors and methods for working with a list of claims,
@@ -232,16 +232,17 @@ class Claims:
         __iter__(): Returns an iterator over the claims.
         __len__(): Returns the number of claims in the collection.
     """
-    def __init__(self, claims: list[Claim]) -> None:
-        self._claims = claims
+    def __init__(self, claims: list["Claim"]) -> None:
+        super().__init__()
+        self._items = claims
 
     @property
-    def claims(self):
-        return self._claims
+    def claims(self) -> list["Claim"]:
+        return self._items
 
     @claims.setter
-    def claims(self, list_of_claim_classes:list[Claim]):
-        self._claims = list_of_claim_classes
+    def claims(self, list_of_claim_classes: list["Claim"]) -> None:
+        self._items = list_of_claim_classes
 
     @property
     def modelling_years(self) -> List:
@@ -267,19 +268,3 @@ class Claims:
         Returns a list of currencies for all claims.
         """
         return {claim.claims_meta_data.currency for claim in self.claims}
-
-    def append(self, claim: Claim):
-        self._claims.append(claim)
-
-    def __getitem__(self, key):
-        if isinstance(key,slice):
-            cls = type(self)
-            return cls(self._claims[key])
-        index = operator.index(key)
-        return self._claims[index]
-
-    def __iter__(self):
-        return iter(self._claims)
-
-    def __len__(self):
-        return len(self._claims)
