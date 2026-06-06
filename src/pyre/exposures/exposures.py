@@ -201,6 +201,12 @@ class Exposure:
         else:
             return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
+    def __repr__(self) -> str:
+        return (
+            f"Exposure(id={self._exposure_meta.exposure_id!r}, "
+            f"name={self._exposure_meta.exposure_name!r})"
+        )
+
     def written_exposure_value(self, analysis_date: date) -> float:
         """Calculate the written exposure value as of the given analysis date.
 
@@ -265,3 +271,13 @@ class Exposures(ItemContainer["Exposure"]):
         """
         years = {exposure.modelling_year for exposure in self.exposures}
         return sorted(years)
+
+    @property
+    def currencies(self) -> set:
+        """Returns the set of unique currencies across all exposures."""
+        return {exposure._exposure_meta.currency for exposure in self._items}
+
+    @property
+    def exposure_ids(self) -> List[str]:
+        """Returns the list of exposure IDs."""
+        return [exposure._exposure_meta.exposure_id for exposure in self._items]

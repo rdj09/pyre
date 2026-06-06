@@ -35,16 +35,6 @@ class ClaimDevelopmentHistory:
     cumulative_dev_paid: List[float] = field(default_factory=list)
     cumulative_dev_incurred: List[float] = field(default_factory=list)
 
-    def __post_init__(self) -> None:
-        # Validate that all lists have the same length
-        self._validate_list_lengths()
-
-    def __setattr__(self, name: str, value: object) -> None:
-        object.__setattr__(self, name, value)
-        _list_fields = {"development_months", "cumulative_dev_paid", "cumulative_dev_incurred"}
-        if name in _list_fields and all(hasattr(self, f) for f in _list_fields):
-            self._validate_list_lengths()
-
     def _validate_list_lengths(self) -> None:
         """Validates that all development lists have the same length."""
         if len(self.development_months) != len(self.cumulative_dev_paid) or len(
@@ -57,6 +47,7 @@ class ClaimDevelopmentHistory:
     @property
     def cumulative_reserved_amount(self) -> List[float]:
         """Returns a list of reserved amounts (incurred minus paid) at each development month."""
+        self._validate_list_lengths()
         return [
             incurred - paid
             for incurred, paid in zip(self.cumulative_dev_incurred, self.cumulative_dev_paid)
