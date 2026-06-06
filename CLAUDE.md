@@ -217,58 +217,15 @@ The codebase uses Python's `Enum` classes heavily for type-safe categorizations 
 - **main**: Production/stable branch
 - **develop**: Development branch
 - **gh-pages**: Documentation hosting
-- **refactor/pyre-v1**: Active refactor branch (see below)
 
-## Active Branch: refactor/pyre-v1
+## Current Development Branch: develop
 
-**Worktree location:** `C:\Users\rhysj\Documents\Actuarial\PricingToolDev\pyre\.worktrees\refactor`
+Active development happens on `develop`. A previous `refactor/pyre-v1` branch
+(Phases 1–5 complete, never merged) has been superseded by a Pythonic refactor
+applied directly to `develop` (see `docs/superpowers/plans/`).
 
-**Status (as of 2026-04-20):** All implementation complete. 272 tests passing. Branch not yet merged or pushed — being kept as-is for the user to handle later.
-
-**What this branch contains** (all ahead of `main`):
-- Full refactor of existing modules (enums centralised, dataclasses, lowercase module names, public API surface via `__init__.py`, PEP 561 `py.typed`)
-- Bug fixes across trending, exposures, claims, curve fitting, IBNER, triangle, burn cost, and contract calculations
-- **New `pyre.data_injector` subpackage** — a complete, production-ready data injection library
-
-### pyre.data_injector — What was built
-
-Plan file: `docs/superpowers/plans/2026-04-18-data-injector.md` (all 9 tasks complete)
-
-**Files created under `src/pyre/data_injector/`:**
-
-| File | Purpose |
-|---|---|
-| `__init__.py` | Public API re-exports |
-| `exceptions.py` | `InjectionError` |
-| `descriptors.py` | `FieldDescriptor` — source key, coercion, defaults, validation, pre-processing |
-| `schema.py` | `Schema` — collection of descriptors, auto-derives from dataclasses |
-| `injector.py` | `Injector[T]` — flat/nested injection, pre/post hooks, `inject_many` with error aggregation |
-| `loader.py` | `Loader[T]` facade — `from_json`, `from_csv`, `from_yaml`, `from_excel`, `from_dict`, `from_one`, `for_class` |
-| `registry.py` | `AdapterRegistry` — plugin-style adapter registration/lookup |
-| `utils.py` | `unflatten`, `parse_bool`, `parse_list` helpers |
-| `adapters/base.py` | `SourceAdapter` `@runtime_checkable` Protocol |
-| `adapters/dict_adapter.py` | Pass-through for `list[dict]` |
-| `adapters/json_adapter.py` | JSON file/string loading |
-| `adapters/csv_adapter.py` | CSV file loading |
-| `adapters/yaml_adapter.py` | YAML file loading (optional dep) |
-| `adapters/excel_adapter.py` | Excel `.xlsx` loading via openpyxl (optional dep) |
-
-**Tests:** `tests/test_data_injector/` — test_descriptors.py, test_schema.py, test_injector.py, test_adapters.py, test_loader.py, test_registry.py, test_utils.py
-
-**Public API (importable from `pyre.data_injector`):**
-```python
-from pyre.data_injector import (
-    FieldDescriptor, InjectionError, Injector, Loader,
-    AdapterRegistry, Schema, parse_bool, parse_list, unflatten
-)
-```
-
-### Next steps for this branch
-
-When ready to ship:
-1. `git push -u origin refactor/pyre-v1`
-2. `gh pr create` targeting `main`
-3. After merge, remove worktree: `git worktree remove .worktrees/refactor`
+The worktree at `.worktrees/refactor` can be removed once no longer needed:
+`git worktree remove .worktrees/refactor`
 
 ## Documentation
 
