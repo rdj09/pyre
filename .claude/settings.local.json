@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest tests/test_trending.py::test_trend_exposures_returns_trended_values -v)",
+      "Bash(python -m pytest -v --ignore=tests/test_exposure_curve_fitting.py)",
+      "Bash(python -m pytest tests/test_trending.py -v)",
+      "Bash(python -m pytest tests/test_triangles.py -v --tb=short)",
+      "Bash(python -m pytest tests/test_triangles.py::test_triangle_from_claims_builds_correctly tests/test_triangles.py::test_triangle_from_claims_paid -v)",
+      "Bash(python -m pytest tests/test_ibner_pattern_extractor.py -v)",
+      "Bash(python -m pytest tests/test_treaty.py::test_loss_to_layer_fn_xol_below_attachment tests/test_treaty.py::test_loss_to_layer_fn_surplus_share_raises -v)",
+      "Bash(python -m pytest tests/test_treaty.py -v)",
+      "Bash(python -m pytest tests/test_burn_cost.py -v)",
+      "Bash(python -m pytest tests/test_exposure_model.py -v)",
+      "Bash(python -m pytest -v)",
+      "Bash(python -m pytest tests/test_claims.py::TestClaimsMetaData::test_modelling_year_accident_year -v)",
+      "Bash(python -m pytest tests/test_claims.py -v --ignore=tests/test_exposure_curve_fitting.py)",
+      "Bash(python -m pytest --ignore=tests/test_exposure_curve_fitting.py -q)",
+      "Bash(python -m pytest tests/test_public_api.py -v)",
+      "Bash(python -m pytest --tb=no -q)",
+      "Bash(python -m pytest --tb=short -q)",
+      "Bash(python -m pytest --ignore=tests/test_exposure_curve_fitting.py --tb=no -q)",
+      "Bash(python -c ' *)",
+      "Bash(python -m pytest tests/test_experience_preparer.py -v)",
+      "Bash(pytest --tb=no -q)",
+      "Bash(pytest --tb=short -q)",
+      "Bash(pytest --ignore=tests/test_exposure_curve_fitting.py --tb=no -q)",
+      "Bash(pytest tests/ --ignore=tests/test_exposure_curve_fitting.py --ignore=tests/test_trending.py -q)",
+      "Bash(pip show *)",
+      "Bash(python -c \"import pyre; print\\(pyre.__file__\\)\")",
+      "Bash(pytest tests/test_trending.py -v)",
+      "Bash(pytest -q)",
+      "Bash(pytest tests/test_claims.py tests/test_trending.py tests/test_exposures.py -v --tb=short)"
+    ]
+  }
+}
