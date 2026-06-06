@@ -1,22 +1,28 @@
-from typing import Dict, List, Optional, Union, Tuple, Any, Iterator
+from typing import Dict, List, Optional, Tuple
 from enum import Enum, auto
 from math import exp
 from ..claims.claims import Claims
 from ..Models.Experience.curve_fitting import (
-    linear_regression, exponential_fit, power_fit,
-    weibull_fit, inverse_power_fit, r_squared,
-    assess_error_assumptions, residuals_standardised
+    exponential_fit,
+    power_fit,
+    weibull_fit,
+    inverse_power_fit,
+    r_squared,
+    assess_error_assumptions,
 )
+
 
 class CurveType(Enum):
     """
     Enum representing different types of curves that can be fitted to triangle data.
     """
+
     EXPONENTIAL = auto()
     POWER = auto()
     WEIBULL = auto()
     INVERSE_POWER = auto()
     OTHER = auto()
+
 
 class Triangle:
     """
@@ -83,7 +89,9 @@ class Triangle:
 
             for dev_period, value in dev_data.items():
                 if not isinstance(dev_period, int):
-                    raise ValueError(f"Development period must be an integer, got {type(dev_period)}")
+                    raise ValueError(
+                        f"Development period must be an integer, got {type(dev_period)}"
+                    )
 
                 if value is not None and not isinstance(value, (int, float)):
                     raise ValueError(f"Triangle values must be numeric or None, got {type(value)}")
@@ -195,7 +203,7 @@ class Triangle:
                 result[oy] = self.get_value(oy, max_dev)
         return result
 
-    def to_incremental(self) -> 'Triangle':
+    def to_incremental(self) -> "Triangle":
         """
         Convert a cumulative triangle to an incremental triangle.
 
@@ -224,10 +232,10 @@ class Triangle:
         return Triangle(
             triangle=incremental_triangle,
             origin_years=self.origin_years.copy(),
-            dev_periods=self.dev_periods.copy()
+            dev_periods=self.dev_periods.copy(),
         )
 
-    def to_cumulative(self) -> 'Triangle':
+    def to_cumulative(self) -> "Triangle":
         """
         Convert an incremental triangle to a cumulative triangle.
 
@@ -252,7 +260,7 @@ class Triangle:
         return Triangle(
             triangle=cumulative_triangle,
             origin_years=self.origin_years.copy(),
-            dev_periods=self.dev_periods.copy()
+            dev_periods=self.dev_periods.copy(),
         )
 
     @classmethod
@@ -285,7 +293,7 @@ class Triangle:
             origin_year = claim.modelling_year
 
             # Skip claims with no development history
-            if not hasattr(claim, 'capped_claim_development_history'):
+            if not hasattr(claim, "capped_claim_development_history"):
                 continue
 
             # Get the appropriate development history based on value_type
@@ -350,7 +358,9 @@ class Triangle:
 
             if method == "simple":
                 # Simple average
-                dev_factors = [factors[oy].get(dev) for oy in self.origin_years if dev in factors.get(oy, {})]
+                dev_factors = [
+                    factors[oy].get(dev) for oy in self.origin_years if dev in factors.get(oy, {})
+                ]
                 dev_factors = [f for f in dev_factors if f is not None]
 
                 if dev_factors:
@@ -374,7 +384,9 @@ class Triangle:
 
         return avg_factors
 
-    def fit_curve(self, curve_type: CurveType, c_values: List[float] = None) -> Tuple[Dict[str, float], Dict[str, float]]:
+    def fit_curve(
+        self, curve_type: CurveType, c_values: List[float] = None
+    ) -> Tuple[Dict[str, float], Dict[str, float]]:
         """
         Fit a curve to the average age-to-age factors.
 
@@ -412,13 +424,13 @@ class Triangle:
         elif curve_type == CurveType.POWER:
             a, b = power_fit(factors, dev_periods)
             params = {"a": a, "b": b}
-            expected = [a * (b ** dp) for dp in dev_periods]
+            expected = [a * (b**dp) for dp in dev_periods]
             num_params = 2
 
         elif curve_type == CurveType.WEIBULL:
             a, b = weibull_fit(factors, dev_periods)
             params = {"a": a, "b": b}
-            expected = [1 / (1 - exp(-a * (dp ** b))) for dp in dev_periods]
+            expected = [1 / (1 - exp(-a * (dp**b))) for dp in dev_periods]
             num_params = 2
 
         elif curve_type == CurveType.INVERSE_POWER:
@@ -434,20 +446,19 @@ class Triangle:
         r_squared_value = r_squared(factors, expected)
         error_metrics = assess_error_assumptions(factors, expected, num_params)
 
-        metrics = {
-            "r_squared": r_squared_value,
-            **error_metrics
-        }
+        metrics = {"r_squared": r_squared_value, **error_metrics}
 
         return params, metrics
 
-    #TODO output selected development pattern for the purpose of burn cost.
+    # TODO output selected development pattern for the purpose of burn cost.
 
-#TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
+
+# TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
 class IBNERPatternExtractor:
     """
     Extracts IBNER patterns from either a Claims object or a Triangle object.
     """
+
     def __init__(self, triangle: Triangle):
         self.triangle = triangle.triangle
         self.origin_years = triangle.origin_years

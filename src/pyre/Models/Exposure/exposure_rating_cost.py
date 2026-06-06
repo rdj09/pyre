@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 from .exposure_curve_functions import ExposureCurveType, exposure_curve_calculation
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
@@ -6,34 +6,41 @@ from ...treaty.contracts import RIContract
 # citation https://www.casact.org/sites/default/files/presentation/reinsure_2009_handouts_cs1-rosin.pdf "STACKING"
 
 
-
-class ExposureModel():
-    def __init__(self, exposures: Exposures, ri_contract: RIContract, selected_curve: ExposureCurveType, curve_parameters: Dict):
+class ExposureModel:
+    def __init__(
+        self,
+        exposures: Exposures,
+        ri_contract: RIContract,
+        selected_curve: ExposureCurveType,
+        curve_parameters: Dict,
+    ):
         self._exposures = exposures
         self._ri_contract = ri_contract
         self._selected_curve = selected_curve
         self._curve_parameters = curve_parameters
 
-# selected_policy_limit = policy_limit_lower_Bound + band_mid_point * (
-#             policy_limit_upper_Bound - policy_limit_lower_Bound)
-# selected_policy_attachment = policy_lower_bound_attachment + band_mid_point * (
-#             policy_upper_bound_attachment - policy_lower_bound_attachment)
-# selected_total_insured_value = selected_policy_limit + selected_policy_attachment
-# seleceted_treaty_bottom = min(selected_policy_attachment + treaty_layer_attachment, selected_total_insured_value)
-#
-# if treaty_layer_limit + treaty_layer_attachment < selected_policy_limit:
-#     seleceted_treaty_top = selected_policy_attachment + treaty_layer_limit + treaty_layer_attachment
-# else:
-#     seleceted_treaty_top = selected_total_insured_value
+    # selected_policy_limit = policy_limit_lower_Bound + band_mid_point * (
+    #             policy_limit_upper_Bound - policy_limit_lower_Bound)
+    # selected_policy_attachment = policy_lower_bound_attachment + band_mid_point * (
+    #             policy_upper_bound_attachment - policy_lower_bound_attachment)
+    # selected_total_insured_value = selected_policy_limit + selected_policy_attachment
+    # seleceted_treaty_bottom = min(selected_policy_attachment + treaty_layer_attachment, selected_total_insured_value)
+    #
+    # if treaty_layer_limit + treaty_layer_attachment < selected_policy_limit:
+    #     seleceted_treaty_top = selected_policy_attachment + treaty_layer_limit + treaty_layer_attachment
+    # else:
+    #     seleceted_treaty_top = selected_total_insured_value
 
-#        curve_position_policy_lower = mbbefd_curve(curve_parameter,selected_policy_attachment / selected_total_insured_value)
-#       curve_position_policy_higher = mbbefd_curve(curve_parameter,(selected_policy_limit + selected_policy_attachment) / selected_total_insured_value)
-#       curve_position_treaty_lower = mbbefd_curve(curve_parameter,seleceted_treaty_bottom / selected_total_insured_value)
-#       curve_position_treaty_higher = mbbefd_curve(curve_parameter,seleceted_treaty_top / selected_total_insured_value)
-#       return (curve_position_treaty_higher - curve_position_treaty_lower) / (curve_position_policy_higher - curve_position_policy_lower)
+    #        curve_position_policy_lower = mbbefd_curve(curve_parameter,selected_policy_attachment / selected_total_insured_value)
+    #       curve_position_policy_higher = mbbefd_curve(curve_parameter,(selected_policy_limit + selected_policy_attachment) / selected_total_insured_value)
+    #       curve_position_treaty_lower = mbbefd_curve(curve_parameter,seleceted_treaty_bottom / selected_total_insured_value)
+    #       curve_position_treaty_higher = mbbefd_curve(curve_parameter,seleceted_treaty_top / selected_total_insured_value)
+    #       return (curve_position_treaty_higher - curve_position_treaty_lower) / (curve_position_policy_higher - curve_position_policy_lower)
 
-# TODO should attach to this class. Think about ILF option nad adjustment to calculation
-    def calculate_exposure_curve(self, curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
+    # TODO should attach to this class. Think about ILF option nad adjustment to calculation
+    def calculate_exposure_curve(
+        self, curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float
+    ) -> float:
         """Calculate curve value based on curve type and parameters.
 
         Args:
@@ -49,8 +56,6 @@ class ExposureModel():
 
         func = exposure_curve_calculation[curve_type]
         return func(**parameters, curve_position=position)
-
-
 
     def _calculate_single_exposure_share(self, exposure):
         """
@@ -88,27 +93,26 @@ class ExposureModel():
                 curve_position_policy_lower = self.calculate_exposure_curve(
                     self._selected_curve,
                     self._curve_parameters,
-                    policy_attachment / total_insured_value
+                    policy_attachment / total_insured_value,
                 )
                 curve_position_policy_higher = self.calculate_exposure_curve(
                     self._selected_curve,
                     self._curve_parameters,
-                    total_insured_value / total_insured_value  # This equals 1.0
+                    total_insured_value / total_insured_value,  # This equals 1.0
                 )
                 curve_position_treaty_lower = self.calculate_exposure_curve(
                     self._selected_curve,
                     self._curve_parameters,
-                    treaty_bottom / total_insured_value
+                    treaty_bottom / total_insured_value,
                 )
                 curve_position_treaty_higher = self.calculate_exposure_curve(
-                    self._selected_curve,
-                    self._curve_parameters,
-                    treaty_top / total_insured_value
+                    self._selected_curve, self._curve_parameters, treaty_top / total_insured_value
                 )
 
-            # Calculate share of risk
+                # Calculate share of risk
                 share = (curve_position_treaty_higher - curve_position_treaty_lower) / (
-                            curve_position_policy_higher - curve_position_policy_lower)
+                    curve_position_policy_higher - curve_position_policy_lower
+                )
                 shares_by_layer[layer.layer_id] = share
 
         return shares_by_layer

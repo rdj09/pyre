@@ -4,14 +4,14 @@ from pyre.treaty.contracts import (
     IndexationClauseType,
     RILayer,
     RIContractMetadata,
-    RIContract
+    RIContract,
 )
 from pyre.treaty.layer_loss_functions import (
     xol_calculation,
     qs_calculation,
     franchise_calculation,
     surplus_share_calculation,
-    layer_loss_calculation
+    layer_loss_calculation,
 )
 
 __all__ = [

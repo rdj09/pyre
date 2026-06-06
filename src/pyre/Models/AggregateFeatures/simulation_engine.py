@@ -1,9 +1,8 @@
-
 class Simulation:
     def __init__(self) -> None:
         pass
 
-    def run(self)-> None:
+    def run(self) -> None:
         pass
 
     def output(self) -> None:
@@ -16,17 +15,17 @@ class Simulation:
         pass
 
     def cashflows():
-        #premium and claims
+        # premium and claims
         pass
 
     def loss_cost():
         pass
 
     def required_capital():
-        # risk adjusted capital 
+        # risk adjusted capital
         pass
 
-    def investment_return() : #/ discounting:
+    def investment_return():  # / discounting:
         # pattern and yeild assumptions from all cashflows
         pass
 
@@ -44,7 +43,7 @@ class Simulation:
     def required_premium_layer():
         # required_capital = required_capital()
         # investment_return = investment_return()
-        # tax_rate = tax_rate() 
+        # tax_rate = tax_rate()
         # retrocession_cost = retrocession_cost()
         # loss_cost = loss_cost()
         # acquisition_cost = 0.0

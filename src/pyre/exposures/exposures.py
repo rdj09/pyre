@@ -57,10 +57,12 @@ class ExposureMetaData:
             ValueError: If setting either date field would make start > end.
         """
         object.__setattr__(self, name, value)
-        if name in ('exposure_period_start', 'exposure_period_end'):
-            if (hasattr(self, 'exposure_period_start') and
-                    hasattr(self, 'exposure_period_end') and
-                    self.exposure_period_start > self.exposure_period_end):
+        if name in ("exposure_period_start", "exposure_period_end"):
+            if (
+                hasattr(self, "exposure_period_start")
+                and hasattr(self, "exposure_period_end")
+                and self.exposure_period_start > self.exposure_period_end
+            ):
                 raise ValueError("Exposure period start date cannot be after end date")
 
     @property
@@ -100,9 +102,10 @@ class ExposureValues:
         Raises:
             ValueError: If attachment_point or limit is set to a negative value.
         """
-        if name in ('attachment_point', 'limit') and isinstance(value, (int, float)) and value < 0:
+        if name in ("attachment_point", "limit") and isinstance(value, (int, float)) and value < 0:
             raise ValueError(f"{name} cannot be negative")
         object.__setattr__(self, name, value)
+
 
 class Exposure:
     """Represents an insurance exposure with associated metadata and values.
@@ -177,7 +180,11 @@ class Exposure:
             return 0.0
         if self._exposure_meta.aggregate:  # No need for == True
             return 0.0  # TODO: Implement parallelogram method when handling aggregate exposures
-        return min((analysis_date - self._exposure_meta.exposure_period_start).days / self._exposure_meta.exposure_term_length_days, 1.0)
+        return min(
+            (analysis_date - self._exposure_meta.exposure_period_start).days
+            / self._exposure_meta.exposure_term_length_days,
+            1.0,
+        )
 
     def earned_exposure_value(self, analysis_date: date) -> float:
         """Calculate the earned exposure value as of the given analysis date.
@@ -212,6 +219,7 @@ class Exposure:
             return self._exposure_values.exposure_value  # Avoid division by zero
         else:
             return self._exposure_values.exposure_value
+
 
 class Exposures(ItemContainer["Exposure"]):
     """A container class for managing a collection of Exposure objects.

@@ -1,4 +1,3 @@
-
 # Implementation of ILF fitting methods based on:
 # "Increased Limits Ratemaking for Liability Insurance" by Palmer (CAS Study Note)
 # https://www.casact.org/sites/default/files/database/studynotes_palmer.pdf
@@ -7,8 +6,9 @@ import numpy as np
 from scipy import optimize
 import pandas as pd
 import matplotlib.pyplot as plt
-from typing import List, Dict, Tuple, Optional, Union, Callable
-from .exposure_ILF_functions import pareto_ilf, power_ilf, pareto_limited_severity
+from typing import List, Dict, Tuple, Callable
+from .exposure_ILF_functions import pareto_ilf, power_ilf
+
 
 class ILFFitter:
     """
@@ -64,8 +64,8 @@ class ILFFitter:
         predicted_ilfs = power_ilf(self.limits, self.base_limit, slope)
 
         # Calculate R-squared
-        ss_total = np.sum((self.ilfs - np.mean(self.ilfs))**2)
-        ss_residual = np.sum((self.ilfs - predicted_ilfs)**2)
+        ss_total = np.sum((self.ilfs - np.mean(self.ilfs)) ** 2)
+        ss_residual = np.sum((self.ilfs - predicted_ilfs) ** 2)
         r_squared = 1 - (ss_residual / ss_total)
 
         return slope, r_squared
@@ -75,7 +75,7 @@ class ILFFitter:
         Fit a Pareto distribution to the observed ILFs.
 
         The Pareto distribution has the form:
-        ILF(limit) = [1 - (alpha / (alpha + limit/scale))^(alpha-1)] / 
+        ILF(limit) = [1 - (alpha / (alpha + limit/scale))^(alpha-1)] /
                      [1 - (alpha / (alpha + base_limit/scale))^(alpha-1)]
 
         Returns:
@@ -84,10 +84,13 @@ class ILFFitter:
                 - scale parameter (x_m)
                 - R-squared value of the fit
         """
+
         def objective_function(params):
             alpha, x_m = params
-            predicted_ilfs = [pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in self.limits]
-            return np.sum((np.array(predicted_ilfs) - self.ilfs)**2)
+            predicted_ilfs = [
+                pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in self.limits
+            ]
+            return np.sum((np.array(predicted_ilfs) - self.ilfs) ** 2)
 
         # Initial guess for parameters
         initial_guess = [2.0, self.base_limit / 10]
@@ -96,7 +99,9 @@ class ILFFitter:
         bounds = [(1.001, 10), (0.001, self.base_limit)]
 
         # Optimize to find the best parameters
-        result = optimize.minimize(objective_function, initial_guess, bounds=bounds, method='L-BFGS-B')
+        result = optimize.minimize(
+            objective_function, initial_guess, bounds=bounds, method="L-BFGS-B"
+        )
 
         if not result.success:
             raise RuntimeError(f"Optimization failed: {result.message}")
@@ -107,8 +112,8 @@ class ILFFitter:
         predicted_ilfs = [pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in self.limits]
 
         # Calculate R-squared
-        ss_total = np.sum((self.ilfs - np.mean(self.ilfs))**2)
-        ss_residual = np.sum((self.ilfs - np.array(predicted_ilfs))**2)
+        ss_total = np.sum((self.ilfs - np.mean(self.ilfs)) ** 2)
+        ss_residual = np.sum((self.ilfs - np.array(predicted_ilfs)) ** 2)
         r_squared = 1 - (ss_residual / ss_total)
 
         return alpha, x_m, r_squared
@@ -134,7 +139,7 @@ class ILFFitter:
         plt.figure(figsize=(10, 6))
 
         # Plot observed ILFs
-        plt.scatter(self.limits, self.ilfs, color='black', label='Observed ILFs')
+        plt.scatter(self.limits, self.ilfs, color="black", label="Observed ILFs")
 
         # Create a range of limits for smooth curves
         x = np.linspace(self.base_limit, max(self.limits) * 1.1, 100)
@@ -143,21 +148,29 @@ class ILFFitter:
         if power_params:
             power_param, r_squared = power_params
             y_power = power_ilf(x, self.base_limit, power_param)
-            plt.plot(x, y_power, 'r-', label=f'Power Curve (p={power_param:.3f}, R²={r_squared:.3f})')
+            plt.plot(
+                x, y_power, "r-", label=f"Power Curve (p={power_param:.3f}, R²={r_squared:.3f})"
+            )
 
         # Plot Pareto curve if parameters provided
         if pareto_params:
             alpha, x_m, r_squared = pareto_params
             y_pareto = [pareto_ilf(self.base_limit, limit, alpha, x_m) for limit in x]
-            plt.plot(x, y_pareto, 'b-', label=f'Pareto (α={alpha:.3f}, x_m={x_m:.3f}, R²={r_squared:.3f})')
+            plt.plot(
+                x,
+                y_pareto,
+                "b-",
+                label=f"Pareto (α={alpha:.3f}, x_m={x_m:.3f}, R²={r_squared:.3f})",
+            )
 
-        plt.xlabel('Limit')
-        plt.ylabel('ILF')
+        plt.xlabel("Limit")
+        plt.ylabel("ILF")
         plt.title(title)
         plt.legend()
         plt.grid(True)
 
         return plt.gcf()  # Return the figure for further customization or saving
+
 
 def fit_ilf_from_losses(losses: List[float], limits: List[float], base_limit: float) -> ILFFitter:
     """
@@ -182,7 +195,10 @@ def fit_ilf_from_losses(losses: List[float], limits: List[float], base_limit: fl
     # Create and return ILFFitter
     return ILFFitter(limits, ilfs, base_limit)
 
-def fit_ilf_from_severity_curve(severity_function: Callable, limits: List[float], base_limit: float) -> ILFFitter:
+
+def fit_ilf_from_severity_curve(
+    severity_function: Callable, limits: List[float], base_limit: float
+) -> ILFFitter:
     """
     Generate ILFs from a severity curve function.
 
@@ -201,7 +217,10 @@ def fit_ilf_from_severity_curve(severity_function: Callable, limits: List[float]
     # Create and return ILFFitter
     return ILFFitter(limits, ilfs, base_limit)
 
-def calculate_ilf_table(alpha: float, x_m: float, base_limit: float, limits: List[float]) -> pd.DataFrame:
+
+def calculate_ilf_table(
+    alpha: float, x_m: float, base_limit: float, limits: List[float]
+) -> pd.DataFrame:
     """
     Calculate an ILF table using the Pareto distribution.
 
@@ -215,4 +234,4 @@ def calculate_ilf_table(alpha: float, x_m: float, base_limit: float, limits: Lis
         DataFrame with limits and corresponding ILFs
     """
     ilfs = [pareto_ilf(base_limit, limit, alpha, x_m) for limit in limits]
-    return pd.DataFrame({'Limit': limits, 'ILF': ilfs})
+    return pd.DataFrame({"Limit": limits, "ILF": ilfs})
