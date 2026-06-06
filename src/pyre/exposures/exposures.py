@@ -94,6 +94,16 @@ class ExposureValues:
         if self.limit < 0:
             raise ValueError("Limit cannot be negative")
 
+    def __setattr__(self, name: str, value: object) -> None:
+        """Set an attribute, enforcing non-negative invariant for attachment_point and limit.
+
+        Raises:
+            ValueError: If attachment_point or limit is set to a negative value.
+        """
+        if name in ('attachment_point', 'limit') and isinstance(value, (int, float)) and value < 0:
+            raise ValueError(f"{name} cannot be negative")
+        object.__setattr__(self, name, value)
+
 class Exposure:
     """Represents an insurance exposure with associated metadata and values.
 
