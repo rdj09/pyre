@@ -18,3 +18,7 @@ src/pyre/Models/__pycache__/*
 src/pyre/Models/__pycache__/*
 src/pyre/Models/Experience/*
 .worktrees/
+src/pyre/Models/Exposure/__pycache__/__init__.cpython-313.pyc
+src/pyre/Models/Exposure/__pycache__/exposure_curve_fitting.cpython-313.pyc
+src/pyre/Models/Exposure/__pycache__/exposure_curve_functions.cpython-313.pyc
+src/pyre/Models/Exposure/__pycache__/exposure_rating_cost.cpython-313.pyc
