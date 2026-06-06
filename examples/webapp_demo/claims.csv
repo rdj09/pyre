@@ -1,0 +1,13 @@
+claims_meta_data.claim_id,claims_meta_data.currency,claims_meta_data.loss_date,claims_meta_data.policy_inception_date,claims_meta_data.report_date,claims_meta_data.contract_limit,claims_meta_data.contract_deductible,claims_meta_data.claim_in_xs_of_deductible,claims_meta_data.claim_year_basis,claims_meta_data.line_of_business,claims_meta_data.status,claims_development_history.development_months,claims_development_history.cumulative_dev_paid,claims_development_history.cumulative_dev_incurred
+CL-2019-01,GBP,2019-04-15,2019-01-01,2019-05-15,15000,0,false,ACCIDENT_YEAR,Property,Closed,12|24|36|48|60|72,0|500|1500|3000|4500|5000,4500|4700|4900|5000|5000|5000
+CL-2019-02,GBP,2019-09-20,2019-01-01,2019-10-20,15000,0,false,ACCIDENT_YEAR,Property,Closed,12|24|36|48|60|72,200|900|2000|3000|3400|3500,3000|3300|3450|3500|3500|3500
+CL-2020-01,GBP,2020-02-10,2020-01-01,2020-03-10,15000,0,false,ACCIDENT_YEAR,Property,Closed,12|24|36|48|60,0|800|2500|6000|8500,7500|8000|8300|8500|8500
+CL-2020-02,GBP,2020-07-25,2020-01-01,2020-08-25,15000,0,false,ACCIDENT_YEAR,Property,Closed,12|24|36|48|60,500|2000|5000|10000|12000,9000|10500|11500|12000|12000
+CL-2021-01,GBP,2021-01-18,2021-01-01,2021-02-18,15000,0,false,ACCIDENT_YEAR,Property,Closed,12|24|36|48,0|600|2500|5500,5200|5700|5900|6000
+CL-2021-02,GBP,2021-08-05,2021-01-01,2021-09-05,15000,0,false,ACCIDENT_YEAR,Property,Closed,12|24|36|48,300|1400|3000|4000,3600|3900|4100|4200
+CL-2022-01,GBP,2022-03-12,2022-01-01,2022-04-12,15000,0,false,ACCIDENT_YEAR,Property,Open,12|24|36,0|700|2000,6000|7500|8200
+CL-2022-02,GBP,2022-09-28,2022-01-01,2022-10-28,15000,0,false,ACCIDENT_YEAR,Property,Open,12|24|36,400|1500|3500,8500|11000|12500
+CL-2023-01,GBP,2023-04-03,2023-01-01,2023-05-03,15000,0,false,ACCIDENT_YEAR,Property,Open,12|24,0|600,5200|7200
+CL-2023-02,GBP,2023-10-17,2023-01-01,2023-11-17,15000,0,false,ACCIDENT_YEAR,Property,Open,12|24,600|1500,9000|11500
+CL-2024-01,GBP,2024-02-22,2024-01-01,2024-03-22,15000,0,false,ACCIDENT_YEAR,Property,Open,12,0,6500
+CL-2024-02,GBP,2024-07-11,2024-01-01,2024-08-11,15000,0,false,ACCIDENT_YEAR,Property,Open,12,300,9800

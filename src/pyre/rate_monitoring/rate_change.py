@@ -1,6 +1,7 @@
 """
 Rate Change Metrics Calculation Module
 
+
 Bodoff, N. (2009). "Measuring Rate Change: Methods and Implications."
 https://www.casact.org/sites/default/files/database/forum_09wforum_bodoff.pdf
 
@@ -11,6 +12,7 @@ https://assets.lloyds.com/assets/pdf-performance-management-pmdr-renewal-scenari
 
 
 """
+
 
 def rate_change_simple(expiring_premium: float, renewed_premium: float) -> float:
     """
@@ -27,10 +29,9 @@ def rate_change_simple(expiring_premium: float, renewed_premium: float) -> float
         raise ValueError("Expiring premium cannot be zero.")
     return (renewed_premium / expiring_premium) - 1
 
+
 def rate_change_adjusted(
-    expiring_premium: float,
-    renewed_premium: float,
-    adjusted_expiring_premium: Optional[float] = None
+    expiring_premium: float, renewed_premium: float, adjusted_expiring_premium: float | None = None
 ) -> float:
     """
     Calculate rate change, optionally adjusting expiring premium for exposure/terms.

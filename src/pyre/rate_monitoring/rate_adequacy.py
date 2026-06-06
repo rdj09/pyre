@@ -6,6 +6,7 @@ Bodoff, N. (2009). "Measuring Rate Change: Methods and Implications."
 https://www.casact.org/sites/default/files/database/forum_09wforum_bodoff.pdf
 """
 
+
 def rate_adequacy(premium: float, indicated_premium: float) -> float:
     """
     Calculates rate adequacy as the ratio of actual premium to indicated premium.
@@ -21,11 +22,9 @@ def rate_adequacy(premium: float, indicated_premium: float) -> float:
         raise ValueError("Indicated premium cannot be zero.")
     return premium / indicated_premium
 
+
 def rate_adequacy_change(
-    prior_premium: float,
-    prior_indicated: float,
-    current_premium: float,
-    current_indicated: float
+    prior_premium: float, prior_indicated: float, current_premium: float, current_indicated: float
 ) -> float:
     """
     Calculates the change in rate adequacy between two periods.
