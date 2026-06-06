@@ -1,9 +1,12 @@
 import operator
+from dataclasses import dataclass, field
 from typing import List, Optional
 from datetime import date
 
 from ..enums import ExposureBasis
 
+
+@dataclass
 class ExposureMetaData:
     """Represents metadata for an insurance exposure, including identification, period, and classification details.
 
@@ -24,175 +27,49 @@ class ExposureMetaData:
     Properties:
         exposure_term_length_days (int): Number of days in the exposure period.
     """
-    def __init__(
-        self,
-        exposure_id: str,
-        exposure_name: str,
-        exposure_period_start: date,
-        exposure_period_end: date,
-        currency: str,
-        aggregate: bool = False,
-        line_of_business: Optional[str] = None,
-        stacking_id: Optional[str] = None,
-        exposure_type: Optional[ExposureBasis] = ExposureBasis.EARNED,
-        location: Optional[str] = None,
-        peril: Optional[str] = None,
-        occupancy: Optional[str] = None
-    ):
-        """Initialize an ExposureMetaData instance.
 
-        Args:
-            exposure_id (str): Unique identifier for the exposure.
-            exposure_name (str): Human-readable name for the exposure.
-            exposure_period_start (date): Start date of the exposure period.
-            exposure_period_end (date): End date of the exposure period.
-            currency (str): Currency code associated with the exposure.
-            aggregate (bool, optional): Indicates if the exposure is aggregated. Defaults to False.
-            line_of_business (Optional[str], optional): Line of business. Defaults to None.
-            stacking_id (Optional[str], optional): Identifier for stacking exposures. Defaults to None.
-            exposure_type (Optional[ExposureBasis], optional): Type of exposure. Defaults to ExposureBasis.EARNED.
-            location (Optional[str], optional): Location associated with the exposure. Defaults to None.
-            peril (Optional[str], optional): Peril associated with the exposure. Defaults to None.
-            occupancy (Optional[str], optional): Occupancy type for the exposure. Defaults to None.
+    exposure_id: str
+    exposure_name: str
+    exposure_period_start: date
+    exposure_period_end: date
+    currency: str
+    aggregate: bool = False
+    line_of_business: Optional[str] = None
+    stacking_id: Optional[str] = None
+    exposure_type: Optional[ExposureBasis] = field(default=ExposureBasis.EARNED)
+    location: Optional[str] = None
+    peril: Optional[str] = None
+    occupancy: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        """Validate date ordering after initialisation.
 
         Raises:
             ValueError: If exposure_period_end is before exposure_period_start.
         """
-        if exposure_period_end < exposure_period_start:
+        if self.exposure_period_end < self.exposure_period_start:
             raise ValueError("Exposure period end date cannot be before start date")
 
-        self._exposure_id = exposure_id
-        self._exposure_name = exposure_name
-        self._exposure_period_start = exposure_period_start
-        self._exposure_period_end = exposure_period_end
-        self._currency = currency
-        self._aggregate = aggregate
-        self._line_of_business = line_of_business
-        self._stacking_id = stacking_id
-        self._exposure_type = exposure_type
-        self._location = location
-        self._peril = peril
-        self._occupancy = occupancy
-
-    @property
-    def exposure_id(self) -> str:
-        return self._exposure_id
-
-    @exposure_id.setter
-    def exposure_id(self, value: str) -> None:
-        self._exposure_id = value
-
-    @property
-    def exposure_name(self) -> str:
-        return self._exposure_name
-
-    @exposure_name.setter
-    def exposure_name(self, value: str) -> None:
-        self._exposure_name = value
-
-    @property
-    def exposure_period_start(self) -> date:
-        return self._exposure_period_start
-
-    @exposure_period_start.setter
-    def exposure_period_start(self, value: date) -> None:
-        """Set the exposure period start date.
-
-        Args:
-            value (date): The new start date.
+    def __setattr__(self, name: str, value: object) -> None:
+        """Set an attribute, enforcing date-ordering invariant for period fields.
 
         Raises:
-            ValueError: If the new start date is after the current end date.
+            ValueError: If setting either date field would make start > end.
         """
-        if hasattr(self, '_exposure_period_end') and value > self._exposure_period_end:
-            raise ValueError("Exposure period start date cannot be after end date")
-        self._exposure_period_start = value
+        object.__setattr__(self, name, value)
+        if name in ('exposure_period_start', 'exposure_period_end'):
+            if (hasattr(self, 'exposure_period_start') and
+                    hasattr(self, 'exposure_period_end') and
+                    self.exposure_period_start > self.exposure_period_end):
+                raise ValueError("Exposure period start date cannot be after end date")
 
-    @property
-    def exposure_period_end(self) -> date:
-        return self._exposure_period_end
-
-    @exposure_period_end.setter
-    def exposure_period_end(self, value: date) -> None:
-        """Set the exposure period end date.
-
-        Args:
-            value (date): The new end date.
-
-        Raises:
-            ValueError: If the new end date is before the current start date.
-        """
-        if hasattr(self, '_exposure_period_start') and value < self._exposure_period_start:
-            raise ValueError("Exposure period end date cannot be before start date")
-        self._exposure_period_end = value
-
-    @property
-    def currency(self) -> str:
-        return self._currency
-
-    @currency.setter
-    def currency(self, value: str) -> None:
-        self._currency = value
-
-    @property
-    def aggregate(self) -> bool:
-        return self._aggregate
-
-    @aggregate.setter
-    def aggregate(self, value: bool) -> None:
-        self._aggregate = value
-
-    @property
-    def line_of_business(self) -> Optional[str]:
-        return self._line_of_business
-
-    @line_of_business.setter
-    def line_of_business(self, value: Optional[str]) -> None:
-        self._line_of_business = value
-
-    @property
-    def stacking_id(self) -> Optional[str]:
-        return self._stacking_id
-
-    @stacking_id.setter
-    def stacking_id(self, value: Optional[str]) -> None:
-        self._stacking_id = value
-
-    @property
-    def exposure_type(self) -> ExposureBasis:
-        return self._exposure_type
-
-    @exposure_type.setter
-    def exposure_type(self, value: ExposureBasis) -> None:
-        self._exposure_type = value
-
-    @property
-    def location(self) -> Optional[str]:
-        return self._location
-
-    @location.setter
-    def location(self, value: Optional[str]) -> None:
-        self._location = value
-
-    @property
-    def peril(self) -> Optional[str]:
-        return self._peril
-
-    @peril.setter
-    def peril(self, value: Optional[str]) -> None:
-        self._peril = value
-
-    @property
-    def occupancy(self) -> Optional[str]:
-        return self._occupancy
-
-    @occupancy.setter
-    def occupancy(self, value: Optional[str]) -> None:
-        self._occupancy = value
     @property
     def exposure_term_length_days(self) -> int:
+        """Number of days in the exposure period."""
         return (self.exposure_period_end - self.exposure_period_start).days
 
+
+@dataclass
 class ExposureValues:
     """Represents the key financial values associated with an insurance exposure.
 
@@ -201,69 +78,21 @@ class ExposureValues:
         attachment_point (float): The threshold amount at which coverage begins to apply.
         limit (float): The maximum amount payable under the coverage.
     """
-    def __init__(self, exposure_value: float, attachment_point: float, limit: float):
-        """Initialize an ExposureValues instance.
 
-        Args:
-            exposure_value (float): The total value of the exposure.
-            attachment_point (float): The threshold amount at which coverage begins to apply.
-            limit (float): The maximum amount payable under the coverage.
+    exposure_value: float
+    attachment_point: float
+    limit: float
+
+    def __post_init__(self) -> None:
+        """Validate that attachment_point and limit are non-negative.
 
         Raises:
             ValueError: If attachment_point or limit is negative.
         """
-        if attachment_point < 0:
+        if self.attachment_point < 0:
             raise ValueError("Attachment point cannot be negative")
-        if limit < 0:
+        if self.limit < 0:
             raise ValueError("Limit cannot be negative")
-
-        self._exposure_value = exposure_value
-        self._attachment_point = attachment_point
-        self._limit = limit
-
-    @property
-    def exposure_value(self) -> float:
-        return self._exposure_value
-
-    @exposure_value.setter
-    def exposure_value(self, value: float) -> None:
-        self._exposure_value = value
-
-    @property
-    def attachment_point(self) -> float:
-        return self._attachment_point
-
-    @attachment_point.setter
-    def attachment_point(self, value: float) -> None:
-        """Set the attachment point.
-
-        Args:
-            value (float): The new attachment point.
-
-        Raises:
-            ValueError: If the new attachment point is negative.
-        """
-        if value < 0:
-            raise ValueError("Attachment point cannot be negative")
-        self._attachment_point = value
-
-    @property
-    def limit(self) -> float:
-        return self._limit
-
-    @limit.setter
-    def limit(self, value: float) -> None:
-        """Set the limit.
-
-        Args:
-            value (float): The new limit.
-
-        Raises:
-            ValueError: If the new limit is negative.
-        """
-        if value < 0:
-            raise ValueError("Limit cannot be negative")
-        self._limit = value
 
 class Exposure:
     """Represents an insurance exposure with associated metadata and values.
