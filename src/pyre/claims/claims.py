@@ -37,6 +37,12 @@ class ClaimDevelopmentHistory:
         # Validate that all lists have the same length
         self._validate_list_lengths()
 
+    def __setattr__(self, name: str, value: object) -> None:
+        object.__setattr__(self, name, value)
+        _list_fields = {'development_months', 'cumulative_dev_paid', 'cumulative_dev_incurred'}
+        if name in _list_fields and all(hasattr(self, f) for f in _list_fields):
+            self._validate_list_lengths()
+
     def _validate_list_lengths(self) -> None:
         """Validates that all development lists have the same length."""
         if len(self.development_months) != len(self.cumulative_dev_paid) or len(self.development_months) != len(self.cumulative_dev_incurred):
