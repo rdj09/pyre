@@ -1,21 +1,9 @@
 from datetime import date
 import operator
 from typing import Optional, List, Sequence, Set
-from enum import Enum, auto
 
+from ..enums import ClaimYearType
 from ..exceptions.exceptions import ClaimsException
-
-class ClaimYearType(Enum):
-    """Enumeration of claim year types used in insurance data analysis.
-
-    Attributes:
-        ACCIDENT_YEAR: Represents the year in which the insured event (accident) occurred.
-        UNDERWRITING_YEAR: Represents the year in which the insurance policy was underwritten or issued.
-        REPORTED_YEAR: Represents the year in which the claim was reported to the insurer.
-    """
-    ACCIDENT_YEAR = auto()
-    UNDERWRITING_YEAR = auto()
-    REPORTED_YEAR = auto()
 
 class ClaimDevelopmentHistory:
     """Represents the development history of an insurance claim, tracking cumulative and incremental paid and incurred amounts over development months.

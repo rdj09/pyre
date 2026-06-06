@@ -1,20 +1,8 @@
 from datetime import date
-from enum import Enum
 from typing import Any, Dict, Sequence
 from ..treaty.layer_loss_functions import layer_loss_calculation
-from ..claims.claims import ClaimYearType
-from ..exceptions.exceptions import ContractException #TODO need to move this to a common ENUM module so no dependency on claims module
-from ..treaty.contract_types import ContractType
-
-class ClaimTriggerBasis(Enum):
-    LOD = "Losses Occurrence" #Accident Year
-    RAD = "Risk Attaching" # Policy Inception Year
-    CMB = "Claims Made Basis" # Reported Year
-
-class IndexationClauseType(Enum):
-    FULL_INDEXATION = "Full Indexation"
-    FIC = "Franchise - FIC"
-    SIC = "Severe Inflation (also London Market) - SIC"
+from ..enums import ClaimYearType, ClaimTriggerBasis, IndexationClauseType, ContractType
+from ..exceptions.exceptions import ContractException
 
 claim_year_basis ={
     ClaimTriggerBasis.RAD:ClaimYearType.UNDERWRITING_YEAR,

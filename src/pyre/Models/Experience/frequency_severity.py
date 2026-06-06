@@ -1,17 +1,7 @@
 from typing import Any, Dict, List
-from enum import Enum, auto
 from ...Models.Experience.experience_preparer import ExperienceModelData
+from ...enums import SeverityDistribution, FrequencyDistribution
 
-
-class SeverityDistribution(Enum):
-    LOGNORMAL = auto()
-    PARETO = auto()
-    OTHER = auto()
-
-class FrequencyDistribution(Enum):
-    POISSON = auto()
-    NEGATIVE_BINOMIAL = auto()
-    OTHER = auto()
 
 class severity_fit:
     def __init__(self, distributions: List[SeverityDistribution], data : ExperienceModelData, ibner_dev_pattern: Dict[int, float], ground_up:bool = True):
