@@ -28,4 +28,5 @@ nav:
   - Treaty: treaty.md
   - Rate Monitoring: rate_monitoring.md
   - Treaty Pricing Workbench: workbench.md
+  - Excel File I/O: io_excel.md
   - About: about.md

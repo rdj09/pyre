@@ -91,7 +91,9 @@ def read_claims(path: str | Path, sheet_name: str = "Claims") -> Claims:
             currency=str(first[col["currency"]]),
             contract_limit=float(contract_limit),
             contract_deductible=(
-                float(first[col["contract_deductible"]] or 0.0) if "contract_deductible" in col else 0.0
+                float(first[col["contract_deductible"]] or 0.0)
+                if "contract_deductible" in col
+                else 0.0
             ),
             claim_in_xs_of_deductible=(
                 _parse_bool(first[col["claim_in_xs_of_deductible"]])
@@ -106,7 +108,8 @@ def read_claims(path: str | Path, sheet_name: str = "Claims") -> Claims:
             ),
             policy_inception_date=(
                 _parse_date(first[col["policy_inception_date"]])
-                if "policy_inception_date" in col and first[col["policy_inception_date"]] is not None
+                if "policy_inception_date" in col
+                and first[col["policy_inception_date"]] is not None
                 else date(1900, 1, 1)
             ),
             report_date=(

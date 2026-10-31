@@ -14,13 +14,13 @@ except ImportError:
 from pyre import (
     Claim,
     ClaimDevelopmentHistory,
+    Claims,
     ClaimsMetaData,
-    Claims as PyreClaims,
-    Exposure as PyreExposure,
-    ExposureMetaData as PyreExposureMetaData,
-    Exposures as PyreExposures,
-    ExposureValues as PyreExposureValues,
     ExperienceModelData,
+    Exposure,
+    ExposureMetaData,
+    Exposures,
+    ExposureValues,
     RIContract,
     RIContractMetadata,
     RILayer,
@@ -88,7 +88,9 @@ class TestReadClaims(unittest.TestCase):
     def tearDown(self):
         self._tmpdir.cleanup()
 
-    def _write_claims_sheet(self, rows, headers=None, sheet_name="Claims", trailing_blank_row=False):
+    def _write_claims_sheet(
+        self, rows, headers=None, sheet_name="Claims", trailing_blank_row=False
+    ):
         headers = headers or [
             "claim_id", "currency", "contract_limit",
             "loss_date", "development_month", "cumulative_paid", "cumulative_incurred",
@@ -142,7 +144,10 @@ class TestReadClaims(unittest.TestCase):
 
         self._write_claims_sheet(
             rows=[["CLM001", "USD", 12, 50000, 120000]],
-            headers=["claim_id", "currency", "development_month", "cumulative_paid", "cumulative_incurred"],
+            headers=[
+                "claim_id", "currency", "development_month",
+                "cumulative_paid", "cumulative_incurred",
+            ],
         )
 
         with self.assertRaises(ValueError):
@@ -224,7 +229,10 @@ class TestReadExposures(unittest.TestCase):
 
         self._write_exposures_sheet(
             rows=[["EXP2022", date(2022, 1, 1), date(2022, 12, 31), "USD", 1000000]],
-            headers=["exposure_id", "exposure_period_start", "exposure_period_end", "currency", "exposure_value"],
+            headers=[
+                "exposure_id", "exposure_period_start", "exposure_period_end",
+                "currency", "exposure_value",
+            ],
         )
 
         with self.assertRaises(ValueError):
@@ -306,19 +314,19 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
                 cumulative_dev_incurred=[120000.0, 250000.0],
             ),
         )
-        claims = PyreClaims([claim])
+        claims = Claims([claim])
 
-        exposure = PyreExposure(
-            PyreExposureMetaData(
+        exposure = Exposure(
+            ExposureMetaData(
                 exposure_id="EXP2022",
                 exposure_name="2022 Premium",
                 exposure_period_start=date(2022, 1, 1),
                 exposure_period_end=date(2022, 12, 31),
                 currency="USD",
             ),
-            PyreExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
+            ExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
         )
-        exposures = PyreExposures([exposure])
+        exposures = Exposures([exposure])
 
         metadata = RIContractMetadata(
             contract_id="C-0001",
@@ -349,7 +357,9 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
         )
         contract = RIContract(contract_meta_data=metadata, layers=[layer])
 
-        self.model_data = ExperienceModelData(claims=claims, exposures=exposures, ri_contract=contract)
+        self.model_data = ExperienceModelData(
+            claims=claims, exposures=exposures, ri_contract=contract
+        )
 
     def tearDown(self):
         self._tmpdir.cleanup()
@@ -365,7 +375,10 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
         by_layer_year = [list(row) for row in wb["ByLayerYear"].iter_rows(values_only=True)]
         self.assertEqual(
             by_layer_year[0],
-            ["layer_id", "layer_name", "modelling_year", "ceded_paid", "ceded_incurred", "claim_count", "earned_premium"],
+            [
+                "layer_id", "layer_name", "modelling_year", "ceded_paid",
+                "ceded_incurred", "claim_count", "earned_premium",
+            ],
         )
         self.assertEqual(by_layer_year[1][0], 1)
         self.assertEqual(by_layer_year[1][1], "XOL Layer")
@@ -397,19 +410,19 @@ class TestWriteExposureRatingResults(unittest.TestCase):
         self._tmpdir.cleanup()
 
     def test_writes_one_row_per_exposure_layer_pair(self):
+        from pyre.io_excel.results_io import write_exposure_rating_results
         from pyre.models.Exposure.exposure_curve_functions import ExposureCurveType
         from pyre.models.Exposure.exposure_rating_cost import ExposureModel
-        from pyre.io_excel.results_io import write_exposure_rating_results
 
-        exposure = PyreExposure(
-            PyreExposureMetaData(
+        exposure = Exposure(
+            ExposureMetaData(
                 exposure_id="EXP001",
                 exposure_name="EXP001",
                 exposure_period_start=date(2023, 1, 1),
                 exposure_period_end=date(2023, 12, 31),
                 currency="USD",
             ),
-            PyreExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
+            ExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
         )
         layer = RILayer(
             layer_id=1,
@@ -440,7 +453,7 @@ class TestWriteExposureRatingResults(unittest.TestCase):
         )
         contract = RIContract(contract_meta_data=metadata, layers=[layer])
         model = ExposureModel(
-            exposures=PyreExposures([exposure]),
+            exposures=Exposures([exposure]),
             ri_contract=contract,
             selected_curve=ExposureCurveType.MBBEFD,
             curve_parameters={"curve": 3.0},
@@ -453,6 +466,40 @@ class TestWriteExposureRatingResults(unittest.TestCase):
         self.assertEqual(rows[0], ["exposure_id", "layer_id", "share"])
         self.assertEqual(rows[1][0], "EXP001")
         self.assertEqual(rows[1][1], 1)
+
+
+@unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
+class TestPublicApiSurface(unittest.TestCase):
+    def test_all_five_functions_importable_from_io_excel_package(self):
+        from pyre.io_excel import (
+            read_claims,
+            read_exposures,
+            write_experience_rating_results,
+            write_exposure_rating_results,
+            write_triangle,
+        )
+
+        self.assertTrue(callable(read_claims))
+        self.assertTrue(callable(read_exposures))
+        self.assertTrue(callable(write_triangle))
+        self.assertTrue(callable(write_experience_rating_results))
+        self.assertTrue(callable(write_exposure_rating_results))
+
+    def test_bare_import_pyre_does_not_require_openpyxl(self):
+        # Confirms pyre/__init__.py never imports io_excel transitively.
+        # (openpyxl IS installed in this test env, so this only checks that
+        # `pyre.io_excel` is absent from sys.modules after a bare `import pyre`
+        # -- it does not prove openpyxl is uninstallable-safe, just that the
+        # import graph doesn't pull it in.)
+        import sys
+
+        for name in list(sys.modules):
+            if name == "pyre" or name.startswith("pyre."):
+                del sys.modules[name]
+
+        import pyre  # noqa: F401
+
+        self.assertNotIn("pyre.io_excel", sys.modules)
 
 
 if __name__ == "__main__":

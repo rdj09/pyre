@@ -8,7 +8,7 @@ from openpyxl import Workbook, load_workbook
 
 def write_table(
     headers: list[str],
-    rows: list[Sequence[Any]],
+    rows: Sequence[Sequence[Any]],
     path: str | Path,
     sheet_name: str = "Sheet1",
 ) -> None:

@@ -22,6 +22,7 @@ hatch run docs:deploy           # publish to gh-pages
 
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
+pip install -e ".[excel]"       # install with headless Excel (.xlsx) read/write support
 hatch run panel:serve           # serve app/main.py at localhost (panel serve, --show --autoreload)
 ```
 
@@ -37,6 +38,7 @@ hatch run panel:serve           # serve app/main.py at localhost (panel serve, -
 | `exposures/` | `Exposure`, `ExposureMetaData`, `ExposureValues`, `Exposures` |
 | `treaty/` | `RILayer`, `RIContractMetadata`, `RIContract`, layer loss functions |
 | `models/` | `Experience/`, `Exposure/`, `AggregateFeatures/` submodules + `trending.py` |
+| `io_excel/` | Headless `.xlsx` read/write (`read_claims`, `read_exposures`, `write_triangle`, `write_experience_rating_results`, `write_exposure_rating_results`) — optional, requires `pip install -e ".[excel]"` |
 | `rate_monitoring/` | Rate adequacy and rate change tracking |
 | `exceptions/` | `GeneralException`, `ExposureException`, `ClaimsException`, `ContractException` |
 
@@ -99,28 +101,33 @@ pyre/
 │   │   ├── Experience/
 │   │   ├── Exposure/
 │   │   └── AggregateFeatures/
+│   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; ~84 tests collected
+├── tests/                     # unittest.TestCase style; ~125 tests collected
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
 ```
 
-## Known Test State (develop, as of the Models/models housekeeping refactor)
+## Known Test State (develop, as of the io_excel subpackage addition)
 
-**Expected: 22 failed, 78 passed** (when ignoring `test_exposure_curve_fitting.py`).
+**Expected: 22 failed, 103 passed** (when ignoring `test_exposure_curve_fitting.py`).
 
-Three pre-existing bugs have been fixed so far, each with its own regression
+Four pre-existing bugs have been fixed so far, each with its own regression
 test: `RILayer.loss_to_layer_fn` (`tests/test_treaty.py::TestRILayerLossToLayerFn`),
 `Trending.trend_exposures`'s method/property mismatch
-(`tests/test_trending.py::TestTrendExposuresPropertyFix`), and
+(`tests/test_trending.py::TestTrendExposuresPropertyFix`),
 `Triangle.from_claims` (`tests/test_triangles.py::TestTriangleFromClaims` — it
 read a nonexistent `claim.modelling_year` instead of
 `claim.claims_meta_data.modelling_year`, and iterated the paid/incurred lists
-with `.items()` as if they were dicts). The remaining 22 failures below are
-still **pre-existing** and out of scope — do not attempt to fix them without
-understanding they pre-date these changes:
+with `.items()` as if they were dicts), and `ExposureModel._calculate_single_exposure_share`
+(`tests/test_exposure_rating_cost.py::TestCalculateAllShares` — an indentation
+bug meant the curve-position/share calculation only ran inside the `else`
+branch, silently dropping any layer whose limit+attachment fit inside the
+policy limit). The remaining failures below are still **pre-existing** and
+out of scope — do not attempt to fix them without understanding they pre-date
+these changes:
 
 | Failure group | Count | Root cause |
 |---|---|---|

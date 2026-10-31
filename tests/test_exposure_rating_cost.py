@@ -75,7 +75,9 @@ class TestCalculateAllShares(unittest.TestCase):
     def test_layer_fitting_inside_policy_limit_is_included(self):
         # 400,000 + 100,000 = 500,000 < 1,000,000 policy limit -> "if" branch,
         # previously never added to shares_by_layer at all.
-        layer = _build_layer(layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=400_000.0)
+        layer = _build_layer(
+            layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=400_000.0
+        )
         contract = _build_contract([layer])
         model = ExposureModel(
             exposures=self.exposures,
@@ -99,7 +101,9 @@ class TestCalculateAllShares(unittest.TestCase):
 
     def test_layer_exceeding_policy_limit_is_included(self):
         # 600,000 + 500,000 = 1,100,000 >= 1,000,000 policy limit -> "else" branch.
-        layer = _build_layer(layer_id=2, occurrence_attachment=500_000.0, occurrence_limit=600_000.0)
+        layer = _build_layer(
+            layer_id=2, occurrence_attachment=500_000.0, occurrence_limit=600_000.0
+        )
         contract = _build_contract([layer])
         model = ExposureModel(
             exposures=self.exposures,
@@ -119,8 +123,12 @@ class TestCalculateAllShares(unittest.TestCase):
         self.assertAlmostEqual(shares["EXP001"][2], expected)
 
     def test_both_layer_types_present_simultaneously(self):
-        layer_inside = _build_layer(layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=400_000.0)
-        layer_outside = _build_layer(layer_id=2, occurrence_attachment=500_000.0, occurrence_limit=600_000.0)
+        layer_inside = _build_layer(
+            layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=400_000.0
+        )
+        layer_outside = _build_layer(
+            layer_id=2, occurrence_attachment=500_000.0, occurrence_limit=600_000.0
+        )
         contract = _build_contract([layer_inside, layer_outside])
         model = ExposureModel(
             exposures=self.exposures,
@@ -134,7 +142,9 @@ class TestCalculateAllShares(unittest.TestCase):
         self.assertEqual(set(shares["EXP001"].keys()), {1, 2})
 
     def test_empty_exposures_returns_empty_dict(self):
-        layer = _build_layer(layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=400_000.0)
+        layer = _build_layer(
+            layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=400_000.0
+        )
         contract = _build_contract([layer])
         model = ExposureModel(
             exposures=Exposures([]),
