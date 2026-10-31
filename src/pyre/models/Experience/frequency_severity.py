@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from ...Models.Experience.experience_preparer import ExperienceModelData
+from ...models.Experience.experience_preparer import ExperienceModelData
 from ...enums import SeverityDistribution, FrequencyDistribution
 
 

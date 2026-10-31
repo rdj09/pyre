@@ -1,6 +1,6 @@
 import unittest
 from datetime import date
-from pyre.Models.trending import (
+from pyre.models.trending import (
     Trending,
     calculate_trend_factor,
     trend_exposures,

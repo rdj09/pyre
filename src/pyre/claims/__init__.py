@@ -1,10 +1,10 @@
-from pyre.claims.claims import (
+from .claims import (
     Claim,
     ClaimDevelopmentHistory,
     ClaimsMetaData,
     Claims,
 )
-from pyre.claims.triangles import IBNERPatternExtractor, Triangle
+from .triangles import IBNERPatternExtractor, Triangle
 
 __all__ = [
     "Claim",

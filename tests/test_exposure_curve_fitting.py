@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from src.pyre.Models.Exposure.exposure_curve_fitting import ExposureCurveFitter, select_best_curve
-from src.pyre.Models.Exposure.exposure_curve_functions import ExposureCurveType, riebesell_curve, mixed_exponential_curve, mbbefd_curve
+from src.pyre.models.Exposure.exposure_curve_fitting import ExposureCurveFitter, select_best_curve
+from src.pyre.models.Exposure.exposure_curve_functions import ExposureCurveType, riebesell_curve, mixed_exponential_curve, mbbefd_curve
 
 def test_riebesell_fitting():
     """Test fitting a Riebesell curve to synthetic data."""

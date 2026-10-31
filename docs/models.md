@@ -105,7 +105,7 @@ these exact figures end-to-end.
 from their origin year to a common base year.
 
 ```python
-from pyre.Models.trending import Trending
+from pyre.models.trending import Trending
 
 trending = Trending(
     exposure_trend_factors={2021: 1.02, 2022: 1.03},
@@ -136,7 +136,7 @@ factor = trending.calculate_trend_factor(2022, for_claims=False)  # 1.03
 to produce a burn cost (ceded loss / exposure) per modelling year:
 
 ```python
-from pyre.Models.Experience.burn_cost import BurnCostModel
+from pyre.models.Experience.burn_cost import BurnCostModel
 
 model = BurnCostModel(model_data=data, layer_id=1)
 print(model.calculate_burn_cost())  # {2023: 0.16666...}
@@ -164,7 +164,7 @@ signature as a placeholder for future work, not a working API.
 distribute loss cost across a layer relative to total sum insured:
 
 ```python
-from pyre.Models.Exposure.exposure_curve_functions import (
+from pyre.models.Exposure.exposure_curve_functions import (
     mbbefd_curve, mixed_exponential_curve, riebesell_curve, swissRe_c_values,
 )
 
@@ -187,7 +187,7 @@ test runs).
 ### Increased Limit Factors (ILFs)
 
 ```python
-from pyre.Models.Exposure.exposure_ILF_functions import pareto_ilf, power_ilf
+from pyre.models.Exposure.exposure_ILF_functions import pareto_ilf, power_ilf
 
 # Pareto-distribution ILF moving from a 1M to a 5M limit
 ilf = pareto_ilf(limit_1=1_000_000, limit_2=5_000_000, alpha=2.0, x_m=1.0)
@@ -207,8 +207,8 @@ is a thin dispatcher over the three curve functions above, driven by an
 `ExposureCurveType` enum:
 
 ```python
-from pyre.Models.Exposure.exposure_rating_cost import ExposureModel
-from pyre.Models.Exposure.exposure_curve_functions import ExposureCurveType, swissRe_c_values
+from pyre.models.Exposure.exposure_rating_cost import ExposureModel
+from pyre.models.Exposure.exposure_curve_functions import ExposureCurveType, swissRe_c_values
 
 exposure_model = ExposureModel(
     exposures=exposures, ri_contract=contract,
@@ -242,32 +242,32 @@ feed into is not yet implemented.
 
 ## API Reference
 
-::: pyre.Models.Experience.experience_preparer
+::: pyre.models.Experience.experience_preparer
 
-::: pyre.Models.Experience.burn_cost
+::: pyre.models.Experience.burn_cost
 
-::: pyre.Models.Experience.curve_fitting
+::: pyre.models.Experience.curve_fitting
 
-::: pyre.Models.Experience.frequency_severity
+::: pyre.models.Experience.frequency_severity
 
-::: pyre.Models.Experience.pareto_rating
+::: pyre.models.Experience.pareto_rating
 
-::: pyre.Models.Experience.resampling
+::: pyre.models.Experience.resampling
 
-::: pyre.Models.Exposure.exposure_curve_functions
+::: pyre.models.Exposure.exposure_curve_functions
 
-::: pyre.Models.Exposure.exposure_curve_fitting
+::: pyre.models.Exposure.exposure_curve_fitting
 
-::: pyre.Models.Exposure.exposure_ILF_functions
+::: pyre.models.Exposure.exposure_ILF_functions
 
-::: pyre.Models.Exposure.exposure_ILF_fitting
+::: pyre.models.Exposure.exposure_ILF_fitting
 
-::: pyre.Models.Exposure.exposure_rating_cost
+::: pyre.models.Exposure.exposure_rating_cost
 
-::: pyre.Models.AggregateFeatures.aggregate_features
+::: pyre.models.AggregateFeatures.aggregate_features
 
-::: pyre.Models.AggregateFeatures.selections
+::: pyre.models.AggregateFeatures.selections
 
-::: pyre.Models.AggregateFeatures.simulation_engine
+::: pyre.models.AggregateFeatures.simulation_engine
 
-::: pyre.Models.trending
+::: pyre.models.trending

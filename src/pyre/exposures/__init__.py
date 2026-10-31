@@ -1,4 +1,4 @@
-from pyre.exposures.exposures import (
+from .exposures import (
     Exposure,
     ExposureMetaData,
     Exposures,

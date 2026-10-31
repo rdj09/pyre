@@ -92,28 +92,37 @@ print(f"Modelling years: {claims_collection.modelling_years}")
 
 ### Working with Claims Triangles
 
-!!! bug "`Triangle.from_claims` is currently broken"
-    `Triangle.from_claims(claims, value_type=...)` raises
-    `AttributeError: 'Claim' object has no attribute 'modelling_year'` —
-    it should read `claim.claims_meta_data.modelling_year`. It also
-    iterates `cumulative_dev_paid`/`cumulative_dev_incurred` with `.items()`
-    as if they were dicts, but they are plain lists. This is a pre-existing
-    bug, untested and not yet fixed. Until it's fixed, build a `Triangle`
-    directly from a `{origin_year: {dev_period: value}}` dict (its native
-    storage format — see the class docstring) as shown below.
-
 ```python
+from pyre.claims.claims import Claim, Claims, ClaimsMetaData, ClaimDevelopmentHistory
 from pyre.claims.triangles import Triangle, CurveType, IBNERPatternExtractor
+from datetime import date
 
-# Build a triangle directly: {origin_year: {dev_period: cumulative_value}}
-incurred_triangle = Triangle(
-    triangle={
-        2021: {0: 20000.0, 3: 15000.0, 6: 12000.0},
-        2022: {0: 80000.0, 3: 70000.0, 6: 60000.0, 9: 55000.0, 12: 50000.0},
-    },
-    origin_years=[2021, 2022],
-    dev_periods=[0, 3, 6, 9, 12],
+# Two claims in different origin (accident) years, each with a contract_limit
+# set -- ClaimsMetaData.contract_limit defaults to 0.0, which would silently
+# cap every value to zero in capped_claim_development_history below.
+claim_2022 = Claim(
+    ClaimsMetaData(claim_id="CL001", currency="USD", contract_limit=1_000_000,
+                    loss_date=date(2022, 3, 15)),
+    ClaimDevelopmentHistory(
+        development_months=[0, 3, 6, 9, 12],
+        cumulative_dev_paid=[0, 15000, 30000, 45000, 50000],
+        cumulative_dev_incurred=[80000, 70000, 60000, 55000, 50000],
+    ),
 )
+claim_2021 = Claim(
+    ClaimsMetaData(claim_id="CL002", currency="EUR", contract_limit=1_000_000,
+                    loss_date=date(2021, 5, 10)),
+    ClaimDevelopmentHistory(
+        development_months=[0, 3, 6],
+        cumulative_dev_paid=[0, 5000, 10000],
+        cumulative_dev_incurred=[20000, 15000, 12000],
+    ),
+)
+claims_data = Claims([claim_2022, claim_2021])
+
+# Create a triangle from claims data
+incurred_triangle = Triangle.from_claims(claims_data, value_type="incurred")
+paid_triangle = Triangle.from_claims(claims_data, value_type="paid")
 
 # Display the triangle
 print(incurred_triangle)

@@ -1,5 +1,5 @@
 from typing import Dict, List, Any, Optional
-from ...Models.trending import Trending
+from ...models.trending import Trending
 from ...claims.claims import Claim, ClaimDevelopmentHistory, Claims
 from ...exposures.exposures import Exposure, Exposures
 from ...treaty.contracts import RIContract

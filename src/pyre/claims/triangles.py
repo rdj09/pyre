@@ -2,7 +2,7 @@ from typing import Dict, List, Optional, Tuple
 from enum import Enum, auto
 from math import exp
 from ..claims.claims import Claims
-from ..Models.Experience.curve_fitting import (
+from ..models.Experience.curve_fitting import (
     exponential_fit,
     power_fit,
     weibull_fit,
@@ -281,33 +281,35 @@ class Triangle:
         if value_type not in ["incurred", "paid"]:
             raise ValueError(f"value_type must be 'incurred' or 'paid', got '{value_type}'")
 
-        # Collect all unique modelling years and development periods
+        # Collect all unique modelling years
         origin_years = claims.modelling_years
-        dev_periods = claims.development_periods
 
-        # Build the triangle
-        triangle = {year: {} for year in origin_years}
+        # Build the triangle, tracking development periods actually seen.
+        # Note: Claims.development_periods returns per-claim month *sequences*
+        # (its own pre-existing, separately-tracked quirk), not the flat set
+        # of period values this method needs -- so build that set here.
+        triangle: Dict[int, Dict[int, float]] = {year: {} for year in origin_years}
+        dev_periods_seen: set = set()
 
         # Aggregate claims by origin year and development period
         for claim in claims:
-            origin_year = claim.modelling_year
-
-            # Skip claims with no development history
-            if not hasattr(claim, "capped_claim_development_history"):
-                continue
+            origin_year = claim.claims_meta_data.modelling_year
 
             # Get the appropriate development history based on value_type
             if value_type == "incurred":
                 dev_history = claim.capped_claim_development_history.cumulative_dev_incurred
             else:  # value_type == "paid"
                 dev_history = claim.capped_claim_development_history.cumulative_dev_paid
+            dev_months = claim.capped_claim_development_history.development_months
 
             # Add values to the triangle
-            for dev_period, value in dev_history.items():
-                if dev_period in dev_periods:
-                    if dev_period not in triangle[origin_year]:
-                        triangle[origin_year][dev_period] = 0.0
-                    triangle[origin_year][dev_period] += value
+            for dev_period, value in zip(dev_months, dev_history):
+                dev_periods_seen.add(dev_period)
+                if dev_period not in triangle[origin_year]:
+                    triangle[origin_year][dev_period] = 0.0
+                triangle[origin_year][dev_period] += value
+
+        dev_periods = sorted(dev_periods_seen)
 
         return cls(triangle=triangle, origin_years=origin_years, dev_periods=dev_periods)
 

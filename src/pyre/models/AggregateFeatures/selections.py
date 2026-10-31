@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional, Any
 import math
-from ...Models.Experience.experience_preparer import ExperienceModelData
-from ...Models.Exposure.exposure_rating_cost import ExposureModel
+from ...models.Experience.experience_preparer import ExperienceModelData
+from ...models.Exposure.exposure_rating_cost import ExposureModel
 
 
 class CredibilityWeight:

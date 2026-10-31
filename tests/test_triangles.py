@@ -1,5 +1,8 @@
 import unittest
+from datetime import date
 from math import exp
+
+from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData
 from pyre.claims.triangles import Triangle, CurveType
 
 class TestTriangle(unittest.TestCase):
@@ -224,6 +227,65 @@ class TestTriangle(unittest.TestCase):
             triangle.fit_curve(curve_type="invalid_type")  # type: ignore
 
 
+class TestTriangleFromClaims(unittest.TestCase):
+    """Regression tests for Triangle.from_claims (previously raised
+    AttributeError and then TypeError -- see claim.claims_meta_data.modelling_year
+    and the flat dev_periods fix in Triangle.from_claims)."""
+
+    def setUp(self):
+        claim_2022 = Claim(
+            ClaimsMetaData(
+                claim_id="CL001",
+                currency="USD",
+                contract_limit=1_000_000,
+                loss_date=date(2022, 3, 15),
+            ),
+            ClaimDevelopmentHistory(
+                development_months=[0, 3, 6, 9, 12],
+                cumulative_dev_paid=[0, 15000, 30000, 45000, 50000],
+                cumulative_dev_incurred=[80000, 70000, 60000, 55000, 50000],
+            ),
+        )
+        claim_2021 = Claim(
+            ClaimsMetaData(
+                claim_id="CL002",
+                currency="EUR",
+                contract_limit=1_000_000,
+                loss_date=date(2021, 5, 10),
+            ),
+            ClaimDevelopmentHistory(
+                development_months=[0, 3, 6],
+                cumulative_dev_paid=[0, 5000, 10000],
+                cumulative_dev_incurred=[20000, 15000, 12000],
+            ),
+        )
+        self.claims = Claims([claim_2022, claim_2021])
+
+    def test_from_claims_incurred(self):
+        triangle = Triangle.from_claims(self.claims, value_type="incurred")
+        self.assertEqual(
+            triangle.triangle,
+            {
+                2021: {0: 20000.0, 3: 15000.0, 6: 12000.0},
+                2022: {0: 80000.0, 3: 70000.0, 6: 60000.0, 9: 55000.0, 12: 50000.0},
+            },
+        )
+        self.assertEqual(triangle.origin_years, [2021, 2022])
+        self.assertEqual(triangle.dev_periods, [0, 3, 6, 9, 12])
+
+    def test_from_claims_paid(self):
+        triangle = Triangle.from_claims(self.claims, value_type="paid")
+        self.assertEqual(
+            triangle.triangle,
+            {
+                2021: {0: 0.0, 3: 5000.0, 6: 10000.0},
+                2022: {0: 0.0, 3: 15000.0, 6: 30000.0, 9: 45000.0, 12: 50000.0},
+            },
+        )
+
+    def test_from_claims_invalid_value_type(self):
+        with self.assertRaises(ValueError):
+            Triangle.from_claims(self.claims, value_type="bogus")
 
 
 if __name__ == "__main__":

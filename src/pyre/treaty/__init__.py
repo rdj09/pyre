@@ -1,12 +1,12 @@
-from pyre.treaty.contract_types import ContractType
-from pyre.treaty.contracts import (
+from .contract_types import ContractType
+from .contracts import (
     ClaimTriggerBasis,
     IndexationClauseType,
     RILayer,
     RIContractMetadata,
     RIContract,
 )
-from pyre.treaty.layer_loss_functions import (
+from .layer_loss_functions import (
     xol_calculation,
     qs_calculation,
     franchise_calculation,

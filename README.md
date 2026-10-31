@@ -84,7 +84,7 @@ pyre/
 │   └── pyre/
 │       ├── claims/     # Claims analysis tools
 │       ├── exposures/  # Exposure management
-│       ├── Models/     # Pricing models
+│       ├── models/     # Pricing models
 │       ├── treaty/     # Reinsurance contract modeling
 │       └── rate_monitoring/ # Rate monitoring tools
 └── tests/              # Test suite

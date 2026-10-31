@@ -1,4 +1,4 @@
-from pyre.claims import (
+from .claims import (
     Claim,
     ClaimDevelopmentHistory,
     Claims,
@@ -6,23 +6,23 @@ from pyre.claims import (
     IBNERPatternExtractor,
     Triangle,
 )
-from pyre.enums import (
+from .enums import (
     ClaimYearType,
     ExposureBasis,
     FrequencyDistribution,
     SeverityDistribution,
 )
-from pyre.exposures import (
+from .exposures import (
     Exposure,
     ExposureMetaData,
     Exposures,
     ExposureValues,
 )
-from pyre.Models import (
+from .models import (
     ExperienceModelData,
     Trending,
 )
-from pyre.treaty import (
+from .treaty import (
     ClaimTriggerBasis,
     ContractType,
     IndexationClauseType,

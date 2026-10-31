@@ -37,9 +37,12 @@ from pyre.claims.triangles import Triangle
 from datetime import date
 
 # Create a claim with metadata and development history
+# (contract_limit must be set -- it defaults to 0.0, which would silently
+# cap every value below to zero in the triangle built from it)
 metadata = ClaimsMetaData(
     claim_id="CL001",
     currency="USD",
+    contract_limit=1_000_000,
     loss_date=date(2022, 1, 15),
     report_date=date(2022, 2, 1),
     line_of_business="Property"
@@ -56,14 +59,8 @@ claim = Claim(metadata, development)
 # Create a collection of claims
 claims_collection = Claims([claim])
 
-# Build a triangle directly: {origin_year: {dev_period: cumulative_value}}
-# (Triangle.from_claims has a pre-existing bug -- see docs/claims.md -- so
-# this is the reliable way to construct one today.)
-triangle = Triangle(
-    triangle={2022: dict(zip(development.development_months, development.cumulative_dev_incurred))},
-    origin_years=[2022],
-    dev_periods=development.development_months,
-)
+# Create a triangle from claims data
+triangle = Triangle.from_claims(claims_collection, value_type="incurred")
 
 # Calculate age-to-age factors
 factors = triangle.calculate_age_to_age_factors()
@@ -81,7 +78,7 @@ pyre/
 │   └── pyre/
 │       ├── claims/     # Claims analysis tools
 │       ├── exposures/  # Exposure management
-│       ├── Models/     # Pricing models
+│       ├── models/     # Pricing models
 │       ├── treaty/     # Reinsurance contract modeling
 │       └── rate_monitoring/ # Rate monitoring tools
 └── tests/              # Test suite

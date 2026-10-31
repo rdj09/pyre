@@ -9,12 +9,12 @@ Guidance for Claude Code when working in this repository.
 ## Commands
 
 ```bash
-pytest                          # run all tests (src-layout: pythonpath=["src"] set in pyproject.toml)
+pytest                          # run all tests (src-layout: pythonpath=["src", "."] set in pyproject.toml)
 pytest tests/test_claims.py -v  # module-specific
 pytest -q --ignore=tests/test_exposure_curve_fitting.py  # skip scipy-dependent test
 
 hatch run types:check           # mypy across src/pyre and tests
-ruff check src/pyre/            # lint (E, F, I, N, W, B rules; N999 ignored for Models/)
+ruff check src/pyre/            # lint (E, F, I, N, W, B rules; N999 ignored for exposure_ILF_* filenames)
 ruff format src/pyre/           # auto-format
 
 hatch run docs:serve            # local docs at localhost:8000
@@ -36,7 +36,7 @@ hatch run panel:serve           # serve app/main.py at localhost (panel serve, -
 | `claims/` | `Claim`, `ClaimDevelopmentHistory`, `ClaimsMetaData`, `Claims`, `Triangle`, `IBNERPatternExtractor` |
 | `exposures/` | `Exposure`, `ExposureMetaData`, `ExposureValues`, `Exposures` |
 | `treaty/` | `RILayer`, `RIContractMetadata`, `RIContract`, layer loss functions |
-| `Models/` | `Experience/`, `Exposure/`, `AggregateFeatures/` submodules + `trending.py` |
+| `models/` | `Experience/`, `Exposure/`, `AggregateFeatures/` submodules + `trending.py` |
 | `rate_monitoring/` | Rate adequacy and rate change tracking |
 | `exceptions/` | `GeneralException`, `ExposureException`, `ClaimsException`, `ContractException` |
 
@@ -95,7 +95,7 @@ pyre/
 │   ├── claims/
 │   ├── exposures/
 │   ├── treaty/
-│   ├── Models/                # uppercase — non-Pythonic, rename deferred
+│   ├── models/
 │   │   ├── Experience/
 │   │   ├── Exposure/
 │   │   └── AggregateFeatures/
@@ -107,17 +107,20 @@ pyre/
 └── mkdocs.yml
 ```
 
-## Known Test State (develop, as of Panel treaty pricing workbench addition)
+## Known Test State (develop, as of the Models/models housekeeping refactor)
 
-**Expected: 22 failed, 75 passed** (when ignoring `test_exposure_curve_fitting.py`).
+**Expected: 22 failed, 78 passed** (when ignoring `test_exposure_curve_fitting.py`).
 
-As part of adding the Panel treaty pricing workbench (`app/`), two pre-existing
-bugs in `src/pyre/treaty/contracts.py` (`RILayer.loss_to_layer_fn`) and
-`src/pyre/Models/trending.py` (`Trending.trend_exposures`) were fixed — see
-`tests/test_treaty.py::TestRILayerLossToLayerFn` and
-`tests/test_trending.py::TestTrendExposuresPropertyFix`. The remaining 22
-failures below are still **pre-existing** and out of scope — do not attempt to
-fix them without understanding they pre-date this change:
+Three pre-existing bugs have been fixed so far, each with its own regression
+test: `RILayer.loss_to_layer_fn` (`tests/test_treaty.py::TestRILayerLossToLayerFn`),
+`Trending.trend_exposures`'s method/property mismatch
+(`tests/test_trending.py::TestTrendExposuresPropertyFix`), and
+`Triangle.from_claims` (`tests/test_triangles.py::TestTriangleFromClaims` — it
+read a nonexistent `claim.modelling_year` instead of
+`claim.claims_meta_data.modelling_year`, and iterated the paid/incurred lists
+with `.items()` as if they were dicts). The remaining 22 failures below are
+still **pre-existing** and out of scope — do not attempt to fix them without
+understanding they pre-date these changes:
 
 | Failure group | Count | Root cause |
 |---|---|---|
@@ -134,22 +137,23 @@ fix them without understanding they pre-date this change:
 
 ## Tooling (configured in pyproject.toml)
 
-- **ruff**: `line-length=100`, `target-version=py310`, rules E/F/I/N/W/B, `N999` ignored (for `Models/`)
+- **ruff**: `line-length=100`, `target-version=py310`, rules E/F/I/N/W/B, `N999` ignored (needed for `exposure_ILF_fitting.py`/`exposure_ILF_functions.py` — uppercase "ILF" in the filename)
 - **mypy**: non-strict, `python_version=3.10`, `ignore_missing_imports=true`
-- **pytest**: `addopts="--tb=short"`, `pythonpath=["src"]`
+- **pytest**: `addopts="--tb=short"`, `pythonpath=["src", "."]` (the `.` lets tests import the top-level `app/` package)
 - **pytest-cov**: `source_pkgs=["pyre","tests"]`, branch coverage
 
 ## Git Branches
 
-- **main**: stable/production
-- **develop**: active development (12 commits ahead of origin — Pythonic refactor complete)
-- **gh-pages**: docs hosting
+- **main**: stable/production — kept in sync with `develop` (fast-forward only)
+- **develop**: active development — both branches pushed and in sync with `origin`
+- **gh-pages**: docs hosting, deployed via `hatch run docs:deploy` (see Commands)
 
-Active development on `develop`. The `refactor/pyre-v1` branch is abandoned (superseded by refactor applied directly to `develop`). The worktree at `.worktrees/refactor` can be removed: `git worktree remove .worktrees/refactor`
+No other local branches or worktrees exist — the former `.worktrees/refactor`
+worktree and its `feature/shiny-webapp-data-injection`/`refactor/pyre-v1`
+branches (both already fully-merged ancestors of `develop`) have been removed.
 
 ## Important Notes
 
-- `Models/` uses an uppercase directory name — rename to `models/` is a follow-up task (affects all imports and docs).
-- `Models/Experience/frequency_severity.py`: class is `SeverityFit` (was `severity_fit`).
+- `models/Experience/frequency_severity.py`: class is `SeverityFit` (was `severity_fit`).
 - Relative imports within `pyre` package — always use `from ..enums import X` style, not absolute `from pyre.enums import X`, inside `src/pyre/`.
 - Full docs: https://rdj09.github.io/pyre/ — `hatch run docs:serve` locally.
