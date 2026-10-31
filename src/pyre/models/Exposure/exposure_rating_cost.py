@@ -87,32 +87,40 @@ class ExposureModel:
             else:
                 treaty_top = total_insured_value
 
-                ##TODO: below is not general for all function very much mbbefd curve input expectations.
+            # TODO: below is not general for all function very much mbbefd curve input expectations.
+            curve_position_policy_lower = self.calculate_exposure_curve(
+                self._selected_curve,
+                self._curve_parameters,
+                policy_attachment / total_insured_value,
+            )
+            curve_position_policy_higher = self.calculate_exposure_curve(
+                self._selected_curve,
+                self._curve_parameters,
+                total_insured_value / total_insured_value,  # This equals 1.0
+            )
+            curve_position_treaty_lower = self.calculate_exposure_curve(
+                self._selected_curve,
+                self._curve_parameters,
+                treaty_bottom / total_insured_value,
+            )
+            curve_position_treaty_higher = self.calculate_exposure_curve(
+                self._selected_curve, self._curve_parameters, treaty_top / total_insured_value
+            )
 
-                # Use the general calculate_curve function for other curve types
-                curve_position_policy_lower = self.calculate_exposure_curve(
-                    self._selected_curve,
-                    self._curve_parameters,
-                    policy_attachment / total_insured_value,
-                )
-                curve_position_policy_higher = self.calculate_exposure_curve(
-                    self._selected_curve,
-                    self._curve_parameters,
-                    total_insured_value / total_insured_value,  # This equals 1.0
-                )
-                curve_position_treaty_lower = self.calculate_exposure_curve(
-                    self._selected_curve,
-                    self._curve_parameters,
-                    treaty_bottom / total_insured_value,
-                )
-                curve_position_treaty_higher = self.calculate_exposure_curve(
-                    self._selected_curve, self._curve_parameters, treaty_top / total_insured_value
-                )
-
-                # Calculate share of risk
-                share = (curve_position_treaty_higher - curve_position_treaty_lower) / (
-                    curve_position_policy_higher - curve_position_policy_lower
-                )
-                shares_by_layer[layer.layer_id] = share
+            share = (curve_position_treaty_higher - curve_position_treaty_lower) / (
+                curve_position_policy_higher - curve_position_policy_lower
+            )
+            shares_by_layer[layer.layer_id] = share
 
         return shares_by_layer
+
+    def calculate_all_shares(self) -> Dict[str, Dict[int, float]]:
+        """Run _calculate_single_exposure_share for every exposure in self._exposures.
+
+        Returns:
+            Dict mapping exposure_id -> {layer_id: share}.
+        """
+        return {
+            exposure.exposure_meta.exposure_id: self._calculate_single_exposure_share(exposure)
+            for exposure in self._exposures
+        }
