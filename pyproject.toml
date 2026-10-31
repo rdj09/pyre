@@ -29,6 +29,9 @@ panel = [
   "panel>=1.4",
   "pandas>=2.0",
 ]
+excel = [
+  "openpyxl>=3.1",
+]
 
 
 [project.urls]
@@ -99,6 +102,11 @@ dependencies = [
 ]
 [tool.hatch.envs.panel.scripts]
 serve = "panel serve app/main.py --show --autoreload"
+
+[tool.hatch.envs.excel]
+dependencies = [
+  "openpyxl>=3.1",
+]
 
 [tool.hatch.envs.docs]
 dependencies = [
