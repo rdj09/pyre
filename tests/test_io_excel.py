@@ -387,5 +387,73 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
         self.assertEqual(len(by_layer_year_rows), 2)  # header + 1 data row, not 1 + 2
 
 
+@unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
+class TestWriteExposureRatingResults(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "exposure.xlsx"
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_writes_one_row_per_exposure_layer_pair(self):
+        from pyre.models.Exposure.exposure_curve_functions import ExposureCurveType
+        from pyre.models.Exposure.exposure_rating_cost import ExposureModel
+        from pyre.io_excel.results_io import write_exposure_rating_results
+
+        exposure = PyreExposure(
+            PyreExposureMetaData(
+                exposure_id="EXP001",
+                exposure_name="EXP001",
+                exposure_period_start=date(2023, 1, 1),
+                exposure_period_end=date(2023, 12, 31),
+                currency="USD",
+            ),
+            PyreExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
+        )
+        layer = RILayer(
+            layer_id=1,
+            layer_name="Layer 1",
+            layer_type=ContractType.EXCESS_OF_LOSS,
+            occurrence_attachment=100_000.0,
+            occurrence_limit=400_000.0,
+            aggregate_attachment=0.0,
+            aggregate_limit=0.0,
+            subject_lines_of_business=[],
+            subject_lob_exposure_amounts=[],
+            full_subject_premium=0.0,
+            written_line=1.0,
+            signed_line=1.0,
+            number_of_reinstatements=0,
+            reinstatement_cost={},
+        )
+        metadata = RIContractMetadata(
+            contract_id="C-0001",
+            contract_description="Test",
+            cedent_name="Acme Re",
+            trigger_basis=ClaimTriggerBasis.LOD,
+            indexation_clause=IndexationClauseType.FULL_INDEXATION,
+            indexation_margin=0.0,
+            inception_date=date(2023, 1, 1),
+            expiration_date=date(2023, 12, 31),
+            fx_rates={"USD": 1.0},
+        )
+        contract = RIContract(contract_meta_data=metadata, layers=[layer])
+        model = ExposureModel(
+            exposures=PyreExposures([exposure]),
+            ri_contract=contract,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters={"curve": 3.0},
+        )
+
+        write_exposure_rating_results(model, self.path)
+
+        wb = openpyxl.load_workbook(self.path)
+        rows = [list(row) for row in wb["ExposureShares"].iter_rows(values_only=True)]
+        self.assertEqual(rows[0], ["exposure_id", "layer_id", "share"])
+        self.assertEqual(rows[1][0], "EXP001")
+        self.assertEqual(rows[1][1], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

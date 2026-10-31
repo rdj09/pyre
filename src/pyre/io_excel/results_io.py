@@ -61,3 +61,21 @@ def write_experience_rating_results(model_data: "ExperienceModelData", path: str
         path=path,
         sheet_name="ExposuresByYear",
     )
+
+
+def write_exposure_rating_results(exposure_model: "ExposureModel", path: str | Path) -> None:
+    """Write ExposureModel.calculate_all_shares() to one 'ExposureShares' sheet."""
+    shares = exposure_model.calculate_all_shares()
+
+    rows = [
+        [exposure_id, layer_id, share]
+        for exposure_id, layer_shares in shares.items()
+        for layer_id, share in layer_shares.items()
+    ]
+
+    write_table(
+        headers=["exposure_id", "layer_id", "share"],
+        rows=rows,
+        path=path,
+        sheet_name="ExposureShares",
+    )
