@@ -1,9 +1,11 @@
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
 
 try:
     import openpyxl
+    from openpyxl import Workbook
 
     HAS_OPENPYXL = True
 except ImportError:
@@ -59,6 +61,109 @@ class TestWriteTable(unittest.TestCase):
 
         wb = openpyxl.load_workbook(self.path)
         self.assertEqual(set(wb.sheetnames), {"First", "Second"})
+
+
+@unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
+class TestReadClaims(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "claims.xlsx"
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def _write_claims_sheet(self, rows, headers=None, sheet_name="Claims", trailing_blank_row=False):
+        headers = headers or [
+            "claim_id", "currency", "contract_limit",
+            "loss_date", "development_month", "cumulative_paid", "cumulative_incurred",
+        ]
+        wb = Workbook()
+        ws = wb.active
+        ws.title = sheet_name
+        ws.append(headers)
+        for row in rows:
+            ws.append(row)
+        if trailing_blank_row:
+            ws.append([None] * len(headers))
+        wb.save(self.path)
+
+    def test_builds_claims_with_correct_dev_history(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            [
+                ["CLM001", "USD", 2000000, date(2022, 3, 1), 12, 50000, 120000],
+                ["CLM001", "USD", 2000000, date(2022, 3, 1), 24, 90000, 250000],
+                ["CLM002", "USD", 2000000, date(2022, 7, 10), 12, 20000, 60000],
+            ]
+        )
+
+        claims = read_claims(self.path)
+        self.assertEqual(sorted(claims.modelling_years), [2022])
+
+        by_id = {c.claims_meta_data.claim_id: c for c in claims.claims}
+        self.assertEqual(
+            by_id["CLM001"].capped_claim_development_history.cumulative_dev_paid,
+            [50000.0, 90000.0],
+        )
+        self.assertEqual(
+            by_id["CLM001"].capped_claim_development_history.development_months,
+            [12, 24],
+        )
+
+    def test_accepts_iso_string_dates_as_well_as_native_excel_dates(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            [["CLM001", "USD", 2000000, "2022-03-01", 12, 50000, 120000]]
+        )
+
+        claims = read_claims(self.path)
+        self.assertEqual(claims.claims[0].claims_meta_data.loss_date, date(2022, 3, 1))
+
+    def test_rejects_missing_required_column(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            rows=[["CLM001", "USD", 12, 50000, 120000]],
+            headers=["claim_id", "currency", "development_month", "cumulative_paid", "cumulative_incurred"],
+        )
+
+        with self.assertRaises(ValueError):
+            read_claims(self.path)
+
+    def test_rejects_missing_or_zero_contract_limit(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            [["CLM001", "USD", 0, date(2022, 3, 1), 12, 50000, 120000]]
+        )
+
+        with self.assertRaises(ValueError):
+            read_claims(self.path)
+
+    def test_ignores_trailing_blank_row(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            [["CLM001", "USD", 2000000, date(2022, 3, 1), 12, 50000, 120000]],
+            trailing_blank_row=True,
+        )
+
+        claims = read_claims(self.path)
+        self.assertEqual(len(claims), 1)
+
+    def test_missing_optional_column_entirely_defaults_cleanly(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        # No "claim_year_basis", "contract_deductible", "line_of_business" etc. columns at all
+        self._write_claims_sheet(
+            [["CLM001", "USD", 2000000, date(2022, 3, 1), 12, 50000, 120000]]
+        )
+
+        claims = read_claims(self.path)  # must not raise KeyError
+        self.assertEqual(claims.claims[0].claims_meta_data.contract_deductible, 0.0)
+        self.assertEqual(claims.claims[0].claims_meta_data.status, "Open")
 
 
 if __name__ == "__main__":
