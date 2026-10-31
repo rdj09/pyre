@@ -2,6 +2,18 @@
 
 The Exposures module provides tools for managing and analyzing exposure data in reinsurance contexts. It includes classes for representing individual exposures, collections of exposures, and methods for calculating earned and written exposure values.
 
+!!! note "Actuarial background"
+    Earned exposure is prorated by calendar overlap between the exposure
+    period and the analysis date, following standard pro-rata-temporis
+    earning conventions used for premium/exposure accrual in reinsurance
+    pricing (see Friedland, J. (2010), *Estimating Unpaid Claims Using
+    Basic Techniques*, CAS Study Note, §2, for the underlying earning
+    convention). `exposure_type` (an `ExposureBasis`) determines whether
+    `earned_exposure_value`/`written_exposure_value` prorate at all —
+    `ExposureBasis.EARNED` always returns the full value (it is already
+    earned by construction), so the proration logic only applies when
+    the metadata indicates a written/unearned basis.
+
 ## Core Classes
 
 ### Exposures Data Structure
@@ -50,7 +62,7 @@ exposure = Exposure(metadata, values)
 print(f"Exposure ID: {exposure.exposure_meta.exposure_id}")
 print(f"Exposure Name: {exposure.exposure_meta.exposure_name}")
 print(f"Exposure Value: {exposure.exposure_values.exposure_value}")
-print(f"Term Length (days): {exposure.exposure_meta.exposure_term_length_days()}")
+print(f"Term Length (days): {exposure.exposure_meta.exposure_term_length_days}")
 
 # Calculate earned exposure as of a specific date
 analysis_date = date(2022, 6, 30)  # Mid-year
@@ -83,11 +95,17 @@ for exp in exposures_collection:
     print(f"Exposure {exp.exposure_meta.exposure_id} - "
           f"Period: {exp.exposure_meta.exposure_period_start} to {exp.exposure_meta.exposure_period_end}")
 
-# Get unique modelling years
-print(f"Modelling years: {exposures_collection.modelling_years()}")
+# Get unique modelling years (a property, not a method)
+print(f"Modelling years: {exposures_collection.modelling_years}")
 ```
 
 ### Working with Multiple Exposures
+
+!!! note "Optional dependency"
+    This example uses `pandas`, which is **not** a `pyre` core dependency
+    (`pyre` core has zero runtime deps by design). Install it separately,
+    or use the `panel` extra (`pip install -e ".[panel]"`), which already
+    includes it.
 
 ```python
 from pyre.exposures.exposures import Exposures

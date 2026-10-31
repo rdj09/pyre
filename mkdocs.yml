@@ -7,7 +7,10 @@ theme:
   highlightjs: true
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
   - social
 markdown_extensions:
   - admonition
@@ -24,4 +27,5 @@ nav:
   - Models: models.md
   - Treaty: treaty.md
   - Rate Monitoring: rate_monitoring.md
+  - Treaty Pricing Workbench: workbench.md
   - About: about.md

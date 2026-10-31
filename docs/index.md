@@ -9,6 +9,7 @@
 - **Treaty Modeling**: Functionality for modeling reinsurance contracts and layers
 - **Experience Rating**: Methods for burn cost analysis, frequency-severity modeling, and curve fitting
 - **Rate Monitoring**: Tools for tracking rate adequacy and rate changes
+- **Treaty Pricing Workbench**: An optional [Panel](https://panel.holoviz.org/) dashboard for configuring a contract, loading claims/exposures, and viewing ceded-loss results — see [Treaty Pricing Workbench](workbench.md)
 
 ## Installation
 To install the package, clone the repository and install the dependencies:
@@ -17,7 +18,14 @@ To install the package, clone the repository and install the dependencies:
 git clone https://github.com/rdj09/pyre.git
 cd pyre
 pip install -e .
+
+# Optional: install the Panel treaty pricing workbench's dependencies too
+pip install -e ".[panel]"
 ```
+
+The core `pyre` package has **zero runtime dependencies** by design — the
+`panel` extra (pulling in `panel` and `pandas`) is only needed to run the
+[Treaty Pricing Workbench](workbench.md).
 
 ## Quick Start
 Here's a simple example of how to use the package to analyze claims data:
@@ -48,13 +56,22 @@ claim = Claim(metadata, development)
 # Create a collection of claims
 claims_collection = Claims([claim])
 
-# Create a triangle from claims data
-triangle = Triangle.from_claims(claims_collection, value_type="incurred")
+# Build a triangle directly: {origin_year: {dev_period: cumulative_value}}
+# (Triangle.from_claims has a pre-existing bug -- see docs/claims.md -- so
+# this is the reliable way to construct one today.)
+triangle = Triangle(
+    triangle={2022: dict(zip(development.development_months, development.cumulative_dev_incurred))},
+    origin_years=[2022],
+    dev_periods=development.development_months,
+)
 
 # Calculate age-to-age factors
 factors = triangle.calculate_age_to_age_factors()
 print(factors)
 ```
+
+See [Claims](claims.md#working-with-claims-triangles) for the full triangle
+walkthrough, including IBNER extraction and curve fitting.
 
 ## Directory Structure
 ```

@@ -2,6 +2,21 @@
 
 The Treaty module provides tools for modeling reinsurance contracts and layers. It includes classes for representing different types of reinsurance contracts, their metadata, and methods for calculating recoveries.
 
+## Layer loss-to-layer formulas
+
+`RILayer.loss_to_layer_fn(gross_amount)` dispatches on `layer_type` to one of
+the functions in `treaty/layer_loss_functions.py`:
+
+| `ContractType` | Formula | Notes |
+|---|---|---|
+| `EXCESS_OF_LOSS`, `AGGREGATE_STOP_LOSS` | `max(min(gross − attachment, limit), 0)` | Standard XOL layer recovery. |
+| `FRANCHISE_DEDUCTIBLE` | `gross if gross > attachment else 0`, capped at `limit` | Franchise deductible: whole loss ceded once attachment is pierced, not just the excess. |
+| `QUOTA_SHARE` | `gross` (unscaled) | Deliberate: QS share/cession is applied by the caller, not inside `loss_to_layer_fn` — see the inline comment in `contracts.py`. |
+| `SURPLUS_SHARE` | *not implemented* | Raises `NotImplementedError` — surplus share needs a per-risk `sum_insured` that `RILayer` does not model yet (see `layer_loss_functions.surplus_share_calculation`, which exists but is unreachable through this path). |
+
+Reference: Clark, D. (1996), *Basics of Reinsurance Pricing*, CAS Study
+Note — [casact.org](https://www.casact.org/sites/default/files/database/studynotes_clark_reinsure.pdf).
+
 ## Core Classes
 
 ### Treaty Data Structure
@@ -29,8 +44,8 @@ metadata = RIContractMetadata(
     contract_id="XL001",
     contract_description="Property Cat XL",
     cedent_name="ABC Insurance",
-    trigger_basis=ClaimTriggerBasis.LOSSES_OCCURRING,
-    indexation_clause=IndexationClauseType.NONE,
+    trigger_basis=ClaimTriggerBasis.LOD,  # Losses Occurring During (-> accident year)
+    indexation_clause=IndexationClauseType.FULL_INDEXATION,
     indexation_margin=0.0,
     inception_date=date(2022, 1, 1),
     expiration_date=date(2022, 12, 31),
@@ -63,14 +78,14 @@ print(f"Contract ID: {contract.contract_meta_data.contract_id}")
 print(f"Contract Description: {contract.contract_meta_data.contract_description}")
 print(f"Contract Period: {contract.contract_meta_data.inception_date} to {contract.contract_meta_data.expiration_date}")
 
-# Access layer properties
-for layer_id in contract.layer_ids():
+# Access layer properties (layer_ids is a property, not a method)
+for layer_id in contract.layer_ids:
     layer = contract.layers[layer_id - 1]  # Layer IDs are 1-based
     print(f"Layer {layer.layer_id}: {layer.layer_name}")
     print(f"  Attachment: {layer.occurrence_attachment}")
     print(f"  Limit: {layer.occurrence_limit}")
-    print(f"  Written Line Premium: {layer.written_line_premium()}")
-    print(f"  Signed Line Premium: {layer.signed_line_premium()}")
+    print(f"  Written Line Premium: {layer.written_line_premium}")  # property
+    print(f"  Signed Line Premium: {layer.signed_line_premium}")  # property
 
 # Calculate recovery for a loss
 loss_amount = 25000000
@@ -142,10 +157,12 @@ layers = [
 contract = RIContract(contract_metadata, layers)
 
 # Calculate total premium
-total_premium = sum(layer.signed_line_premium() for layer in contract.layers)
+total_premium = sum(layer.signed_line_premium for layer in contract.layers)
 print(f"Total premium for all layers: {total_premium}")
 
 # Calculate recovery for a large loss across multiple layers
+# Note: loss_to_layer_fn raises NotImplementedError for SURPLUS_SHARE layers
+# (not modelled yet) -- wrap in try/except if a contract might contain one.
 loss_amount = 75000000
 total_recovery = 0
 for layer in contract.layers:

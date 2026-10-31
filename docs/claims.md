@@ -2,6 +2,13 @@
 
 The Claims module provides tools for managing and analyzing claims data in reinsurance contexts. It includes classes for representing individual claims, collections of claims, and claims development triangles.
 
+!!! note "Actuarial background"
+    Development triangles, age-to-age ("link ratio") factors, and IBNER
+    (Incurred But Not Enough Reported) patterns follow the standard loss
+    reserving methods described in Friedland, J. (2010), *Estimating
+    Unpaid Claims Using Basic Techniques*, CAS Study Note —
+    [casact.org](https://www.casact.org/sites/default/files/database/studynotes_friedland_estimating.pdf).
+
 ## Core Classes
 
 ### Claims Data Structure
@@ -54,11 +61,11 @@ development = ClaimDevelopmentHistory(
 # Create a claim
 claim = Claim(metadata, development)
 
-# Access claim properties
+# Access claim properties (latest_* are properties, not methods)
 print(f"Claim ID: {claim.claims_meta_data.claim_id}")
-print(f"Latest paid amount: {claim.uncapped_claim_development_history.latest_paid()}")
-print(f"Latest incurred amount: {claim.uncapped_claim_development_history.latest_incurred()}")
-print(f"Latest reserved amount: {claim.uncapped_claim_development_history.latest_reserved_amount()}")
+print(f"Latest paid amount: {claim.uncapped_claim_development_history.latest_paid}")
+print(f"Latest incurred amount: {claim.uncapped_claim_development_history.latest_incurred}")
+print(f"Latest reserved amount: {claim.uncapped_claim_development_history.latest_reserved_amount}")
 
 # Create a collection of claims
 claims_collection = Claims([claim])
@@ -79,21 +86,34 @@ for claim in claims_collection:
     print(f"Claim {claim.claims_meta_data.claim_id} - "
           f"Loss date: {claim.claims_meta_data.loss_date}")
 
-# Get unique modelling years
-print(f"Modelling years: {claims_collection.modelling_years()}")
+# Get unique modelling years (a property, not a method)
+print(f"Modelling years: {claims_collection.modelling_years}")
 ```
 
 ### Working with Claims Triangles
 
+!!! bug "`Triangle.from_claims` is currently broken"
+    `Triangle.from_claims(claims, value_type=...)` raises
+    `AttributeError: 'Claim' object has no attribute 'modelling_year'` —
+    it should read `claim.claims_meta_data.modelling_year`. It also
+    iterates `cumulative_dev_paid`/`cumulative_dev_incurred` with `.items()`
+    as if they were dicts, but they are plain lists. This is a pre-existing
+    bug, untested and not yet fixed. Until it's fixed, build a `Triangle`
+    directly from a `{origin_year: {dev_period: value}}` dict (its native
+    storage format — see the class docstring) as shown below.
+
 ```python
-from pyre.claims.triangles import Triangle, CurveType
-from pyre.claims.claims import Claims
+from pyre.claims.triangles import Triangle, CurveType, IBNERPatternExtractor
 
-# Assuming we have a Claims collection called 'claims_data'
-
-# Create a triangle from claims data
-incurred_triangle = Triangle.from_claims(claims_data, value_type="incurred")
-paid_triangle = Triangle.from_claims(claims_data, value_type="paid")
+# Build a triangle directly: {origin_year: {dev_period: cumulative_value}}
+incurred_triangle = Triangle(
+    triangle={
+        2021: {0: 20000.0, 3: 15000.0, 6: 12000.0},
+        2022: {0: 80000.0, 3: 70000.0, 6: 60000.0, 9: 55000.0, 12: 50000.0},
+    },
+    origin_years=[2021, 2022],
+    dev_periods=[0, 3, 6, 9, 12],
+)
 
 # Display the triangle
 print(incurred_triangle)
@@ -111,15 +131,26 @@ for origin_year, factors_dict in factors.items():
 avg_factors = incurred_triangle.get_average_age_to_age_factors(method="volume")
 print(f"Volume-weighted average factors: {avg_factors}")
 
-# Fit a curve to the development pattern
-curve_params = incurred_triangle.fit_curve(CurveType.EXPONENTIAL)
-print(f"Curve parameters: {curve_params}")
+# Fit a curve to the development pattern -- see the "Known limitation" note below
+try:
+    curve_params = incurred_triangle.fit_curve(CurveType.EXPONENTIAL)
+    print(f"Curve parameters: {curve_params}")
+except (ValueError, ZeroDivisionError) as exc:
+    print(f"Curve fit failed: {exc}")
 
 # Extract IBNER pattern
 ibner_extractor = IBNERPatternExtractor(incurred_triangle)
 ibner_pattern = ibner_extractor.get_IBNER_pattern()
 print(f"IBNER pattern: {ibner_pattern}")
 ```
+
+!!! warning "Known limitation"
+    `fit_curve` can raise `ValueError`/`ZeroDivisionError` whenever the
+    age-to-age factors don't fit the chosen curve's assumptions (e.g. a
+    decaying — rather than development-growing — triangle, or sparse data).
+    This is a pre-existing issue tracked by `tests/test_triangles.py`. Check
+    your triangle's shape and wrap the call as shown above before relying
+    on fitted curve parameters.
 
 ## API Reference
 

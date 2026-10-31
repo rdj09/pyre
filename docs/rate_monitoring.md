@@ -2,6 +2,18 @@
 
 The Rate Monitoring module provides tools for tracking and analyzing rate changes and rate adequacy over time. It includes methods for calculating rate change indices and assessing rate adequacy.
 
+!!! note "Actuarial background"
+    Rate change and rate adequacy methodology follows Bodoff, N. (2009),
+    *Measuring Rate Change: Methods and Implications*, CAS Forum —
+    [casact.org](https://www.casact.org/sites/default/files/database/forum_09wforum_bodoff.pdf),
+    and (for `rate_change`) Lloyd's PMDR renewal-scenario conventions —
+    [assets.lloyds.com](https://assets.lloyds.com/media/04e08389-5b68-42a7-aa66-167df72c0721/PMDR-Instructions-2024-V1.0.pdf).
+
+!!! note "Optional dependencies"
+    The examples below use `pandas` and `matplotlib`, neither of which is
+    a `pyre` core dependency. Install them separately to run these
+    examples as-is.
+
 ## Core Components
 
 ### Rate Change

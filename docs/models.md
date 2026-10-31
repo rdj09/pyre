@@ -1,280 +1,248 @@
 # Models Module
 
-The Models module provides a variety of actuarial and statistical modeling tools for reinsurance pricing. It includes submodules for experience rating, exposure rating, and aggregate features modeling.
+The Models module provides actuarial and statistical modeling tools for
+reinsurance pricing: experience rating, exposure rating, trending, and
+aggregate loss features.
+
+!!! note "Maturity varies by submodule"
+    `experience_preparer.py` (`ExperienceModelData`) and `trending.py` are
+    the stable, tested entry points — they back the
+    [treaty pricing workbench](workbench.md) and have unit test coverage.
+    `AggregateFeatures` (`Simulation`, parts of `Selections`) and
+    `SeverityFit` are early-stage scaffolding: signatures exist but some
+    methods are stubs or unfinished. This page says so explicitly wherever
+    that's the case, rather than showing a fabricated "working" example.
 
 ## Submodules
 
-### Experience Rating
+| Submodule | Files | Purpose |
+|---|---|---|
+| `Experience/` | `experience_preparer.py`, `trending.py` (one level up), `burn_cost.py`, `frequency_severity.py`, `pareto_rating.py`, `resampling.py`, `curve_fitting.py` | Combine claims + exposures + contract into ceded-loss results; burn-cost and frequency/severity rating |
+| `Exposure/` | `exposure_curve_functions.py`, `exposure_curve_fitting.py`, `exposure_ILF_functions.py`, `exposure_ILF_fitting.py`, `exposure_rating_cost.py` | Exposure (increased limit factor / exposure curve) rating |
+| `AggregateFeatures/` | `aggregate_features.py`, `selections.py`, `simulation_engine.py` | Aggregate loss distribution modelling and credibility-weighted selections — **early-stage** |
 
-The Experience module provides tools for analyzing historical claims experience:
+## Experience Rating
 
-- `burn_cost`: Methods for burn cost analysis
-- `curve_fitting`: Functions for fitting curves to data
-- `frequency_severity`: Tools for frequency-severity modeling
-- `pareto_rating`: Pareto distribution-based rating methods
-- `resampling`: Methods for resampling claims data
+### `ExperienceModelData` — the central entry point
 
-### Exposure Rating
+`ExperienceModelData` ties `Claims` + `Exposures` + `RIContract` together,
+applies [trending](#trending), applies each layer's loss-to-layer function
+(see [Treaty: layer loss-to-layer formulas](treaty.md#layer-loss-to-layer-formulas)),
+and aggregates the result by layer and modelling year. This is the same
+calculation the [treaty pricing workbench](workbench.md) runs.
 
-The Exposure module provides tools for exposure-based rating:
+```python
+from datetime import date
 
-- `mbbefd`: Implementation of the Modified Beta Beta Equivalent Finite Difference (MBBEFD) distribution
-- `mixed_exponential`: Implementation of the Mixed Exponential distribution
-- `pareto_ilf`: Pareto distribution-based Increased Limit Factors
-- `riebesell`: Implementation of the Riebesell approximation
+from pyre import (
+    Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData,
+    Exposure, ExposureMetaData, Exposures, ExposureValues,
+    RIContract, RIContractMetadata, RILayer,
+    ExperienceModelData,
+)
+from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
 
-### Aggregate Features
+# One claim that exhausts a 200k xs 100k XOL layer in its second valuation
+claim = Claim(
+    ClaimsMetaData(claim_id="CL001", currency="USD", contract_limit=2_000_000,
+                    loss_date=date(2023, 5, 15)),
+    ClaimDevelopmentHistory(
+        development_months=[12, 24],
+        cumulative_dev_paid=[50_000, 350_000],
+        cumulative_dev_incurred=[120_000, 350_000],
+    ),
+)
+claims = Claims([claim])
 
-The AggregateFeatures module provides tools for modeling aggregate loss distributions:
+exposure = Exposure(
+    ExposureMetaData(exposure_id="EXP2023", exposure_name="2023 Premium",
+                        exposure_period_start=date(2023, 1, 1),
+                        exposure_period_end=date(2023, 12, 31), currency="USD"),
+    ExposureValues(exposure_value=1_200_000, attachment_point=0, limit=0),
+)
+exposures = Exposures([exposure])
 
-- `aggregate_features`: Methods for calculating aggregate loss statistics
-- `selections`: Tools for selecting and combining models
-- `simulation_engine`: Monte Carlo simulation engine for aggregate losses
+metadata = RIContractMetadata(
+    contract_id="C-0001", contract_description="Demo XOL", cedent_name="Acme Re",
+    trigger_basis=ClaimTriggerBasis.LOD, indexation_clause=IndexationClauseType.FULL_INDEXATION,
+    indexation_margin=0.0, inception_date=date(2023, 1, 1), expiration_date=date(2023, 12, 31),
+    fx_rates={"USD": 1.0},
+)
+layer = RILayer(
+    layer_id=1, layer_name="XOL Layer", layer_type=ContractType.EXCESS_OF_LOSS,
+    occurrence_attachment=100_000, occurrence_limit=200_000,
+    aggregate_attachment=0, aggregate_limit=0, subject_lines_of_business=["Property"],
+    subject_lob_exposure_amounts=[1_200_000], full_subject_premium=0,
+    written_line=1.0, signed_line=1.0, number_of_reinstatements=0, reinstatement_cost={},
+)
+contract = RIContract(metadata, [layer])
+
+data = ExperienceModelData(claims, exposures, contract)
+# defaults: trend factors of 1.0 for every year, base_year = contract inception year
+
+print(data.aggregate_subject_contract_claims[1][2023])
+# {'latest_paid': 200000.0, 'latest_incurred': 200000.0,
+#  'claim_counts': {'Open': 1}, 'total_count': 1}
+print(data.aggregate_exposures[2023])
+# {'written': 1200000.0, 'earned': 1200000.0}
+
+loss_ratio = data.aggregate_subject_contract_claims[1][2023]["latest_incurred"] / \
+    data.aggregate_exposures[2023]["earned"]
+print(f"Loss ratio: {loss_ratio:.1%}")  # 16.7%
+```
+
+This mirrors `tests/test_app_service.py::TestRunPricing`, which asserts
+these exact figures end-to-end.
+
+!!! warning "SURPLUS_SHARE layers"
+    `loss_to_layer_fn` — and therefore `subject_contract_claims` — raises
+    `NotImplementedError` for any `SURPLUS_SHARE` layer; it has no
+    `sum_insured` to work with yet.
 
 ### Trending
 
-The trending module provides tools for trending historical data to current levels.
-
-## Examples
-
-### Experience Rating
-
-#### Burn Cost Analysis
-
-```python
-from pyre.Models.Experience.burn_cost import BurnCostModel
-from pyre.claims.claims import Claims
-import numpy as np
-
-# Assuming we have a Claims collection called 'claims_data'
-
-# Create a burn cost model
-model = BurnCostModel(claims_data)
-
-# Calculate basic burn cost statistics
-burn_cost = model.calculate_burn_cost()
-print(f"Average burn cost: {burn_cost}")
-
-# Calculate burn cost with trend
-trend_factor = 1.05  # 5% annual trend
-years_of_trend = 2
-trended_burn_cost = model.calculate_trended_burn_cost(trend_factor, years_of_trend)
-print(f"Trended burn cost: {trended_burn_cost}")
-
-# Calculate burn cost with limits
-attachment = 1000000
-limit = 5000000
-limited_burn_cost = model.calculate_limited_burn_cost(attachment, limit)
-print(f"Limited burn cost: {limited_burn_cost}")
-
-# Calculate confidence intervals
-confidence_level = 0.95
-lower, upper = model.calculate_confidence_interval(confidence_level)
-print(f"{confidence_level*100}% confidence interval: ({lower}, {upper})")
-```
-
-#### Frequency-Severity Modeling
-
-```python
-from pyre.Models.Experience.frequency_severity import FrequencySeverityModel
-from pyre.claims.claims import Claims
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Assuming we have a Claims collection called 'claims_data'
-
-# Create a frequency-severity model
-model = FrequencySeverityModel(claims_data)
-
-# Fit frequency distribution (Poisson)
-freq_params = model.fit_frequency_distribution("poisson")
-print(f"Frequency distribution parameters: {freq_params}")
-
-# Fit severity distribution (Lognormal)
-sev_params = model.fit_severity_distribution("lognormal")
-print(f"Severity distribution parameters: {sev_params}")
-
-# Simulate aggregate losses
-num_simulations = 10000
-aggregate_losses = model.simulate_aggregate_losses(num_simulations)
-
-# Calculate statistics
-mean_loss = np.mean(aggregate_losses)
-median_loss = np.median(aggregate_losses)
-var_95 = np.percentile(aggregate_losses, 95)
-var_99 = np.percentile(aggregate_losses, 99)
-
-print(f"Mean aggregate loss: {mean_loss}")
-print(f"Median aggregate loss: {median_loss}")
-print(f"95% VaR: {var_95}")
-print(f"99% VaR: {var_99}")
-
-# Plot histogram of aggregate losses
-plt.figure(figsize=(10, 6))
-plt.hist(aggregate_losses, bins=50, alpha=0.7)
-plt.axvline(mean_loss, color='r', linestyle='--', label=f'Mean: {mean_loss:.2f}')
-plt.axvline(var_95, color='g', linestyle='--', label=f'95% VaR: {var_95:.2f}')
-plt.axvline(var_99, color='b', linestyle='--', label=f'99% VaR: {var_99:.2f}')
-plt.legend()
-plt.title('Simulated Aggregate Loss Distribution')
-plt.xlabel('Aggregate Loss')
-plt.ylabel('Frequency')
-plt.show()
-```
-
-### Exposure Rating
-
-#### Increased Limit Factors
-
-```python
-from pyre.Models.Exposure.pareto_ilf import ParetoILF
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Create a Pareto ILF model
-alpha = 2.0  # Pareto shape parameter
-model = ParetoILF(alpha)
-
-# Calculate increased limit factors
-base_limit = 1000000
-limits = [1000000, 2000000, 5000000, 10000000, 25000000]
-ilfs = [model.calculate_ilf(base_limit, limit) for limit in limits]
-
-print("Increased Limit Factors:")
-for limit, ilf in zip(limits, ilfs):
-    print(f"  {limit/1000000}M: {ilf:.4f}")
-
-# Calculate layer costs
-attachment = 5000000
-limit = 5000000
-layer_cost = model.calculate_layer_cost(attachment, attachment + limit)
-print(f"Layer cost for {attachment/1000000}M xs {limit/1000000}M: {layer_cost:.4f}")
-
-# Plot ILF curve
-limits_plot = np.linspace(base_limit, 25000000, 100)
-ilfs_plot = [model.calculate_ilf(base_limit, limit) for limit in limits_plot]
-
-plt.figure(figsize=(10, 6))
-plt.plot(limits_plot/1000000, ilfs_plot)
-plt.scatter([l/1000000 for l in limits], ilfs, color='red', s=50)
-plt.title('Pareto Increased Limit Factors')
-plt.xlabel('Limit (Millions)')
-plt.ylabel('ILF')
-plt.grid(True)
-plt.show()
-```
-
-### Trending
+`Trending` applies compounding annual trend factors to move claims/exposures
+from their origin year to a common base year.
 
 ```python
 from pyre.Models.trending import Trending
-from pyre.claims.claims import Claims, Claim, ClaimsMetaData, ClaimDevelopmentHistory
-from pyre.exposures.exposures import Exposures, Exposure, ExposureMetaData, ExposureValues
-from datetime import date
-import pandas as pd
 
-# Create sample trend factors
-exposure_trend_factors = {
-    2018: 1.05,
-    2019: 1.04,
-    2020: 1.03,
-    2021: 1.02,
-    2022: 1.01
-}
-
-claim_trend_factors = {
-    2018: 1.06,
-    2019: 1.05,
-    2020: 1.04,
-    2021: 1.03,
-    2022: 1.02
-}
-
-# Create a Trending instance
-base_year = 2023
 trending = Trending(
-    exposure_trend_factors=exposure_trend_factors,
-    claim_trend_factors=claim_trend_factors,
-    base_year=base_year
+    exposure_trend_factors={2021: 1.02, 2022: 1.03},
+    claim_trend_factors={2021: 1.04, 2022: 1.05},
+    base_year=2023,
 )
-
-# Create sample exposures
-exposures_list = [
-    Exposure(
-        ExposureMetaData(
-            exposure_id=f"EXP{year}",
-            exposure_name=f"Exposure {year}",
-            exposure_period_start=date(year, 1, 1),
-            exposure_period_end=date(year, 12, 31),
-            currency="USD"
-        ),
-        ExposureValues(
-            exposure_value=1000 * (1 + 0.1 * (year - 2018)),
-            attachment_point=0,
-            limit=0
-        )
-    )
-    for year in range(2018, 2023)
-]
-
-# Create sample claims
-claims_list = [
-    Claim(
-        ClaimsMetaData(
-            claim_id=f"CL{year}",
-            currency="USD",
-            loss_date=date(year, 6, 15)
-        ),
-        ClaimDevelopmentHistory(
-            development_months=[0, 12],
-            cumulative_dev_paid=[0, 500 * (1 + 0.1 * (year - 2018))],
-            cumulative_dev_incurred=[1000 * (1 + 0.1 * (year - 2018)), 800 * (1 + 0.1 * (year - 2018))]
-        )
-    )
-    for year in range(2018, 2023)
-]
-
-# Create collections
-exposures = Exposures(exposures_list)
-claims = Claims(claims_list)
-
-# Trend the exposures and claims to the base year
 trended_exposures = trending.trend_exposures(exposures)
 trended_claims = trending.trend_claims(claims)
-
-# Print original and trended values
-print("Original vs. Trended Exposures:")
-for i, (orig, trended) in enumerate(zip(exposures, trended_exposures)):
-    year = 2018 + i
-    orig_value = orig.exposure_values.exposure_value
-    trended_value = trended.exposure_values.exposure_value
-    trend_factor = trending.calculate_trend_factor(year, for_claims=False)
-    print(f"  {year}: Original=${orig_value:.2f}, Trended=${trended_value:.2f}, Factor={trend_factor:.4f}")
-
-print("\nOriginal vs. Trended Claims (Latest Incurred):")
-for i, (orig, trended) in enumerate(zip(claims, trended_claims)):
-    year = 2018 + i
-    orig_value = orig.uncapped_claim_development_history.latest_incurred()
-    trended_value = trended.uncapped_claim_development_history.latest_incurred()
-    trend_factor = trending.calculate_trend_factor(year, for_claims=True)
-    print(f"  {year}: Original=${orig_value:.2f}, Trended=${trended_value:.2f}, Factor={trend_factor:.4f}")
-
-# Get the trend factors
-trend_factors = trending.get_trend_factors()
-print("\nTrend Factors:")
-print("  Exposure Trend Factors:", trend_factors['exposure'])
-print("  Claim Trend Factors:", trend_factors['claim'])
-
-# For backward compatibility, you can also use standalone functions
-from pyre.Models.trending import calculate_trend_factor, trend_exposures, trend_claims
-
-# Calculate a trend factor directly
-origin_year = 2020
-direct_trend_factor = calculate_trend_factor(origin_year, base_year, exposure_trend_factors)
-print(f"\nDirect trend factor from {origin_year} to {base_year}: {direct_trend_factor:.4f}")
+factor = trending.calculate_trend_factor(2022, for_claims=False)  # 1.03
 ```
 
+!!! warning "Known limitation — trend direction for `origin_year > base_year`"
+    `calculate_trend_factor` divides by the annual factors when
+    `origin_year > base_year` instead of multiplying (or vice versa,
+    depending on how you read the convention) — the formula is only
+    verified correct for `origin_year <= base_year`. It only matters when
+    trend factors are not all `1.0`; the default trend factors used by
+    `ExperienceModelData` (all `1.0`) never exercise the bug, which is why
+    the pricing workbench is unaffected. Tracked by the 9 failures under
+    `test_trending.py` in the test suite — see the repository's test-state
+    notes. Citation for the underlying method: Deters, I. (2017),
+    *The Mathematics of On-Leveling* —
+    [casact.org](https://www.casact.org/sites/default/files/database/forum_17spforum_03-deters.pdf).
+
+### Burn cost
+
+`BurnCostModel` wraps an `ExperienceModelData` instance and a specific layer
+to produce a burn cost (ceded loss / exposure) per modelling year:
+
+```python
+from pyre.Models.Experience.burn_cost import BurnCostModel
+
+model = BurnCostModel(model_data=data, layer_id=1)
+print(model.calculate_burn_cost())  # {2023: 0.16666...}
+```
+
+Projection method selection (`ProjectionMethods`), year weighting, a priori
+loss ratios, and development patterns are constructor arguments — see the
+API reference below for the full parameter set. The standalone functions
+`chainladder_method`, `bf_method` (Bornhuetter–Ferguson), `cape_cod_method`,
+and `generalised_cape_cod_method` in the same module implement those
+projection methods individually.
+
+### Severity fitting
+
+`SeverityFit` (in `frequency_severity.py`) is **not yet functional** —
+`fit()` computes IBNER-adjusted individual claim amounts internally but
+does not return or store fitted distribution parameters. Treat its
+signature as a placeholder for future work, not a working API.
+
+## Exposure Rating
+
+### Exposure curves
+
+`exposure_curve_functions.py` implements three curve families used to
+distribute loss cost across a layer relative to total sum insured:
+
+```python
+from pyre.Models.Exposure.exposure_curve_functions import (
+    mbbefd_curve, mixed_exponential_curve, riebesell_curve, swissRe_c_values,
+)
+
+# MBBEFD (Bernegger exposure curve), using a published Swiss Re c-value
+g_value = mbbefd_curve(swissRe_c_values.COMMERCIAL_LINES_MEDIUM, curve_position=0.5)
+
+# Riebesell power-curve approximation (z = ILF base for doubling the limit)
+riebesell_value = riebesell_curve(attachment=0, limit=1_000_000, z_value=0.1, base_limit=1_000_000)
+```
+
+Citations (in source): Bernegger, S. (1997), *The Swiss Re Exposure
+Curves and the MBBEFD Distribution Class* —
+[casact.org](https://www.casact.org/sites/default/files/2021-03/8_Bernegger.pdf);
+mixed-exponential fitting — [casact.org](https://www.casact.org/sites/default/files/database/proceed_proceed99_99578.pdf).
+`ExposureCurveFitter` (`exposure_curve_fitting.py`) fits these curves to
+empirical data but requires `scipy`, which is **not** installed by default
+(see `test_exposure_curve_fitting.py`, always skipped/ignored in this repo's
+test runs).
+
+### Increased Limit Factors (ILFs)
+
+```python
+from pyre.Models.Exposure.exposure_ILF_functions import pareto_ilf, power_ilf
+
+# Pareto-distribution ILF moving from a 1M to a 5M limit
+ilf = pareto_ilf(limit_1=1_000_000, limit_2=5_000_000, alpha=2.0, x_m=1.0)
+
+# Simple power-curve ILF
+ilf_power = power_ilf(limit=5_000_000, basic_limit=1_000_000, power_parameter=0.3)
+```
+
+`ILFFitter` (`exposure_ILF_fitting.py`) fits power-curve or Pareto ILF
+parameters to observed `(limit, ILF)` pairs — its Pareto fit also requires
+`scipy`.
+
+### `ExposureModel`
+
+`ExposureModel.calculate_exposure_curve(curve_type, parameters, position)`
+is a thin dispatcher over the three curve functions above, driven by an
+`ExposureCurveType` enum:
+
+```python
+from pyre.Models.Exposure.exposure_rating_cost import ExposureModel
+from pyre.Models.Exposure.exposure_curve_functions import ExposureCurveType, swissRe_c_values
+
+exposure_model = ExposureModel(
+    exposures=exposures, ri_contract=contract,
+    selected_curve=ExposureCurveType.MBBEFD,
+    curve_parameters={"curve": swissRe_c_values.COMMERCIAL_LINES_MEDIUM},
+)
+value = exposure_model.calculate_exposure_curve(
+    ExposureCurveType.MBBEFD, exposure_model._curve_parameters, position=0.5
+)
+```
+
+`ExposureModel._calculate_single_exposure_share` (the per-risk,
+stacking-aware share-of-layer calculation cited from
+[casact.org](https://www.casact.org/sites/default/files/presentation/reinsure_2009_handouts_cs1-rosin.pdf))
+is internal (`_`-prefixed) and still under active development — its control
+flow does not yet handle every attachment/limit combination correctly, so
+it is not documented as a public API here.
+
+## Aggregate Features (early-stage)
+
+`AggregateFeatures`/`Simulation` (`simulation_engine.py`) are scaffolding —
+most `Simulation` methods are unimplemented stubs. `Selections` and its
+`CredibilityWeight` helper (`selections.py`) are more complete and
+implement standard credibility formulas (limited fluctuation, Bühlmann,
+Bühlmann–Straub, greatest-accuracy, and Bayesian credibility) for blending
+experience and exposure rating indications — see the class docstrings and
+API reference below for exact signatures. No end-to-end example is given
+here since `Selections` depends on both `ExperienceModelData` and
+`ExposureModel`, and the aggregate simulation layer they would ultimately
+feed into is not yet implemented.
+
 ## API Reference
+
+::: pyre.Models.Experience.experience_preparer
 
 ::: pyre.Models.Experience.burn_cost
 
@@ -287,6 +255,12 @@ print(f"\nDirect trend factor from {origin_year} to {base_year}: {direct_trend_f
 ::: pyre.Models.Experience.resampling
 
 ::: pyre.Models.Exposure.exposure_curve_functions
+
+::: pyre.Models.Exposure.exposure_curve_fitting
+
+::: pyre.Models.Exposure.exposure_ILF_functions
+
+::: pyre.Models.Exposure.exposure_ILF_fitting
 
 ::: pyre.Models.Exposure.exposure_rating_cost
 
