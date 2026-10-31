@@ -18,6 +18,12 @@ def write_table(
     report overwrites cleanly) while any other existing sheets in the
     workbook are preserved -- this is how write_experience_rating_results
     puts two sheets in one file via two calls to this function.
+
+    Warning: this loads and re-saves the whole workbook at `path` via
+    openpyxl, which does not round-trip every part of an .xlsx file --
+    charts, images, and pivot tables in an existing file at `path` will be
+    lost. Point these functions at dedicated output files, not at a
+    workbook that already has charts/pivots you want to keep.
     """
     path = Path(path)
 

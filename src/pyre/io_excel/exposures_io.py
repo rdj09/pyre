@@ -4,7 +4,7 @@ from pathlib import Path
 
 from ..enums import ExposureBasis
 from ..exposures.exposures import Exposure, ExposureMetaData, Exposures, ExposureValues
-from .claims_io import _parse_bool, _parse_date, _read_sheet
+from .claims_io import _parse_bool, _parse_date, _read_sheet, _require
 
 EXPOSURES_REQUIRED_COLUMNS = [
     "exposure_id",
@@ -38,12 +38,16 @@ def read_exposures(path: str | Path, sheet_name: str = "Exposures") -> Exposures
             else ExposureBasis.EARNED
         )
 
+        exposure_id = str(row[col["exposure_id"]])
+
         meta = ExposureMetaData(
-            exposure_id=str(row[col["exposure_id"]]),
-            exposure_name=str(row[col["exposure_name"]]),
+            exposure_id=exposure_id,
+            exposure_name=str(
+                _require(row[col["exposure_name"]], "exposure_name", f"exposure '{exposure_id}'")
+            ),
             exposure_period_start=_parse_date(row[col["exposure_period_start"]]),
             exposure_period_end=_parse_date(row[col["exposure_period_end"]]),
-            currency=str(row[col["currency"]]),
+            currency=str(_require(row[col["currency"]], "currency", f"exposure '{exposure_id}'")),
             aggregate=(_parse_bool(row[col["aggregate"]]) if "aggregate" in col else False),
             line_of_business=row[col["line_of_business"]] if "line_of_business" in col else None,
             stacking_id=row[col["stacking_id"]] if "stacking_id" in col else None,
@@ -53,7 +57,9 @@ def read_exposures(path: str | Path, sheet_name: str = "Exposures") -> Exposures
             occupancy=row[col["occupancy"]] if "occupancy" in col else None,
         )
 
-        exposure_value = float(row[col["exposure_value"]])
+        exposure_value = float(
+            _require(row[col["exposure_value"]], "exposure_value", f"exposure '{exposure_id}'")
+        )
         values = ExposureValues(
             exposure_value=exposure_value,
             attachment_point=(

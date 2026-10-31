@@ -166,6 +166,22 @@ class TestCalculateAllShares(unittest.TestCase):
 
         self.assertEqual(model.calculate_all_shares(), {"EXP001": {}})
 
+    def test_duplicate_exposure_id_raises_instead_of_silently_dropping(self):
+        duplicate_a = _build_exposure("E1", attachment_point=0.0, limit=500_000.0)
+        duplicate_b = _build_exposure("E1", attachment_point=0.0, limit=500_000.0)
+        contract = _build_contract(
+            [_build_layer(layer_id=1, occurrence_attachment=0.0, occurrence_limit=500_000.0)]
+        )
+        model = ExposureModel(
+            exposures=Exposures([duplicate_a, duplicate_b]),
+            ri_contract=contract,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters={"curve": self.curve_param},
+        )
+
+        with self.assertRaises(ValueError):
+            model.calculate_all_shares()
+
 
 if __name__ == "__main__":
     unittest.main()

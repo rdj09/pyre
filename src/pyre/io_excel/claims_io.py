@@ -25,8 +25,24 @@ def _read_sheet(path: str | Path, sheet_name: str) -> tuple[list[str], list[tupl
         raise ValueError(f"workbook '{path}' has no sheet named '{sheet_name}'")
     worksheet = workbook[sheet_name]
     rows_iter = worksheet.iter_rows(values_only=True)
-    headers = [str(h) for h in next(rows_iter)]
+    header_row = next(rows_iter, None)
+    if header_row is None:
+        raise ValueError(f"sheet '{sheet_name}' in workbook '{path}' is empty (no header row)")
+    headers = [str(h) for h in header_row]
     return headers, list(rows_iter)
+
+
+def _require(value: Any, name: str, context: str) -> Any:
+    """Raise a descriptive ValueError if a required cell is blank.
+
+    Guards against two silent-corruption failure modes in hand-edited
+    Excel files: a blank cell reaching str() and becoming the literal
+    string "None", or reaching int()/float() and raising an opaque
+    TypeError with no row/claim/file context.
+    """
+    if value is None or (isinstance(value, str) and value.strip() == ""):
+        raise ValueError(f"{context}: '{name}' is empty")
+    return value
 
 
 def _parse_date(value: Any) -> date:
@@ -88,7 +104,7 @@ def read_claims(path: str | Path, sheet_name: str = "Claims") -> Claims:
 
         meta = ClaimsMetaData(
             claim_id=claim_id,
-            currency=str(first[col["currency"]]),
+            currency=str(_require(first[col["currency"]], "currency", f"claim '{claim_id}'")),
             contract_limit=float(contract_limit),
             contract_deductible=(
                 float(first[col["contract_deductible"]] or 0.0)
@@ -120,6 +136,13 @@ def read_claims(path: str | Path, sheet_name: str = "Claims") -> Claims:
             line_of_business=first[col["line_of_business"]] if "line_of_business" in col else None,
             status=(first[col["status"]] if "status" in col and first[col["status"]] else "Open"),
         )
+
+        for row in group_rows:
+            _require(row[col["development_month"]], "development_month", f"claim '{claim_id}'")
+            _require(row[col["cumulative_paid"]], "cumulative_paid", f"claim '{claim_id}'")
+            _require(
+                row[col["cumulative_incurred"]], "cumulative_incurred", f"claim '{claim_id}'"
+            )
 
         sorted_rows = sorted(group_rows, key=lambda r: r[col["development_month"]])
         dev_history = ClaimDevelopmentHistory(

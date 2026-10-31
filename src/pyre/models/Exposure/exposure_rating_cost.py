@@ -119,8 +119,16 @@ class ExposureModel:
 
         Returns:
             Dict mapping exposure_id -> {layer_id: share}.
+
+        Raises:
+            ValueError: if two exposures share the same exposure_id -- a
+                dict-comprehension keyed by exposure_id would otherwise let
+                the later one silently overwrite the earlier one's result.
         """
-        return {
-            exposure.exposure_meta.exposure_id: self._calculate_single_exposure_share(exposure)
-            for exposure in self._exposures
-        }
+        shares: Dict[str, Dict[int, float]] = {}
+        for exposure in self._exposures:
+            exposure_id = exposure.exposure_meta.exposure_id
+            if exposure_id in shares:
+                raise ValueError(f"duplicate exposure_id '{exposure_id}' in exposures collection")
+            shares[exposure_id] = self._calculate_single_exposure_share(exposure)
+        return shares

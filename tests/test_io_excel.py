@@ -186,6 +186,38 @@ class TestReadClaims(unittest.TestCase):
         self.assertEqual(claims.claims[0].claims_meta_data.contract_deductible, 0.0)
         self.assertEqual(claims.claims[0].claims_meta_data.status, "Open")
 
+    def test_empty_sheet_raises_value_error_not_stop_iteration(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Claims"
+        wb.save(self.path)
+
+        with self.assertRaises(ValueError):
+            read_claims(self.path)
+
+    def test_blank_development_month_raises_value_error_naming_the_claim(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            [["CLM001", "USD", 2000000, date(2022, 3, 1), None, 50000, 120000]]
+        )
+
+        with self.assertRaises(ValueError) as ctx:
+            read_claims(self.path)
+        self.assertIn("CLM001", str(ctx.exception))
+
+    def test_blank_currency_raises_value_error_instead_of_string_none(self):
+        from pyre.io_excel.claims_io import read_claims
+
+        self._write_claims_sheet(
+            [["CLM001", None, 2000000, date(2022, 3, 1), 12, 50000, 120000]]
+        )
+
+        with self.assertRaises(ValueError):
+            read_claims(self.path)
+
 
 @unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
 class TestReadExposures(unittest.TestCase):
@@ -258,6 +290,26 @@ class TestReadExposures(unittest.TestCase):
 
         exposures = read_exposures(self.path)  # must not raise KeyError
         self.assertEqual(exposures.exposures[0].exposure_values.attachment_point, 0.0)
+
+    def test_blank_exposure_value_raises_value_error(self):
+        from pyre.io_excel.exposures_io import read_exposures
+
+        self._write_exposures_sheet(
+            [["EXP2022", "2022 Premium", date(2022, 1, 1), date(2022, 12, 31), "USD", None]]
+        )
+
+        with self.assertRaises(ValueError):
+            read_exposures(self.path)
+
+    def test_blank_exposure_name_raises_value_error_instead_of_string_none(self):
+        from pyre.io_excel.exposures_io import read_exposures
+
+        self._write_exposures_sheet(
+            [["EXP2022", None, date(2022, 1, 1), date(2022, 12, 31), "USD", 1000000]]
+        )
+
+        with self.assertRaises(ValueError):
+            read_exposures(self.path)
 
 
 @unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")

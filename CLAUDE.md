@@ -112,7 +112,13 @@ pyre/
 
 ## Known Test State (develop, as of the io_excel subpackage addition)
 
-**Expected: 22 failed, 103 passed** (when ignoring `test_exposure_curve_fitting.py`).
+**Expected: 22 failed, 109 passed** (when ignoring `test_exposure_curve_fitting.py`,
+**with the `excel` extra installed** — `pip install -e ".[excel]"`, or via
+`hatch run pytest`, since `openpyxl` is listed in `[tool.hatch.envs.default]`).
+Without `openpyxl` installed, `tests/test_io_excel.py`'s 25 tests skip
+cleanly instead of failing (22 failed, 84 passed, 25 skipped) —
+`tests/test_exposure_rating_cost.py`'s 6 tests always run regardless, since
+that module is pure `pyre` core with no `openpyxl` dependency.
 
 Four pre-existing bugs have been fixed so far, each with its own regression
 test: `RILayer.loss_to_layer_fn` (`tests/test_treaty.py::TestRILayerLossToLayerFn`),

@@ -50,6 +50,7 @@ extra-dependencies = [
 [tool.hatch.envs.default]
 dependencies = [
   "pytest-cov",
+  "openpyxl>=3.1",
 ]
 
 [tool.hatch.envs.types.scripts]
