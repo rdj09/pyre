@@ -21,6 +21,8 @@ hatch run docs:serve            # local docs at localhost:8000
 hatch run docs:deploy           # publish to gh-pages
 
 pip install -e .                # editable install for development
+pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
+hatch run panel:serve           # serve app/main.py at localhost (panel serve, --show --autoreload)
 ```
 
 ## Architecture
@@ -37,6 +39,26 @@ pip install -e .                # editable install for development
 | `Models/` | `Experience/`, `Exposure/`, `AggregateFeatures/` submodules + `trending.py` |
 | `rate_monitoring/` | Rate adequacy and rate change tracking |
 | `exceptions/` | `GeneralException`, `ExposureException`, `ClaimsException`, `ContractException` |
+
+### Panel treaty pricing workbench (`app/`, top-level — not under `src/pyre/`)
+
+A Panel (HoloViz) dashboard, kept **outside** `src/pyre/` so the core package
+stays dependency-free. Install/run via the `panel` optional extra (see
+Commands above). Layout:
+
+| Path | Purpose |
+|------|---------|
+| `app/service.py` | Pure-Python core (no `import panel`) — CSV parsing into `Claims`/`Exposures`, form-dict → `RIContractMetadata`/`RILayer`, `run_pricing()` → `PricingResults` (pandas DataFrames). Unit-tested in `tests/test_app_service.py` without a running server. |
+| `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results. |
+| `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py`. Only these and `app/main.py` import `panel`. |
+| `app/main.py` | Entrypoint (`panel serve app/main.py`). Deliberately **not** named `app.py` — Bokeh's script loader would register the running script as a module named `app`, colliding with and shadowing the `app` package itself. |
+| `run_app.py` | Top-level launcher (`python run_app.py`). |
+| `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
+
+v1 scope is a single-contract pricing workbench (not a general data explorer or
+rate-monitoring dashboard). `SURPLUS_SHARE` layers are intentionally excluded
+from the layer-type selector — `RILayer.loss_to_layer_fn` raises
+`NotImplementedError` for that type (no `sum_insured` concept modelled yet).
 
 ### Key design patterns (post-refactor, develop branch)
 
@@ -85,15 +107,21 @@ pyre/
 └── mkdocs.yml
 ```
 
-## Known Test State (develop, as of Pythonic refactor)
+## Known Test State (develop, as of Panel treaty pricing workbench addition)
 
-**Expected: 22 failed, 62 passed** (when ignoring `test_exposure_curve_fitting.py`).
+**Expected: 22 failed, 75 passed** (when ignoring `test_exposure_curve_fitting.py`).
 
-All 22 failures are **pre-existing** — not caused by the refactor. Do not attempt to fix them without understanding they pre-date the refactor:
+As part of adding the Panel treaty pricing workbench (`app/`), two pre-existing
+bugs in `src/pyre/treaty/contracts.py` (`RILayer.loss_to_layer_fn`) and
+`src/pyre/Models/trending.py` (`Trending.trend_exposures`) were fixed — see
+`tests/test_treaty.py::TestRILayerLossToLayerFn` and
+`tests/test_trending.py::TestTrendExposuresPropertyFix`. The remaining 22
+failures below are still **pre-existing** and out of scope — do not attempt to
+fix them without understanding they pre-date this change:
 
 | Failure group | Count | Root cause |
 |---|---|---|
-| `test_trending.py` | 9 | `trending.py` calls `exposure.modelling_year()` as method but it's a `@property`; also mismatched API expectations |
+| `test_trending.py` | 9 | `trend_exposures`'s `exposure.modelling_year()`/`exposure.exposure_values()` method-vs-property bug is **fixed**; these 9 now fail for a *different*, separate, still-unfixed reason: `calculate_trend_factor`'s directionality is wrong whenever `origin_year != base_year` (e.g. divides instead of multiplies, or vice versa) — only matters for non-default (non-1.0) trend factors |
 | `test_ibner_pattern_extractor.py` | 4 | `IBNERPatternExtractor` internal API diverged from test expectations |
 | `test_claims.py` modelling year | 4 | Test expects years set by a *different* test method (broken test isolation — data in setUp doesn't match expected values) |
 | `test_claims.py` + `test_exposures.py` append/len | 2 | Tests expect `append` not to mutate in place (tests written incorrectly) |

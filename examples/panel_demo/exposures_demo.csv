@@ -1,0 +1,3 @@
+exposure_id,exposure_name,exposure_period_start,exposure_period_end,currency,exposure_value
+EXP2022,2022 Underlying Premium,2022-01-01,2022-12-31,USD,1000000
+EXP2023,2023 Underlying Premium,2023-01-01,2023-12-31,USD,1200000

@@ -24,6 +24,12 @@ classifiers = [
 ]
 dependencies = []
 
+[project.optional-dependencies]
+panel = [
+  "panel>=1.4",
+  "pandas>=2.0",
+]
+
 
 [project.urls]
 Documentation = "https://github.com/rdj09/pyre#readme"
@@ -84,7 +90,15 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "--tb=short"
-pythonpath = ["src"]
+pythonpath = ["src", "."]
+
+[tool.hatch.envs.panel]
+dependencies = [
+  "panel>=1.4",
+  "pandas>=2.0",
+]
+[tool.hatch.envs.panel.scripts]
+serve = "panel serve app/main.py --show --autoreload"
 
 [tool.hatch.envs.docs]
 dependencies = [

@@ -314,5 +314,40 @@ class TestStandaloneFunctions(unittest.TestCase):
         self.assertEqual(factors['claim_trend_factors'], self.trend_factors)
         self.assertEqual(factors['base_year'], self.base_year)
 
+class TestTrendExposuresPropertyFix(unittest.TestCase):
+    """Pins the exposure.modelling_year/exposure_values property-access fix.
+
+    Uses origin_year == base_year so the trend factor is trivially 1.0 on both
+    the fixed and the (separately, out-of-scope) buggy calculate_trend_factor
+    direction logic -- this isolates the property-vs-method fix from that
+    unrelated bug.
+    """
+
+    def setUp(self):
+        self.trending = Trending(
+            exposure_trend_factors={2023: 1.0},
+            claim_trend_factors={2023: 1.0},
+            base_year=2023,
+        )
+        self.exposure_meta = ExposureMetaData(
+            exposure_id="EXP001",
+            exposure_name="Exposure 1",
+            exposure_period_start=date(2023, 1, 1),
+            exposure_period_end=date(2023, 12, 31),
+            currency="USD",
+        )
+        self.exposure_values = ExposureValues(
+            exposure_value=500000,
+            attachment_point=0,
+            limit=500000,
+        )
+        self.exposures = Exposures([Exposure(self.exposure_meta, self.exposure_values)])
+
+    def test_trend_exposures_does_not_raise_and_preserves_value_at_base_year(self):
+        trended = self.trending.trend_exposures(self.exposures)
+        self.assertIsInstance(trended, Exposures)
+        self.assertAlmostEqual(trended[0].exposure_values.exposure_value, 500000)
+
+
 if __name__ == "__main__":
     unittest.main()

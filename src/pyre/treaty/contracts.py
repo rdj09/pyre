@@ -40,16 +40,16 @@ class RILayer:
     def signed_line_premium(self) -> float | Any:
         return self.cession * self.signed_line * self.full_subject_premium
 
-    def loss_to_layer_fn(self, gross_amount: float):
+    def loss_to_layer_fn(self, gross_amount: float) -> float:
         func = layer_loss_calculation[self.layer_type]
         if self.layer_type == ContractType.QUOTA_SHARE:
             return gross_amount  # TODO analysis typically easier to do at 100% - inuring and profitability at share consider elsewhere !!!!!!
         if self.layer_type == ContractType.SURPLUS_SHARE:
-            return NotImplementedError("Yet to be implemented")
-        else:
-            return lambda gross_amount: func(
-                gross_amount, self.occurrence_attachment, self.occurrence_limit
+            raise NotImplementedError(
+                "SURPLUS_SHARE loss-to-layer calculation requires a sum_insured value "
+                "that RILayer does not currently carry; not supported until that is modelled."
             )
+        return func(gross_amount, self.occurrence_attachment, self.occurrence_limit)
 
 
 @dataclass

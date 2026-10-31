@@ -7,6 +7,8 @@ from pyre.treaty import (
     RIContract,
     ClaimTriggerBasis,
     IndexationClauseType,
+    xol_calculation,
+    franchise_calculation,
 )
 from pyre.claims.claims import ClaimYearType  # Ensure this import is correct
 
@@ -99,6 +101,53 @@ class TestRIContract(unittest.TestCase):
         self.assertEqual(len(self.contract._layers), 1)
         self.assertEqual(self.contract._layers[0].layer_id, 1)
         self.assertEqual(self.contract._layers[0].layer_name, "Layer 1")
+
+
+class TestRILayerLossToLayerFn(unittest.TestCase):
+    def _make_layer(self, layer_type):
+        return RILayer(
+            layer_id=1,
+            layer_name="Layer 1",
+            layer_type=layer_type,
+            occurrence_attachment=100000,
+            occurrence_limit=200000,
+            aggregate_attachment=200000,
+            aggregate_limit=1000000,
+            subject_lines_of_business=["LOB1"],
+            subject_lob_exposure_amounts=[1000000],
+            full_subject_premium=50000,
+            written_line=0.8,
+            signed_line=0.7,
+            number_of_reinstatements=2,
+            reinstatement_cost={1: 1.0},
+        )
+
+    def test_xol_loss_to_layer_fn_returns_computed_value(self):
+        layer = self._make_layer(ContractType.EXCESS_OF_LOSS)
+        result = layer.loss_to_layer_fn(250000)
+        self.assertEqual(result, xol_calculation(250000, 100000, 200000))
+        self.assertIsInstance(result, (int, float))
+
+    def test_franchise_loss_to_layer_fn_returns_computed_value(self):
+        layer = self._make_layer(ContractType.FRANCHISE_DEDUCTIBLE)
+        result = layer.loss_to_layer_fn(250000)
+        self.assertEqual(result, franchise_calculation(250000, 100000, 200000))
+        self.assertIsInstance(result, (int, float))
+
+    def test_aggregate_stop_loss_loss_to_layer_fn_returns_computed_value(self):
+        layer = self._make_layer(ContractType.AGGREGATE_STOP_LOSS)
+        result = layer.loss_to_layer_fn(250000)
+        self.assertEqual(result, xol_calculation(250000, 100000, 200000))
+        self.assertIsInstance(result, (int, float))
+
+    def test_quota_share_loss_to_layer_fn_returns_gross_unchanged(self):
+        layer = self._make_layer(ContractType.QUOTA_SHARE)
+        self.assertEqual(layer.loss_to_layer_fn(123456), 123456)
+
+    def test_surplus_share_loss_to_layer_fn_raises_not_implemented(self):
+        layer = self._make_layer(ContractType.SURPLUS_SHARE)
+        with self.assertRaises(NotImplementedError):
+            layer.loss_to_layer_fn(100000)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,129 @@
+"""Contract + layer configuration page for the treaty pricing workbench."""
+
+from __future__ import annotations
+
+from datetime import date
+
+import pandas as pd
+import panel as pn
+
+from app.service import build_contract_metadata, build_layer
+from app.state import WorkbenchState
+from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
+
+# SURPLUS_SHARE is excluded -- pyre's loss_to_layer_fn raises NotImplementedError
+# for it (no sum_insured concept modelled yet). Keeping it out of the selectable
+# options prevents a crash on "Run pricing" rather than catching it after the fact.
+SELECTABLE_LAYER_TYPES = [
+    ContractType.EXCESS_OF_LOSS,
+    ContractType.FRANCHISE_DEDUCTIBLE,
+    ContractType.AGGREGATE_STOP_LOSS,
+    ContractType.QUOTA_SHARE,
+]
+
+LAYER_COLUMNS = [
+    "layer_id",
+    "layer_name",
+    "layer_type",
+    "occurrence_attachment",
+    "occurrence_limit",
+    "full_subject_premium",
+    "written_line",
+    "signed_line",
+]
+
+
+def build_contract_config_page(state: WorkbenchState) -> pn.Column:
+    status = pn.pane.Alert("Contract not yet configured.", alert_type="warning")
+
+    contract_id = pn.widgets.TextInput(name="Contract ID", value="C-0001")
+    contract_description = pn.widgets.TextInput(name="Description", value="")
+    cedent_name = pn.widgets.TextInput(name="Cedent", value="")
+    trigger_basis = pn.widgets.Select(
+        name="Trigger basis",
+        options=[t.name for t in ClaimTriggerBasis],
+        value=ClaimTriggerBasis.LOD.name,
+    )
+    indexation_clause = pn.widgets.Select(
+        name="Indexation clause",
+        options=[t.name for t in IndexationClauseType],
+        value=IndexationClauseType.FULL_INDEXATION.name,
+    )
+    indexation_margin = pn.widgets.FloatInput(name="Indexation margin", value=0.0)
+    inception_date = pn.widgets.DatePicker(name="Inception date", value=date.today())
+    expiration_date = pn.widgets.DatePicker(name="Expiration date", value=date.today())
+
+    layer_rows: list[dict] = []
+    layer_table = pn.widgets.Tabulator(
+        pd.DataFrame(layer_rows, columns=LAYER_COLUMNS),
+        show_index=False,
+        disabled=True,
+        name="Layers",
+    )
+
+    layer_id = pn.widgets.IntInput(name="Layer ID", value=1)
+    layer_name = pn.widgets.TextInput(name="Layer name", value="Layer 1")
+    layer_type = pn.widgets.Select(
+        name="Layer type",
+        options=[t.name for t in SELECTABLE_LAYER_TYPES],
+        value=ContractType.EXCESS_OF_LOSS.name,
+    )
+    occurrence_attachment = pn.widgets.FloatInput(name="Occurrence attachment", value=0.0)
+    occurrence_limit = pn.widgets.FloatInput(name="Occurrence limit", value=0.0)
+    full_subject_premium = pn.widgets.FloatInput(name="Full subject premium", value=0.0)
+    written_line = pn.widgets.FloatInput(name="Written line", value=1.0)
+    signed_line = pn.widgets.FloatInput(name="Signed line", value=1.0)
+
+    add_layer_button = pn.widgets.Button(name="Add layer", button_type="primary")
+    save_contract_button = pn.widgets.Button(name="Save contract metadata", button_type="primary")
+
+    def _on_add_layer(_event):
+        form = {
+            "layer_id": layer_id.value,
+            "layer_name": layer_name.value,
+            "layer_type": layer_type.value,
+            "occurrence_attachment": occurrence_attachment.value,
+            "occurrence_limit": occurrence_limit.value,
+            "full_subject_premium": full_subject_premium.value,
+            "written_line": written_line.value,
+            "signed_line": signed_line.value,
+        }
+        state.layers.append(build_layer(form))
+        layer_rows.append({col: form.get(col) for col in LAYER_COLUMNS})
+        layer_table.value = pd.DataFrame(layer_rows, columns=LAYER_COLUMNS)
+        layer_id.value = layer_id.value + 1
+        layer_name.value = f"Layer {layer_id.value}"
+
+    def _on_save_contract(_event):
+        form = {
+            "contract_id": contract_id.value,
+            "contract_description": contract_description.value,
+            "cedent_name": cedent_name.value,
+            "trigger_basis": trigger_basis.value,
+            "indexation_clause": indexation_clause.value,
+            "indexation_margin": indexation_margin.value,
+            "inception_date": inception_date.value,
+            "expiration_date": expiration_date.value,
+        }
+        state.contract_metadata = build_contract_metadata(form)
+        status.object = (
+            f"Contract '{contract_id.value}' configured with {len(state.layers)} layer(s)."
+        )
+        status.alert_type = "success"
+
+    add_layer_button.on_click(_on_add_layer)
+    save_contract_button.on_click(_on_save_contract)
+
+    return pn.Column(
+        "## Contract metadata",
+        pn.Row(contract_id, contract_description, cedent_name),
+        pn.Row(trigger_basis, indexation_clause, indexation_margin),
+        pn.Row(inception_date, expiration_date),
+        "## Layers (SURPLUS_SHARE not yet supported by pyre -- omitted)",
+        pn.Row(layer_id, layer_name, layer_type),
+        pn.Row(occurrence_attachment, occurrence_limit, full_subject_premium),
+        pn.Row(written_line, signed_line, add_layer_button),
+        layer_table,
+        save_contract_button,
+        status,
+    )
