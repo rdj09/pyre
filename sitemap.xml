@@ -2,30 +2,50 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://rdj09.github.io/pyre/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
     </url>
     <url>
          <loc>https://rdj09.github.io/pyre/about/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
     </url>
     <url>
          <loc>https://rdj09.github.io/pyre/claims/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
     </url>
     <url>
          <loc>https://rdj09.github.io/pyre/exposures/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
     </url>
     <url>
          <loc>https://rdj09.github.io/pyre/models/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
     </url>
     <url>
          <loc>https://rdj09.github.io/pyre/rate_monitoring/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
     </url>
     <url>
          <loc>https://rdj09.github.io/pyre/treaty/</loc>
-         <lastmod>2025-06-04</lastmod>
+         <lastmod>2026-10-31</lastmod>
+    </url>
+    <url>
+         <loc>https://rdj09.github.io/pyre/workbench/</loc>
+         <lastmod>2026-10-31</lastmod>
+    </url>
+    <url>
+         <loc>https://rdj09.github.io/pyre/superpowers/plans/2026-04-16-refactor-phase1-4/</loc>
+         <lastmod>2026-10-31</lastmod>
+    </url>
+    <url>
+         <loc>https://rdj09.github.io/pyre/superpowers/plans/2026-04-16-refactor-phase5/</loc>
+         <lastmod>2026-10-31</lastmod>
+    </url>
+    <url>
+         <loc>https://rdj09.github.io/pyre/superpowers/plans/2026-04-16-refactor-phase6/</loc>
+         <lastmod>2026-10-31</lastmod>
+    </url>
+    <url>
+         <loc>https://rdj09.github.io/pyre/superpowers/specs/2026-04-16-refactor-design/</loc>
+         <lastmod>2026-10-31</lastmod>
     </url>
 </urlset>

@@ -1,0 +1,1622 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://rdj09.github.io/pyre/superpowers/specs/2026-04-16-refactor-design/">
+      
+      
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.25">
+    
+    
+      
+        <title>pyRE Refactoring & Completion Design - pyRE - python package for non-life reinsurance pricing</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+      
+        <meta  property="og:type"  content="website" >
+      
+        <meta  property="og:title"  content="pyRE Refactoring & Completion Design - pyRE - python package for non-life reinsurance pricing" >
+      
+        <meta  property="og:description"  content="None" >
+      
+        <meta  property="og:image"  content="https://rdj09.github.io/pyre/assets/images/social/superpowers/specs/2026-04-16-refactor-design.png" >
+      
+        <meta  property="og:image:type"  content="image/png" >
+      
+        <meta  property="og:image:width"  content="1200" >
+      
+        <meta  property="og:image:height"  content="630" >
+      
+        <meta  property="og:url"  content="https://rdj09.github.io/pyre/superpowers/specs/2026-04-16-refactor-design/" >
+      
+        <meta  name="twitter:card"  content="summary_large_image" >
+      
+        <meta  name="twitter:title"  content="pyRE Refactoring & Completion Design - pyRE - python package for non-life reinsurance pricing" >
+      
+        <meta  name="twitter:description"  content="None" >
+      
+        <meta  name="twitter:image"  content="https://rdj09.github.io/pyre/assets/images/social/superpowers/specs/2026-04-16-refactor-design.png" >
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#pyre-refactoring-completion-design" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="pyRE - python package for non-life reinsurance pricing" class="md-header__button md-logo" aria-label="pyRE - python package for non-life reinsurance pricing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            pyRE - python package for non-life reinsurance pricing
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              pyRE Refactoring &amp; Completion Design
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="pyRE - python package for non-life reinsurance pricing" class="md-nav__button md-logo" aria-label="pyRE - python package for non-life reinsurance pricing" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    pyRE - python package for non-life reinsurance pricing
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../claims/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Claims
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../exposures/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Exposures
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../treaty/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Treaty
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../rate_monitoring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rate Monitoring
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../workbench/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Treaty Pricing Workbench
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../about/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#target-module-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Target Module Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-1-bug-fixes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 1 — Bug Fixes
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 1 — Bug Fixes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fix-1-trendingtrend_exposures-modelstrendingpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fix 1 — Trending.trend_exposures() (models/trending.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-2-trianglefrom_claims-claimstrianglespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fix 2 — Triangle.from_claims() (claims/triangles.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-3-rilayerloss_to_layer_fn-treatycontractspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fix 3 — RILayer.loss_to_layer_fn() (treaty/contracts.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-4-exposuremodel_calculate_single_exposure_share-modelsexposureexposure_rating_costpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fix 4 — ExposureModel._calculate_single_exposure_share() (models/exposure/exposure_rating_cost.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-5-burncostmodelcalculate_burn_cost-modelsexperienceburn_costpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fix 5 — BurnCostModel.calculate_burn_cost() (models/experience/burn_cost.py)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fix-6-ibnerpatternextractor_compute_n_and_d-claimstrianglespy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fix 6 — IBNERPatternExtractor._compute_N_and_D() (claims/triangles.py)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-2-dataclasses-conversion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 2 — Dataclasses Conversion
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 2 — Dataclasses Conversion">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#classes-converted" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes converted
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#classes-not-converted" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes not converted
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-3-module-restructure-enums-public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 3 — Module Restructure, Enums, Public API
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 3 — Module Restructure, Enums, Public API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3a-package-rename" class="md-nav__link">
+    <span class="md-ellipsis">
+      3a — Package rename
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3b-pyreenumspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      3b — pyre/enums.py
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3c-pyre__init__py-public-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      3c — pyre/__init__.py public API
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3d-pytyped-marker" class="md-nav__link">
+    <span class="md-ellipsis">
+      3d — py.typed marker
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-4-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 4 — Caching
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-5-todo-completions-functional-gaps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 5 — TODO Completions &amp; Functional Gaps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 5 — TODO Completions & Functional Gaps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5a-miscellaneous-bugs-and-typos" class="md-nav__link">
+    <span class="md-ellipsis">
+      5a — Miscellaneous bugs and typos
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5b-parallelogram-method-for-aggregate-exposures" class="md-nav__link">
+    <span class="md-ellipsis">
+      5b — Parallelogram method for aggregate exposures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5c-triangleget_selected_development_pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      5c — Triangle.get_selected_development_pattern()
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5d-severityfitfit-and-frequencyfit" class="md-nav__link">
+    <span class="md-ellipsis">
+      5d — SeverityFit.fit() and FrequencyFit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5e-exposuremodel-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      5e — ExposureModel completion
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5f-simulation-and-aggregatefeatures-full-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      5f — Simulation and AggregateFeatures — full implementation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#phase-6-professional-development-workstreams" class="md-nav__link">
+    <span class="md-ellipsis">
+      Phase 6 — Professional Development Workstreams
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Phase 6 — Professional Development Workstreams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6a-linting-formatting" class="md-nav__link">
+    <span class="md-ellipsis">
+      6a — Linting &amp; Formatting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6b-type-checking-strict" class="md-nav__link">
+    <span class="md-ellipsis">
+      6b — Type checking (strict)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6c-test-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      6c — Test coverage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6d-cicd-github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      6d — CI/CD (GitHub Actions)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6e-pre-commit-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      6e — Pre-commit hooks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6f-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      6f — Documentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6g-versioning-changelog" class="md-nav__link">
+    <span class="md-ellipsis">
+      6g — Versioning &amp; Changelog
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-of-all-changes-by-file" class="md-nav__link">
+    <span class="md-ellipsis">
+      Summary of All Changes by File
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+<h1 id="pyre-refactoring-completion-design">pyRE Refactoring &amp; Completion Design</h1>
+<p><strong>Date:</strong> 2026-04-16<br />
+<strong>Status:</strong> Approved<br />
+<strong>Scope:</strong> Fix-and-restructure — bugs, structure, TODO completions, production readiness<br />
+<strong>Backward compatibility:</strong> None required — clean breaks throughout</p>
+<hr />
+<h2 id="overview">Overview</h2>
+<p>pyRE is a Python reinsurance pricing library (v0.0.1). This design covers a full refactor across six sequential phases:</p>
+<ol>
+<li><strong>Phase 1</strong> — Bug fixes (ship immediately, no API changes)</li>
+<li><strong>Phase 2</strong> — Dataclasses conversion (eliminate boilerplate)</li>
+<li><strong>Phase 3</strong> — Module restructure, enums, public API</li>
+<li><strong>Phase 4</strong> — Caching (performance)</li>
+<li><strong>Phase 5</strong> — TODO completions and functional gaps</li>
+<li><strong>Phase 6</strong> — Professional workstreams (CI/CD, testing, docs, packaging)</li>
+</ol>
+<hr />
+<h2 id="target-module-structure">Target Module Structure</h2>
+<p>End-state after all phases:</p>
+<div class="highlight"><pre><span></span><code>src/pyre/
+├── __init__.py                    # public API surface
+├── __about__.py                   # version
+├── py.typed                       # PEP 561 marker
+├── enums.py                       # all cross-cutting enumerations
+├── exceptions/
+│   └── exceptions.py
+├── claims/
+│   ├── __init__.py
+│   ├── claims.py                  # ClaimDevelopmentHistory, ClaimsMetaData, Claim, Claims
+│   └── triangles.py               # Triangle, IBNERPatternExtractor, CurveType
+├── exposures/
+│   ├── __init__.py
+│   └── exposures.py               # ExposureMetaData, ExposureValues, Exposure, Exposures
+├── treaty/
+│   ├── __init__.py
+│   ├── contracts.py               # RILayer, RIContractMetadata, RIContract
+│   ├── contract_types.py
+│   └── layer_loss_functions.py
+├── models/                        # renamed from Models/
+│   ├── __init__.py
+│   ├── trending.py                # Trending (stays in models/)
+│   ├── experience/                # renamed from Experience/
+│   │   ├── __init__.py
+│   │   ├── experience_preparer.py
+│   │   ├── burn_cost.py
+│   │   ├── frequency_severity.py
+│   │   ├── pareto_rating.py
+│   │   ├── resampling.py
+│   │   └── curve_fitting.py
+│   ├── exposure/                  # renamed from Exposure/
+│   │   ├── __init__.py
+│   │   ├── exposure_rating_cost.py
+│   │   ├── exposure_curve_fitting.py
+│   │   ├── exposure_curve_functions.py
+│   │   ├── exposure_ILF_fitting.py
+│   │   └── exposure_ILF_functions.py
+│   └── aggregate/                 # renamed from AggregateFeatures/
+│       ├── __init__.py
+│       ├── aggregate_features.py
+│       ├── selections.py
+│       └── simulation_engine.py
+└── rate_monitoring/
+    ├── __init__.py
+    ├── rate_adequacy.py
+    └── rate_change.py
+</code></pre></div>
+<hr />
+<h2 id="phase-1-bug-fixes">Phase 1 — Bug Fixes</h2>
+<p>No structural changes. Six targeted fixes. Fix 3 changes the observable behaviour of <code>loss_to_layer_fn</code> (from returning a broken lambda to returning a correct float) — this is intentional; the previous return value was never usable.</p>
+<h3 id="fix-1-trendingtrend_exposures-modelstrendingpy">Fix 1 — <code>Trending.trend_exposures()</code> (<code>models/trending.py</code>)</h3>
+<p><code>exposure.modelling_year()</code> and <code>exposure.exposure_values()</code> called as functions but are properties. Raises <code>TypeError</code> at runtime.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># broken</span>
+<span class="n">origin_year</span> <span class="o">=</span> <span class="n">exposure</span><span class="o">.</span><span class="n">modelling_year</span><span class="p">()</span>
+<span class="n">original_values</span> <span class="o">=</span> <span class="n">exposure</span><span class="o">.</span><span class="n">exposure_values</span><span class="p">()</span>
+
+<span class="c1"># fixed</span>
+<span class="n">origin_year</span> <span class="o">=</span> <span class="n">exposure</span><span class="o">.</span><span class="n">modelling_year</span>
+<span class="n">original_values</span> <span class="o">=</span> <span class="n">exposure</span><span class="o">.</span><span class="n">exposure_values</span>
+</code></pre></div>
+<h3 id="fix-2-trianglefrom_claims-claimstrianglespy">Fix 2 — <code>Triangle.from_claims()</code> (<code>claims/triangles.py</code>)</h3>
+<p>(a) <code>claim.modelling_year</code> does not exist — path is <code>claim.claims_meta_data.modelling_year</code>.<br />
+(b) <code>for dev_period, value in dev_history.items()</code> — <code>dev_history</code> is <code>List[float]</code>, not a dict. Must zip development months with values.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># broken</span>
+<span class="n">origin_year</span> <span class="o">=</span> <span class="n">claim</span><span class="o">.</span><span class="n">modelling_year</span>
+<span class="k">for</span> <span class="n">dev_period</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dev_history</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+<span class="c1"># fixed</span>
+<span class="n">origin_year</span> <span class="o">=</span> <span class="n">claim</span><span class="o">.</span><span class="n">claims_meta_data</span><span class="o">.</span><span class="n">modelling_year</span>
+<span class="n">dev_months</span> <span class="o">=</span> <span class="n">claim</span><span class="o">.</span><span class="n">capped_claim_development_history</span><span class="o">.</span><span class="n">development_months</span>
+<span class="k">for</span> <span class="n">dev_period</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dev_months</span><span class="p">,</span> <span class="n">dev_history</span><span class="p">):</span>
+</code></pre></div>
+<h3 id="fix-3-rilayerloss_to_layer_fn-treatycontractspy">Fix 3 — <code>RILayer.loss_to_layer_fn()</code> (<code>treaty/contracts.py</code>)</h3>
+<p>(a) Surplus share returns the exception object instead of raising it.<br />
+(b) Quota share returns a raw float instead of a float result.<br />
+(c) Final <code>lambda</code> shadows its outer <code>gross_amount</code> parameter.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># fixed</span>
+<span class="k">def</span> <span class="nf">loss_to_layer_fn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gross_amount</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_type</span> <span class="o">==</span> <span class="n">ContractType</span><span class="o">.</span><span class="n">SURPLUS_SHARE</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Surplus share not yet implemented&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_type</span> <span class="o">==</span> <span class="n">ContractType</span><span class="o">.</span><span class="n">QUOTA_SHARE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">gross_amount</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="n">layer_loss_calculation</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_type</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">gross_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occurrence_attachment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">occurrence_limit</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="fix-4-exposuremodel_calculate_single_exposure_share-modelsexposureexposure_rating_costpy">Fix 4 — <code>ExposureModel._calculate_single_exposure_share()</code> (<code>models/exposure/exposure_rating_cost.py</code>)</h3>
+<p>Curve calculation block and <code>shares_by_layer</code> assignment are inside a misplaced <code>else</code> branch — shares are silently never populated for most layers. Restructure so both branches of the <code>if/else</code> compute and store a share. Add missing <code>Any</code> import.</p>
+<h3 id="fix-5-burncostmodelcalculate_burn_cost-modelsexperienceburn_costpy">Fix 5 — <code>BurnCostModel.calculate_burn_cost()</code> (<code>models/experience/burn_cost.py</code>)</h3>
+<p>Bare <code>except Exception</code> swallows all errors and silently substitutes chain-ladder results. Replace with explicit re-raise:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># fixed</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Projection failed for year </span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">, layer </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_layer_id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+</code></pre></div>
+<h3 id="fix-6-ibnerpatternextractor_compute_n_and_d-claimstrianglespy">Fix 6 — <code>IBNERPatternExtractor._compute_N_and_D()</code> (<code>claims/triangles.py</code>)</h3>
+<p><code>N[oy][d] = current - prev + D[oy][d]</code> where <code>D[oy][d] = prev - current</code> evaluates to zero for every cell. Fix formula to match Schnieper (1991) IBNER methodology as cited in the source comment.</p>
+<hr />
+<h2 id="phase-2-dataclasses-conversion">Phase 2 — Dataclasses Conversion</h2>
+<p>Replace Java-style <code>_foo</code> + <code>@property</code> + no-op setter pattern with <code>@dataclass</code>. Validation moves to <code>__post_init__</code>. Computed properties and properties with real logic stay as <code>@property</code>.</p>
+<h3 id="classes-converted">Classes converted</h3>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>File</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ClaimsMetaData</code></td>
+<td><code>claims/claims.py</code></td>
+<td><code>modelling_year</code> stays as <code>@property</code></td>
+</tr>
+<tr>
+<td><code>ClaimDevelopmentHistory</code></td>
+<td><code>claims/claims.py</code></td>
+<td><code>__post_init__</code> runs <code>_validate_list_lengths</code>; all computed properties stay</td>
+</tr>
+<tr>
+<td><code>ExposureMetaData</code></td>
+<td><code>exposures/exposures.py</code></td>
+<td>Period validation in <code>__post_init__</code></td>
+</tr>
+<tr>
+<td><code>ExposureValues</code></td>
+<td><code>exposures/exposures.py</code></td>
+<td>Non-negative validation in <code>__post_init__</code></td>
+</tr>
+<tr>
+<td><code>RILayer</code></td>
+<td><code>treaty/contracts.py</code></td>
+<td><code>written_line_premium</code>, <code>signed_line_premium</code>, <code>loss_to_layer_fn</code> stay</td>
+</tr>
+<tr>
+<td><code>RIContractMetadata</code></td>
+<td><code>treaty/contracts.py</code></td>
+<td><code>claim_year_basis</code> stays as <code>@property</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="classes-not-converted">Classes not converted</h3>
+<p><code>Claim</code>, <code>Claims</code>, <code>Exposure</code>, <code>Exposures</code>, <code>RIContract</code>, <code>BurnCostModel</code>, <code>ExperienceModelData</code>, <code>Trending</code> — collection/composite/stateful classes where <code>@dataclass</code> adds no value.</p>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># BEFORE: 60 lines</span>
+<span class="k">class</span> <span class="nc">ClaimsMetaData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">claim_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_claim_id</span> <span class="o">=</span> <span class="n">claim_id</span>
+        <span class="o">...</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">claim_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_claim_id</span>
+    <span class="nd">@claim_id</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">claim_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">_claim_id</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="c1"># ... x 10 more</span>
+
+<span class="c1"># AFTER: 20 lines</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ClaimsMetaData</span><span class="p">:</span>
+    <span class="n">claim_id</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">currency</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">contract_limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">contract_deductible</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">claim_in_xs_of_deductible</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">claim_year_basis</span><span class="p">:</span> <span class="n">ClaimYearType</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">ClaimYearType</span><span class="o">.</span><span class="n">ACCIDENT_YEAR</span><span class="p">)</span>
+    <span class="n">loss_date</span><span class="p">:</span> <span class="n">date</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">date</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">policy_inception_date</span><span class="p">:</span> <span class="n">date</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">date</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">report_date</span><span class="p">:</span> <span class="n">date</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">date</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">line_of_business</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">status</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Open&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">modelling_year</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<hr />
+<h2 id="phase-3-module-restructure-enums-public-api">Phase 3 — Module Restructure, Enums, Public API</h2>
+<h3 id="3a-package-rename">3a — Package rename</h3>
+<p><code>Models/</code> → <code>models/</code>, <code>Experience/</code> → <code>experience/</code>, <code>Exposure/</code> → <code>exposure/</code>, <code>AggregateFeatures/</code> → <code>aggregate/</code>. All internal imports updated in-place. No re-exports.</p>
+<h3 id="3b-pyreenumspy">3b — <code>pyre/enums.py</code></h3>
+<p>Single source of truth for all cross-cutting enumerations. All enum definitions move here; original locations are deleted.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># src/pyre/enums.py</span>
+<span class="k">class</span> <span class="nc">ClaimYearType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>           <span class="c1"># was claims/claims.py</span>
+<span class="k">class</span> <span class="nc">ClaimTriggerBasis</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>       <span class="c1"># was treaty/contracts.py</span>
+<span class="k">class</span> <span class="nc">ExposureBasis</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>           <span class="c1"># was exposures/exposures.py</span>
+<span class="k">class</span> <span class="nc">ContractType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>            <span class="c1"># was treaty/contract_types.py</span>
+<span class="k">class</span> <span class="nc">IndexationClauseType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>    <span class="c1"># was treaty/contracts.py</span>
+<span class="k">class</span> <span class="nc">ProjectionMethods</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>       <span class="c1"># was models/experience/burn_cost.py</span>
+<span class="k">class</span> <span class="nc">SeverityDistribution</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>    <span class="c1"># was models/experience/frequency_severity.py</span>
+<span class="k">class</span> <span class="nc">FrequencyDistribution</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>   <span class="c1"># was models/experience/frequency_severity.py</span>
+<span class="k">class</span> <span class="nc">ExposureCurveType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>       <span class="c1"># was models/exposure/exposure_curve_functions.py</span>
+<span class="k">class</span> <span class="nc">CurveType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span> <span class="o">...</span>               <span class="c1"># was claims/triangles.py</span>
+</code></pre></div>
+<p>The <code>claim_year_basis</code> module-level mapping dict in <code>contracts.py</code> is removed. Replaced with a method on <code>ClaimTriggerBasis</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">ClaimTriggerBasis</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">LOD</span> <span class="o">=</span> <span class="s2">&quot;Losses Occurrence&quot;</span>
+    <span class="n">RAD</span> <span class="o">=</span> <span class="s2">&quot;Risk Attaching&quot;</span>
+    <span class="n">CMB</span> <span class="o">=</span> <span class="s2">&quot;Claims Made Basis&quot;</span>
+
+    <span class="k">def</span> <span class="nf">to_claim_year_type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ClaimYearType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">LOD</span><span class="p">:</span> <span class="n">ClaimYearType</span><span class="o">.</span><span class="n">ACCIDENT_YEAR</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">RAD</span><span class="p">:</span> <span class="n">ClaimYearType</span><span class="o">.</span><span class="n">UNDERWRITING_YEAR</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">CMB</span><span class="p">:</span> <span class="n">ClaimYearType</span><span class="o">.</span><span class="n">REPORTED_YEAR</span><span class="p">,</span>
+        <span class="p">}[</span><span class="bp">self</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="3c-pyre__init__py-public-api">3c — <code>pyre/__init__.py</code> public API</h3>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pyre.claims.claims</span> <span class="kn">import</span> <span class="n">Claim</span><span class="p">,</span> <span class="n">Claims</span><span class="p">,</span> <span class="n">ClaimDevelopmentHistory</span><span class="p">,</span> <span class="n">ClaimsMetaData</span>
+<span class="kn">from</span> <span class="nn">pyre.exposures.exposures</span> <span class="kn">import</span> <span class="n">Exposure</span><span class="p">,</span> <span class="n">Exposures</span><span class="p">,</span> <span class="n">ExposureMetaData</span><span class="p">,</span> <span class="n">ExposureValues</span>
+<span class="kn">from</span> <span class="nn">pyre.treaty.contracts</span> <span class="kn">import</span> <span class="n">RILayer</span><span class="p">,</span> <span class="n">RIContractMetadata</span><span class="p">,</span> <span class="n">RIContract</span>
+<span class="kn">from</span> <span class="nn">pyre.models.trending</span> <span class="kn">import</span> <span class="n">Trending</span>
+<span class="kn">from</span> <span class="nn">pyre.models.experience.burn_cost</span> <span class="kn">import</span> <span class="n">BurnCostModel</span>
+<span class="kn">from</span> <span class="nn">pyre.models.experience.experience_preparer</span> <span class="kn">import</span> <span class="n">ExperienceModelData</span>
+<span class="kn">from</span> <span class="nn">pyre.models.exposure.exposure_rating_cost</span> <span class="kn">import</span> <span class="n">ExposureModel</span>
+<span class="kn">from</span> <span class="nn">pyre.models.aggregate.selections</span> <span class="kn">import</span> <span class="n">Selections</span><span class="p">,</span> <span class="n">CredibilityWeight</span>
+<span class="kn">from</span> <span class="nn">pyre.models.aggregate.aggregate_features</span> <span class="kn">import</span> <span class="n">AggregateFeatures</span>
+<span class="kn">from</span> <span class="nn">pyre.models.aggregate.simulation_engine</span> <span class="kn">import</span> <span class="n">Simulation</span><span class="p">,</span> <span class="n">SimulationResults</span>
+<span class="kn">from</span> <span class="nn">pyre.enums</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ClaimYearType</span><span class="p">,</span> <span class="n">ClaimTriggerBasis</span><span class="p">,</span> <span class="n">ExposureBasis</span><span class="p">,</span>
+    <span class="n">ContractType</span><span class="p">,</span> <span class="n">ProjectionMethods</span><span class="p">,</span> <span class="n">ExposureCurveType</span><span class="p">,</span>
+    <span class="n">SeverityDistribution</span><span class="p">,</span> <span class="n">FrequencyDistribution</span><span class="p">,</span> <span class="n">CurveType</span><span class="p">,</span>
+    <span class="n">IndexationClauseType</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pyre.__about__</span> <span class="kn">import</span> <span class="n">__version__</span>
+</code></pre></div>
+<h3 id="3d-pytyped-marker">3d — <code>py.typed</code> marker</h3>
+<p>Add empty <code>src/pyre/py.typed</code> (PEP 561) so downstream type checkers recognise pyre as fully typed.</p>
+<hr />
+<h2 id="phase-4-caching">Phase 4 — Caching</h2>
+<p><code>ExperienceModelData</code> computed properties recompute expensive O(n × layers) loops on every access. Convert to <code>functools.cached_property</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
+
+<span class="k">class</span> <span class="nc">ExperienceModelData</span><span class="p">:</span>
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">trended_claims</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Claims</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">trended_exposures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Exposures</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">subject_contract_claims</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Claims</span><span class="p">]:</span> <span class="o">...</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">aggregate_subject_contract_claims</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]]:</span> <span class="o">...</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">aggregate_exposures</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span> <span class="o">...</span>
+</code></pre></div>
+<p><code>update_trend_factors()</code> clears the cache explicitly:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">update_trend_factors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="c1"># update self._trending ...</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;trended_claims&quot;</span><span class="p">,</span> <span class="s2">&quot;trended_exposures&quot;</span><span class="p">,</span> <span class="s2">&quot;subject_contract_claims&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;aggregate_subject_contract_claims&quot;</span><span class="p">,</span> <span class="s2">&quot;aggregate_exposures&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
+<hr />
+<h2 id="phase-5-todo-completions-functional-gaps">Phase 5 — TODO Completions &amp; Functional Gaps</h2>
+<h3 id="5a-miscellaneous-bugs-and-typos">5a — Miscellaneous bugs and typos</h3>
+<table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Issue</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>rate_change.py</code></td>
+<td>Missing <code>Optional</code> import</td>
+<td>Add <code>from typing import Optional</code></td>
+</tr>
+<tr>
+<td><code>frequency_severity.py</code></td>
+<td><code>_inidividual_projected_claims</code> missing <code>return</code> on ground-up branch</td>
+<td>Add <code>return</code></td>
+</tr>
+<tr>
+<td><code>frequency_severity.py</code></td>
+<td>Returns <code>NotImplementedError(...)</code> instead of raising</td>
+<td><code>raise NotImplementedError(...)</code></td>
+</tr>
+<tr>
+<td><code>frequency_severity.py</code></td>
+<td><code>class severity_fit</code> snake_case name</td>
+<td>Rename to <code>SeverityFit</code></td>
+</tr>
+<tr>
+<td><code>frequency_severity.py</code></td>
+<td><code>fit()</code> is empty stub</td>
+<td>Implement (see 5d)</td>
+</tr>
+<tr>
+<td><code>selections.py</code></td>
+<td><code>from ...exposure_rating_cost import *</code> wildcard</td>
+<td>Replace with explicit names</td>
+</tr>
+<tr>
+<td><code>selections.py</code></td>
+<td><code>subject_contract_claims()</code> called as function</td>
+<td>Remove <code>()</code> — it's a property</td>
+</tr>
+<tr>
+<td><code>exposure_curve_functions.py</code></td>
+<td><code>paramaters_mus</code> typo</td>
+<td>Rename to <code>parameters_mus</code> throughout</td>
+</tr>
+<tr>
+<td><code>exposure_curve_functions.py</code></td>
+<td>Commented-out <code>calculate_curve</code> function</td>
+<td>Uncomment and wire into <code>ExposureModel</code></td>
+</tr>
+<tr>
+<td><code>exposure_curve_functions.py</code></td>
+<td><code>mixed_expo_curves</code> Enum uses dicts as values — unused</td>
+<td>Replace with module-level preset dicts</td>
+</tr>
+<tr>
+<td><code>simulation_engine.py</code></td>
+<td><code>profit_commsission</code> typo</td>
+<td>Rename to <code>profit_commission</code></td>
+</tr>
+<tr>
+<td><code>simulation_engine.py</code></td>
+<td><code>retrocession_beneits</code> typo</td>
+<td>Rename to <code>retrocession_benefits</code></td>
+</tr>
+<tr>
+<td><code>simulation_engine.py</code></td>
+<td>All methods missing <code>self</code> parameter</td>
+<td>Add <code>self</code> to all instance methods</td>
+</tr>
+</tbody>
+</table>
+<h3 id="5b-parallelogram-method-for-aggregate-exposures">5b — Parallelogram method for aggregate exposures</h3>
+<p><code>Exposure._earned_pct()</code> returns <code>0.0</code> for aggregate exposures. Implement the parallelogram method:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">_parallelogram_earned_pct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parallelogram method: assumes policies written uniformly over the</span>
+<span class="sd">    exposure period, each with term length equal to exposure_term_length_days.</span>
+<span class="sd">    Returns the proportion of the aggregate exposure earned by analysis_date.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_period_start</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_period_end</span>
+    <span class="n">term</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exposure_meta</span><span class="o">.</span><span class="n">exposure_term_length_days</span>
+    <span class="k">if</span> <span class="n">term</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">analysis_date</span> <span class="o">&lt;=</span> <span class="n">start</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">0.0</span>
+    <span class="k">if</span> <span class="n">analysis_date</span> <span class="o">&gt;=</span> <span class="n">end</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">term</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mf">1.0</span>
+    <span class="n">days_into_earning</span> <span class="o">=</span> <span class="p">(</span><span class="n">analysis_date</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+    <span class="n">total_earning_days</span> <span class="o">=</span> <span class="n">term</span> <span class="o">+</span> <span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span><span class="o">.</span><span class="n">days</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">days_into_earning</span> <span class="o">/</span> <span class="n">total_earning_days</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="5c-triangleget_selected_development_pattern">5c — <code>Triangle.get_selected_development_pattern()</code></h3>
+<p>Closes the loop between <code>Triangle.fit_curve()</code> and <code>BurnCostModel.development_pattern</code>. Add:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_selected_development_pattern</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">curve_type</span><span class="p">:</span> <span class="n">CurveType</span><span class="p">,</span>
+    <span class="n">tail_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">c_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fits a curve to age-to-age factors and returns cumulative-to-ultimate</span>
+<span class="sd">    development factors for each development period.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict mapping development period to cumulative-to-ultimate factor.</span>
+<span class="sd">        Suitable for direct use as BurnCostModel.development_pattern.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
+<h3 id="5d-severityfitfit-and-frequencyfit">5d — <code>SeverityFit.fit()</code> and <code>FrequencyFit</code></h3>
+<p>Implement <code>SeverityFit.fit()</code> for <code>LOGNORMAL</code> and <code>PARETO</code> using method of moments (stdlib <code>math</code> only, no external dependencies):</p>
+<ul>
+<li><strong>Lognormal</strong>: <code>mu = log(mean² / sqrt(variance + mean²))</code>, <code>sigma = sqrt(log(variance/mean² + 1))</code></li>
+<li><strong>Pareto</strong>: MLE estimator <code>alpha = n / sum(log(xi / x_m))</code> where <code>x_m</code> is the minimum observed loss. Cite: Klugman, Panjer &amp; Willmot, <em>Loss Models</em> (4th ed.), Chapter 4.</li>
+</ul>
+<p>Add new <code>FrequencyFit</code> class (parallel structure to <code>SeverityFit</code>) fitting claim counts per year to:
+- <strong>Poisson</strong>: <code>lambda = mean(counts)</code>
+- <strong>Negative Binomial</strong>: method of moments using mean and variance of counts</p>
+<p>Both classes return a <code>FitResult</code> dataclass:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">FitResult</span><span class="p">:</span>
+    <span class="n">distribution</span><span class="p">:</span> <span class="n">SeverityDistribution</span> <span class="o">|</span> <span class="n">FrequencyDistribution</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">log_likelihood</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">aic</span><span class="p">:</span> <span class="nb">float</span>
+</code></pre></div>
+<h3 id="5e-exposuremodel-completion">5e — <code>ExposureModel</code> completion</h3>
+<p>After Phase 1 fix to <code>_calculate_single_exposure_share()</code>, add:</p>
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">calculate_exposure_rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the exposure-rated burning cost per unit of earned exposure</span>
+<span class="sd">    for each layer: sum(exposure_value * share_of_risk) / total_exposure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">calculate_ilf_adjusted_rate</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">ilf_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">analysis_date</span><span class="p">:</span> <span class="n">date</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    ILF-adjusted exposure rate. Accepts any callable ILF function</span>
+<span class="sd">    (e.g. pareto_ilf or power_ilf from exposure_ILF_functions) to</span>
+<span class="sd">    adjust for the portfolio limit profile.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+</code></pre></div>
+<h3 id="5f-simulation-and-aggregatefeatures-full-implementation">5f — <code>Simulation</code> and <code>AggregateFeatures</code> — full implementation</h3>
+<p>The <code>Simulation</code> class is a complete DFA (Dynamic Financial Analysis) pricing engine.</p>
+<p><strong><code>ModellingAssumptions</code> lives in <code>models/aggregate/aggregate_features.py</code></strong> (imported by both <code>Simulation</code> and <code>AggregateFeatures</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ModellingAssumptions</span><span class="p">:</span>
+    <span class="n">cost_of_capital</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">required_rate_of_return</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">capital_confidence_level</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.995</span>   <span class="c1"># VaR/TVaR confidence (Solvency II default)</span>
+    <span class="n">use_tvar</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>                      <span class="c1"># TVaR vs VaR for required capital</span>
+    <span class="n">investment_yield</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">tax_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">acquisition_cost_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">brokerage_cost_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+</code></pre></div>
+<p><strong><code>Simulation</code> constructor</strong> (lives in <code>models/aggregate/simulation_engine.py</code>):</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Simulation</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">frequency_fit</span><span class="p">:</span> <span class="n">FrequencyFit</span><span class="p">,</span>
+        <span class="n">severity_fit</span><span class="p">:</span> <span class="n">SeverityFit</span><span class="p">,</span>
+        <span class="n">ri_contract</span><span class="p">:</span> <span class="n">RIContract</span><span class="p">,</span>
+        <span class="n">assumptions</span><span class="p">:</span> <span class="n">ModellingAssumptions</span><span class="p">,</span>
+        <span class="n">n_simulations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+        <span class="n">random_seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">retrocession_contract</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RIContract</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p><strong>Methods to implement:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>run()</code></td>
+<td>Monte Carlo: draw N frequency samples; for each draw severity samples; apply <code>loss_to_layer_fn</code> per layer; store per-simulation aggregate ceded loss</td>
+</tr>
+<tr>
+<td><code>loss_cost()</code></td>
+<td>Mean ceded loss per layer across simulations</td>
+</tr>
+<tr>
+<td><code>required_capital()</code></td>
+<td>TVaR or VaR at <code>assumptions.capital_confidence_level</code> of simulated aggregate loss distribution per layer</td>
+</tr>
+<tr>
+<td><code>cashflows()</code></td>
+<td>Premium inflow and claim outflow timed by <code>ClaimDevelopmentHistory.mean_payment_duration</code></td>
+</tr>
+<tr>
+<td><code>investment_return()</code></td>
+<td>Apply <code>assumptions.investment_yield</code> to cashflow timing to get present value benefit</td>
+</tr>
+<tr>
+<td><code>profit_commission()</code></td>
+<td>Sliding scale PC calculation against simulated ceded loss ratio</td>
+</tr>
+<tr>
+<td><code>retrocession_cost()</code> / <code>retrocession_benefits()</code></td>
+<td>Apply a nested <code>RIContract</code> as retrocession structure</td>
+</tr>
+<tr>
+<td><code>required_premium_layer()</code></td>
+<td><code>loss_cost + expenses + CoC * required_capital - investment_return + net_retrocession_cost</code></td>
+</tr>
+<tr>
+<td><code>required_premium_programme()</code></td>
+<td>Sum <code>required_premium_layer()</code> across all layers</td>
+</tr>
+<tr>
+<td><code>output()</code></td>
+<td>Returns <code>SimulationResults</code> dataclass</td>
+</tr>
+<tr>
+<td><code>save(path)</code></td>
+<td>Serialise <code>SimulationResults</code> to JSON</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>SimulationResults</code> dataclass:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SimulationResults</span><span class="p">:</span>
+    <span class="n">loss_cost_by_layer</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">required_capital_by_layer</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">required_premium_by_layer</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+    <span class="n">required_premium_programme</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">aggregate_loss_distribution</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>  <span class="c1"># layer_id -&gt; sorted sim losses</span>
+    <span class="n">n_simulations</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">assumptions</span><span class="p">:</span> <span class="n">ModellingAssumptions</span>
+</code></pre></div>
+<p><strong><code>AggregateFeatures</code> refactored as orchestrator:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">AggregateFeatures</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">experience_data</span><span class="p">:</span> <span class="n">ExperienceModelData</span><span class="p">,</span>
+        <span class="n">exposure_data</span><span class="p">:</span> <span class="n">ExposureModel</span><span class="p">,</span>
+        <span class="n">selections</span><span class="p">:</span> <span class="n">Selections</span><span class="p">,</span>
+        <span class="n">assumptions</span><span class="p">:</span> <span class="n">ModellingAssumptions</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_simulations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SimulationResults</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Full pricing workflow: credibility-weight → simulate → output.&quot;&quot;&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="phase-6-professional-development-workstreams">Phase 6 — Professional Development Workstreams</h2>
+<h3 id="6a-linting-formatting">6a — Linting &amp; Formatting</h3>
+<p>Add <code>ruff</code> to <code>pyproject.toml</code> for linting and formatting:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[tool.hatch.envs.default]</span>
+<span class="n">dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;ruff&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pytest&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;pytest-cov&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.ruff]</span>
+<span class="n">line-length</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span>
+<span class="n">target-version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;py310&quot;</span>
+
+<span class="k">[tool.ruff.lint]</span>
+<span class="n">select</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;E&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;F&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;I&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;UP&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;B&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;SIM&quot;</span><span class="p">]</span>
+
+<span class="k">[tool.ruff.format]</span>
+<span class="n">quote-style</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;double&quot;</span>
+</code></pre></div>
+<h3 id="6b-type-checking-strict">6b — Type checking (strict)</h3>
+<div class="highlight"><pre><span></span><code><span class="k">[tool.mypy]</span>
+<span class="n">strict</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">python_version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;3.10&quot;</span>
+</code></pre></div>
+<p>All type errors resulting from <code>strict = true</code> are fixed as part of Phase 6. <code>src/pyre/py.typed</code> added (PEP 561).</p>
+<h3 id="6c-test-coverage">6c — Test coverage</h3>
+<div class="highlight"><pre><span></span><code><span class="k">[tool.hatch.envs.default.scripts]</span>
+<span class="n">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;pytest --cov=pyre --cov-report=term-missing --cov-fail-under=80&quot;</span>
+</code></pre></div>
+<p>New test modules:</p>
+<table>
+<thead>
+<tr>
+<th>Test file</th>
+<th>Covers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tests/test_trending.py</code></td>
+<td>Extend with <code>trend_exposures</code> and <code>trend_claims</code> regression tests for Phase 1 fixes</td>
+</tr>
+<tr>
+<td><code>tests/test_triangles.py</code></td>
+<td>Extend with <code>from_claims()</code> regression test and <code>get_selected_development_pattern()</code></td>
+</tr>
+<tr>
+<td><code>tests/test_burn_cost.py</code></td>
+<td>All four projection methods, exception propagation</td>
+</tr>
+<tr>
+<td><code>tests/test_exposure_model.py</code></td>
+<td><code>_calculate_single_exposure_share()</code>, <code>calculate_exposure_rate()</code>, <code>calculate_ilf_adjusted_rate()</code></td>
+</tr>
+<tr>
+<td><code>tests/test_simulation.py</code></td>
+<td><code>run()</code>, <code>loss_cost()</code>, <code>required_capital()</code>, <code>required_premium_layer()</code>, <code>required_premium_programme()</code></td>
+</tr>
+<tr>
+<td><code>tests/test_frequency_severity.py</code></td>
+<td><code>SeverityFit.fit()</code>, <code>FrequencyFit.fit()</code>, <code>FitResult</code> fields</td>
+</tr>
+<tr>
+<td><code>tests/test_selections.py</code></td>
+<td>All five credibility methods in <code>CredibilityWeight</code>, <code>Selections.make_selection()</code></td>
+</tr>
+<tr>
+<td><code>tests/test_parallelogram.py</code></td>
+<td><code>Exposure._parallelogram_earned_pct()</code> edge cases</td>
+</tr>
+<tr>
+<td><code>tests/test_enums.py</code></td>
+<td><code>ClaimTriggerBasis.to_claim_year_type()</code>, all enum values</td>
+</tr>
+</tbody>
+</table>
+<h3 id="6d-cicd-github-actions">6d — CI/CD (GitHub Actions)</h3>
+<p>Three workflows:</p>
+<div class="highlight"><pre><span></span><code>.github/workflows/
+├── ci.yml          # on push/PR: ruff, mypy, pytest --cov
+├── release.yml     # on tag v*: build + publish to PyPI via Trusted Publisher
+└── docs.yml        # on push to main: mkdocs gh-deploy
+</code></pre></div>
+<p><code>ci.yml</code> steps:
+1. <code>ruff check .</code>
+2. <code>ruff format --check .</code>
+3. <code>mypy src/pyre</code>
+4. <code>pytest --cov=pyre --cov-fail-under=80</code></p>
+<p><code>release.yml</code> uses PyPI OIDC Trusted Publisher — no stored API tokens.</p>
+<h3 id="6e-pre-commit-hooks">6e — Pre-commit hooks</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># .pre-commit-config.yaml</span>
+<span class="nt">repos</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/astral-sh/ruff-pre-commit</span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v0.4.0</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ruff</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ruff-format</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/pre-commit/mirrors-mypy</span>
+<span class="w">    </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.10.0</span>
+<span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mypy</span>
+<span class="w">        </span><span class="nt">additional_dependencies</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;types-all&quot;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<h3 id="6f-documentation">6f — Documentation</h3>
+<ul>
+<li><code>docs/index.md</code> — add end-to-end quickstart showing full pricing workflow</li>
+<li><code>docs/models.md</code> — document <code>BurnCostModel</code>, <code>ExposureModel</code>, <code>Selections</code>, <code>Simulation</code></li>
+<li><code>docs/simulation.md</code> — new page covering DFA pricing model and <code>ModellingAssumptions</code></li>
+<li>All new public classes/methods use Google-style docstrings</li>
+<li>Add <code>mkdocs-gen-files</code> + <code>mkdocs-literate-nav</code> to auto-generate API reference</li>
+</ul>
+<h3 id="6g-versioning-changelog">6g — Versioning &amp; Changelog</h3>
+<ul>
+<li><code>v0.1.0</code> — after Phase 1+2 (bug fixes + dataclasses)</li>
+<li><code>v0.2.0</code> — after Phase 3+4 (restructure + caching)</li>
+<li><code>v0.3.0</code> — after Phase 5 (TODO completions)</li>
+<li><code>v1.0.0</code> — after Phase 6 (full professional workstreams, ≥80% test coverage)</li>
+<li>Add <code>CHANGELOG.md</code> (Keep a Changelog format)</li>
+<li>Add <code>CONTRIBUTING.md</code> (dev setup, branch naming, PR expectations)</li>
+<li>Add <code>SECURITY.md</code> (responsible disclosure contact)</li>
+</ul>
+<hr />
+<h2 id="summary-of-all-changes-by-file">Summary of All Changes by File</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Phase</th>
+<th>Change type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>models/trending.py</code></td>
+<td>1</td>
+<td>Bug fix: property call syntax</td>
+</tr>
+<tr>
+<td><code>claims/triangles.py</code></td>
+<td>1, 5</td>
+<td>Bug fix: <code>from_claims()</code>, IBNER formula; new: <code>get_selected_development_pattern()</code></td>
+</tr>
+<tr>
+<td><code>treaty/contracts.py</code></td>
+<td>1, 2, 3</td>
+<td>Bug fix: <code>loss_to_layer_fn</code>; dataclass: <code>RILayer</code>, <code>RIContractMetadata</code>; enum move</td>
+</tr>
+<tr>
+<td><code>models/experience/burn_cost.py</code></td>
+<td>1, 3</td>
+<td>Bug fix: exception swallowing; rename</td>
+</tr>
+<tr>
+<td><code>models/exposure/exposure_rating_cost.py</code></td>
+<td>1, 5</td>
+<td>Bug fix: share calculation indentation; new: <code>calculate_exposure_rate</code>, <code>calculate_ilf_adjusted_rate</code></td>
+</tr>
+<tr>
+<td><code>claims/claims.py</code></td>
+<td>2, 3</td>
+<td>Dataclass: <code>ClaimsMetaData</code>, <code>ClaimDevelopmentHistory</code>; enum move</td>
+</tr>
+<tr>
+<td><code>exposures/exposures.py</code></td>
+<td>2, 3, 5</td>
+<td>Dataclass: <code>ExposureMetaData</code>, <code>ExposureValues</code>; enum move; parallelogram method</td>
+</tr>
+<tr>
+<td><code>enums.py</code></td>
+<td>3</td>
+<td>New file: all enumerations</td>
+</tr>
+<tr>
+<td><code>__init__.py</code></td>
+<td>3</td>
+<td>New: public API surface</td>
+</tr>
+<tr>
+<td><code>py.typed</code></td>
+<td>3</td>
+<td>New: PEP 561 marker</td>
+</tr>
+<tr>
+<td><code>models/experience/experience_preparer.py</code></td>
+<td>4</td>
+<td><code>cached_property</code> on all computed properties</td>
+</tr>
+<tr>
+<td><code>rate_monitoring/rate_change.py</code></td>
+<td>5</td>
+<td>Bug fix: missing import</td>
+</tr>
+<tr>
+<td><code>models/experience/frequency_severity.py</code></td>
+<td>5</td>
+<td>Bug fix + implement <code>SeverityFit.fit()</code>; new <code>FrequencyFit</code>, <code>FitResult</code></td>
+</tr>
+<tr>
+<td><code>models/aggregate/selections.py</code></td>
+<td>5</td>
+<td>Bug fix: wildcard import, property call</td>
+</tr>
+<tr>
+<td><code>models/exposure/exposure_curve_functions.py</code></td>
+<td>5</td>
+<td>Fix typo, uncomment <code>calculate_curve</code>, replace enum preset pattern</td>
+</tr>
+<tr>
+<td><code>models/aggregate/simulation_engine.py</code></td>
+<td>5</td>
+<td>Full implementation: <code>Simulation</code>, <code>SimulationResults</code></td>
+</tr>
+<tr>
+<td><code>models/aggregate/aggregate_features.py</code></td>
+<td>5</td>
+<td>Refactor: <code>AggregateFeatures</code> as orchestrator</td>
+</tr>
+<tr>
+<td><code>pyproject.toml</code></td>
+<td>6</td>
+<td>Add ruff, pytest-cov, mypy strict, version bumps</td>
+</tr>
+<tr>
+<td><code>.pre-commit-config.yaml</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>.github/workflows/ci.yml</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>.github/workflows/release.yml</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>.github/workflows/docs.yml</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>CHANGELOG.md</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>CONTRIBUTING.md</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>SECURITY.md</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+<tr>
+<td><code>docs/index.md</code></td>
+<td>6</td>
+<td>Quickstart example</td>
+</tr>
+<tr>
+<td><code>docs/simulation.md</code></td>
+<td>6</td>
+<td>New</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.081f42fc.min.js"></script>
+      
+    
+  </body>
+</html>
