@@ -166,5 +166,75 @@ class TestReadClaims(unittest.TestCase):
         self.assertEqual(claims.claims[0].claims_meta_data.status, "Open")
 
 
+@unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
+class TestReadExposures(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "exposures.xlsx"
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def _write_exposures_sheet(self, rows, headers=None, trailing_blank_row=False):
+        headers = headers or [
+            "exposure_id", "exposure_name", "exposure_period_start",
+            "exposure_period_end", "currency", "exposure_value",
+        ]
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Exposures"
+        ws.append(headers)
+        for row in rows:
+            ws.append(row)
+        if trailing_blank_row:
+            ws.append([None] * len(headers))
+        wb.save(self.path)
+
+    def test_builds_exposures(self):
+        from pyre.io_excel.exposures_io import read_exposures
+
+        self._write_exposures_sheet(
+            [
+                ["EXP2022", "2022 Premium", date(2022, 1, 1), date(2022, 12, 31), "USD", 1000000],
+                ["EXP2023", "2023 Premium", date(2023, 1, 1), date(2023, 12, 31), "USD", 1200000],
+            ]
+        )
+
+        exposures = read_exposures(self.path)
+        self.assertEqual(sorted(exposures.modelling_years), [2022, 2023])
+
+    def test_rejects_missing_required_column(self):
+        from pyre.io_excel.exposures_io import read_exposures
+
+        self._write_exposures_sheet(
+            rows=[["EXP2022", date(2022, 1, 1), date(2022, 12, 31), "USD", 1000000]],
+            headers=["exposure_id", "exposure_period_start", "exposure_period_end", "currency", "exposure_value"],
+        )
+
+        with self.assertRaises(ValueError):
+            read_exposures(self.path)
+
+    def test_ignores_trailing_blank_row(self):
+        from pyre.io_excel.exposures_io import read_exposures
+
+        self._write_exposures_sheet(
+            [["EXP2022", "2022 Premium", date(2022, 1, 1), date(2022, 12, 31), "USD", 1000000]],
+            trailing_blank_row=True,
+        )
+
+        exposures = read_exposures(self.path)
+        self.assertEqual(len(exposures), 1)
+
+    def test_missing_optional_column_entirely_defaults_cleanly(self):
+        from pyre.io_excel.exposures_io import read_exposures
+
+        self._write_exposures_sheet(
+            [["EXP2022", "2022 Premium", date(2022, 1, 1), date(2022, 12, 31), "USD", 1000000]]
+        )
+
+        exposures = read_exposures(self.path)  # must not raise KeyError
+        self.assertEqual(exposures.exposures[0].exposure_values.attachment_point, 0.0)
+
+
 if __name__ == "__main__":
     unittest.main()
