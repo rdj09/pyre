@@ -11,6 +11,22 @@ try:
 except ImportError:
     HAS_OPENPYXL = False
 
+from pyre import (
+    Claim,
+    ClaimDevelopmentHistory,
+    ClaimsMetaData,
+    Claims as PyreClaims,
+    Exposure as PyreExposure,
+    ExposureMetaData as PyreExposureMetaData,
+    Exposures as PyreExposures,
+    ExposureValues as PyreExposureValues,
+    ExperienceModelData,
+    RIContract,
+    RIContractMetadata,
+    RILayer,
+)
+from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
+
 
 @unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
 class TestWriteTable(unittest.TestCase):
@@ -269,6 +285,106 @@ class TestWriteTriangle(unittest.TestCase):
         self.assertEqual(rows[1], [2020, 100.0, 150.0, 175.0])
         self.assertEqual(rows[2], [2021, 110.0, 165.0, None])
         self.assertEqual(rows[3], [2022, 120.0, None, None])
+
+
+@unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
+class TestWriteExperienceRatingResults(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "experience.xlsx"
+
+        claim = Claim(
+            ClaimsMetaData(
+                claim_id="CLM001",
+                currency="USD",
+                contract_limit=2_000_000.0,
+                loss_date=date(2022, 3, 1),
+            ),
+            ClaimDevelopmentHistory(
+                development_months=[12, 24],
+                cumulative_dev_paid=[50000.0, 90000.0],
+                cumulative_dev_incurred=[120000.0, 250000.0],
+            ),
+        )
+        claims = PyreClaims([claim])
+
+        exposure = PyreExposure(
+            PyreExposureMetaData(
+                exposure_id="EXP2022",
+                exposure_name="2022 Premium",
+                exposure_period_start=date(2022, 1, 1),
+                exposure_period_end=date(2022, 12, 31),
+                currency="USD",
+            ),
+            PyreExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
+        )
+        exposures = PyreExposures([exposure])
+
+        metadata = RIContractMetadata(
+            contract_id="C-0001",
+            contract_description="Test",
+            cedent_name="Acme Re",
+            trigger_basis=ClaimTriggerBasis.LOD,
+            indexation_clause=IndexationClauseType.FULL_INDEXATION,
+            indexation_margin=0.0,
+            inception_date=date(2022, 1, 1),
+            expiration_date=date(2022, 12, 31),
+            fx_rates={"USD": 1.0},
+        )
+        layer = RILayer(
+            layer_id=1,
+            layer_name="XOL Layer",
+            layer_type=ContractType.EXCESS_OF_LOSS,
+            occurrence_attachment=100_000.0,
+            occurrence_limit=200_000.0,
+            aggregate_attachment=0.0,
+            aggregate_limit=0.0,
+            subject_lines_of_business=[],
+            subject_lob_exposure_amounts=[],
+            full_subject_premium=0.0,
+            written_line=1.0,
+            signed_line=1.0,
+            number_of_reinstatements=0,
+            reinstatement_cost={},
+        )
+        contract = RIContract(contract_meta_data=metadata, layers=[layer])
+
+        self.model_data = ExperienceModelData(claims=claims, exposures=exposures, ri_contract=contract)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_writes_both_sheets(self):
+        from pyre.io_excel.results_io import write_experience_rating_results
+
+        write_experience_rating_results(self.model_data, self.path)
+
+        wb = openpyxl.load_workbook(self.path)
+        self.assertEqual(set(wb.sheetnames), {"ByLayerYear", "ExposuresByYear"})
+
+        by_layer_year = [list(row) for row in wb["ByLayerYear"].iter_rows(values_only=True)]
+        self.assertEqual(
+            by_layer_year[0],
+            ["layer_id", "layer_name", "modelling_year", "ceded_paid", "ceded_incurred", "claim_count", "earned_premium"],
+        )
+        self.assertEqual(by_layer_year[1][0], 1)
+        self.assertEqual(by_layer_year[1][1], "XOL Layer")
+        self.assertEqual(by_layer_year[1][2], 2022)
+
+        exposures_by_year = [list(row) for row in wb["ExposuresByYear"].iter_rows(values_only=True)]
+        self.assertEqual(exposures_by_year[0], ["modelling_year", "written", "earned"])
+        self.assertEqual(exposures_by_year[1][0], 2022)
+
+    def test_rerunning_overwrites_rather_than_duplicating_rows(self):
+        from pyre.io_excel.results_io import write_experience_rating_results
+
+        write_experience_rating_results(self.model_data, self.path)
+        write_experience_rating_results(self.model_data, self.path)  # re-run
+
+        wb = openpyxl.load_workbook(self.path)
+        self.assertEqual(wb.sheetnames.count("ByLayerYear"), 1)
+        by_layer_year_rows = list(wb["ByLayerYear"].iter_rows(values_only=True))
+        self.assertEqual(len(by_layer_year_rows), 2)  # header + 1 data row, not 1 + 2
 
 
 if __name__ == "__main__":
