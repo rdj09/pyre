@@ -236,5 +236,40 @@ class TestReadExposures(unittest.TestCase):
         self.assertEqual(exposures.exposures[0].exposure_values.attachment_point, 0.0)
 
 
+@unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
+class TestWriteTriangle(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "triangle.xlsx"
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_writes_grid_with_blank_cells_for_missing_combinations(self):
+        from pyre.claims.triangles import Triangle
+        from pyre.io_excel.triangle_io import write_triangle
+
+        triangle = Triangle(
+            triangle={
+                2020: {1: 100.0, 2: 150.0, 3: 175.0},
+                2021: {1: 110.0, 2: 165.0},
+                2022: {1: 120.0},
+            },
+            origin_years=[2020, 2021, 2022],
+            dev_periods=[1, 2, 3],
+        )
+
+        write_triangle(triangle, self.path)
+
+        wb = openpyxl.load_workbook(self.path)
+        ws = wb["Triangle"]
+        rows = [list(row) for row in ws.iter_rows(values_only=True)]
+
+        self.assertEqual(rows[0], ["origin_year", "1", "2", "3"])
+        self.assertEqual(rows[1], [2020, 100.0, 150.0, 175.0])
+        self.assertEqual(rows[2], [2021, 110.0, 165.0, None])
+        self.assertEqual(rows[3], [2022, 120.0, None, None])
+
+
 if __name__ == "__main__":
     unittest.main()
