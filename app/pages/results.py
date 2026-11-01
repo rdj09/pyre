@@ -58,7 +58,7 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
             state.results = run_pricing(state.claims, state.exposures, contract)
             results_table.value = state.results.by_layer_year
             exposures_table.value = state.results.exposures_by_year
-            status.object = "Pricing run complete."
+            status.object = "Pricing run complete. See the tables below."
             status.alert_type = "success"
         except NotImplementedError as exc:
             status.object = f"Unsupported layer configuration: {exc}"
