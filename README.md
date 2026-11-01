@@ -122,3 +122,10 @@ Contributions are welcome! Please follow these steps:
 ## License
 
 `pyre` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+
+---
+
+<img src="app/assets/brand/freyja-wordmark-navy.svg" height="18" alt="Freyja Consulting">
+
+Maintained by [Freyja Consulting](https://freyja-consulting.com)
+Freyja Consulting Ltd · Registered in England and Wales · Company No. 16939328 · Registered office: 320 Firecrest Court, Warrington, WA1 1RG
