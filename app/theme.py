@@ -55,6 +55,25 @@ def endorsement() -> pn.pane.HTML:
     )
 
 
+def theme_toggle() -> pn.pane.HTML:
+    """Light/dark switch for the header -- pure client-side, no server round-trip.
+
+    Just the button markup: a Panel HTML pane renders via innerHTML, and
+    browsers don't execute <script> tags inserted that way, so the actual
+    logic (persisting to localStorage, applying .freyja-dark to <html>,
+    wiring the click handler) lives in assets/theme-init.js, loaded as a
+    real <script src> via pn.config.js_files in branded_template() below.
+    """
+    return pn.pane.HTML(
+        '<button id="freyja-theme-toggle" class="freyja-theme-toggle" '
+        'aria-label="Toggle dark mode" aria-pressed="false" type="button">&#9728;</button>',
+        sizing_mode="fixed",
+        width=36,
+        height=36,
+        margin=(0, 8, 0, 8),
+    )
+
+
 def footer() -> pn.pane.HTML:
     version = __about__.__version__
     return pn.pane.HTML(
@@ -68,6 +87,7 @@ def footer() -> pn.pane.HTML:
 
 
 def branded_template(*objects) -> pn.template.BootstrapTemplate:
+    pn.config.js_files.setdefault("freyja-theme-init", "assets/theme-init.js")
     template = pn.template.BootstrapTemplate(
         title=APP_TITLE,
         design=FreyjaDesign,
@@ -77,5 +97,6 @@ def branded_template(*objects) -> pn.template.BootstrapTemplate:
         raw_css=[page_css()],
     )
     template.header.append(endorsement())
+    template.header.append(theme_toggle())
     template.main.extend([*objects, footer()])
     return template

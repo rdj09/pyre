@@ -84,7 +84,7 @@ def parse_claims_csv(path_or_buffer) -> Claims:
 
     missing = [c for c in CLAIMS_REQUIRED_COLUMNS if c not in df.columns]
     if missing:
-        raise ValueError(f"claims CSV is missing required columns: {missing}")
+        raise ValueError(f"claims CSV is missing required column(s): {', '.join(missing)}")
 
     claims: list[Claim] = []
     for claim_id, group in df.groupby("claim_id", sort=False):
@@ -93,9 +93,8 @@ def parse_claims_csv(path_or_buffer) -> Claims:
         contract_limit = first.get("contract_limit")
         if pd.isna(contract_limit) or float(contract_limit) <= 0:
             raise ValueError(
-                f"claim '{claim_id}': contract_limit must be set to a positive value "
-                "-- ClaimsMetaData.contract_limit defaults to 0.0, which caps every "
-                "ceded/gross amount to zero."
+                f"Claim '{claim_id}' needs a contract limit greater than zero "
+                f"(currently {'blank' if pd.isna(contract_limit) else contract_limit})."
             )
 
         claim_year_basis_raw = first.get("claim_year_basis")
@@ -137,7 +136,7 @@ def parse_exposures_csv(path_or_buffer) -> Exposures:
 
     missing = [c for c in EXPOSURES_REQUIRED_COLUMNS if c not in df.columns]
     if missing:
-        raise ValueError(f"exposures CSV is missing required columns: {missing}")
+        raise ValueError(f"exposures CSV is missing required column(s): {', '.join(missing)}")
 
     exposures: list[Exposure] = []
     for _, row in df.iterrows():

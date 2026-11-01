@@ -129,10 +129,18 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
             "expiration_date": expiration_date.value,
         }
         state.contract_metadata = build_contract_metadata(form)
-        status.object = (
-            f"Contract '{contract_id.value}' configured with {len(state.layers)} layer(s)."
-        )
-        status.alert_type = "success"
+        if state.layers:
+            status.object = (
+                f"Contract '{contract_id.value}' saved with {len(state.layers)} layer(s). "
+                'Continue to "3. Run pricing".'
+            )
+            status.alert_type = "success"
+        else:
+            status.object = (
+                f"Contract '{contract_id.value}' saved, but it has no layers yet -- "
+                "add at least one layer above before running pricing."
+            )
+            status.alert_type = "warning"
 
     add_layer_button.on_click(_on_add_layer)
     save_contract_button.on_click(_on_save_contract)
@@ -142,10 +150,16 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
         pn.Row(contract_id, contract_description, cedent_name),
         pn.Row(trigger_basis, indexation_clause, indexation_margin),
         pn.Row(inception_date, expiration_date),
-        "## Layers (SURPLUS_SHARE not yet supported by pyre -- omitted)",
+        "## Layers",
+        pn.pane.Markdown(
+            "Excess of loss, franchise deductible, aggregate stop loss, and quota share "
+            "layers are supported. Surplus share is not yet available.",
+            margin=(0, 0, 10, 0),
+        ),
         pn.Row(layer_id, layer_name, layer_type),
         pn.Row(occurrence_attachment, occurrence_limit, full_subject_premium),
         pn.Row(written_line, signed_line, add_layer_button),
+        pn.pane.Markdown("*Add one or more layers above, then click Save contract metadata.*"),
         layer_table,
         save_contract_button,
         status,
