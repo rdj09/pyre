@@ -1,5 +1,6 @@
-from typing import Dict
-from ..claims.claims import Claims, Claim, ClaimDevelopmentHistory
+from typing import Any, Dict
+
+from ..claims.claims import Claim, ClaimDevelopmentHistory, Claims
 from ..exposures.exposures import Exposure, Exposures, ExposureValues
 
 
@@ -114,7 +115,7 @@ class Trending:
 
         return Exposures(trended_exposures)
 
-    def get_trend_factors(self) -> Dict[str, Dict[int, float]]:
+    def get_trend_factors(self) -> Dict[str, Any]:
         """
         Get the trend factors from this Trending instance.
 
@@ -241,7 +242,7 @@ def trend_claims(claims: Claims, trend_factors: Dict[int, float], base_year: int
     return trending.trend_claims(claims)
 
 
-def get_trend_factors(trending_instance: Trending) -> Dict[str, Dict[int, float]]:
+def get_trend_factors(trending_instance: Trending) -> Dict[str, Any]:
     """
     Get the trend factors from a Trending instance.
 
