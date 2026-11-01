@@ -148,5 +148,44 @@ class TestSaveLoadVersion(unittest.TestCase):
         self.assertEqual(ctx.exception.stored_pyre_version, "0.0.0-does-not-exist")
 
 
+class TestListVersionsAndSetFinal(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "test.db"
+        init_db(self.path)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_lists_versions_without_touching_the_blob(self):
+        from app.db import ModelSnapshot, list_versions, save_version
+
+        save_version(self.path, ModelSnapshot(None, None, None, []), label="a")
+        save_version(self.path, ModelSnapshot(None, None, None, []), label="b")
+
+        summaries = list_versions(self.path)
+
+        self.assertEqual({s.label for s in summaries}, {"a", "b"})
+        self.assertFalse(summaries[0].has_results)
+
+    def test_final_only_filters_to_final_versions_and_coexist_is_allowed(self):
+        from app.db import ModelSnapshot, list_versions, save_version, set_final
+
+        id_a = save_version(self.path, ModelSnapshot(None, None, None, []), label="a")
+        id_b = save_version(self.path, ModelSnapshot(None, None, None, []), label="b")
+        set_final(self.path, id_a, True)
+        set_final(self.path, id_b, True)
+
+        self.assertEqual(len(list_versions(self.path, final_only=True)), 2)
+        self.assertEqual(len(list_versions(self.path)), 2)
+
+    def test_final_only_returns_empty_list_when_none_are_final(self):
+        from app.db import ModelSnapshot, list_versions, save_version
+
+        save_version(self.path, ModelSnapshot(None, None, None, []), label="a")
+
+        self.assertEqual(list_versions(self.path, final_only=True), [])
+
+
 if __name__ == "__main__":
     unittest.main()

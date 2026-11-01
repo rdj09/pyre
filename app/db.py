@@ -74,6 +74,22 @@ class ModelSnapshot:
     layers: list[RILayer]
 
 
+@dataclass
+class VersionSummary:
+    id: int
+    label: str
+    parent_id: Optional[int]
+    is_final: bool
+    created_at: str
+    updated_at: str
+    contract_id: Optional[str]
+    cedent_name: Optional[str]
+    contract_description: Optional[str]
+    inception_date: Optional[str]
+    expiration_date: Optional[str]
+    has_results: bool
+
+
 class IncompatibleSnapshotError(Exception):
     """Raised when a stored snapshot blob can't be unpickled under the current pyre version."""
 
@@ -215,3 +231,48 @@ def load_version(path: Path, version_id: int) -> tuple[ModelSnapshot, list[dict]
         exposures_by_year: list[dict[str, Any]] = [dict(r) for r in exposures_by_year_rows]
 
     return snapshot, by_layer_year, exposures_by_year
+
+
+def list_versions(path: Path, *, final_only: bool = False) -> list[VersionSummary]:
+    with _connect(path) as conn:
+        query = (
+            "SELECT id, label, parent_id, is_final, created_at, updated_at, "
+            "contract_id, cedent_name, contract_description, inception_date, expiration_date, "
+            "EXISTS (SELECT 1 FROM pricing_results_by_layer_year WHERE version_id = pricing_versions.id) AS has_results "
+            "FROM pricing_versions"
+        )
+        if final_only:
+            query += " WHERE is_final = 1"
+        query += " ORDER BY created_at DESC"
+
+        rows = conn.execute(query).fetchall()
+
+        summaries = []
+        for row in rows:
+            summary = VersionSummary(
+                id=row[0],
+                label=row[1],
+                parent_id=row[2],
+                is_final=bool(row[3]),
+                created_at=row[4],
+                updated_at=row[5],
+                contract_id=row[6],
+                cedent_name=row[7],
+                contract_description=row[8],
+                inception_date=row[9],
+                expiration_date=row[10],
+                has_results=bool(row[11]),
+            )
+            summaries.append(summary)
+
+        return summaries
+
+
+def set_final(path: Path, version_id: int, is_final: bool) -> None:
+    now = datetime.now(timezone.utc).isoformat()
+    with _connect(path) as conn:
+        conn.execute(
+            "UPDATE pricing_versions SET is_final = ?, updated_at = ? WHERE id = ?",
+            (int(is_final), now, version_id),
+        )
+        conn.commit()
