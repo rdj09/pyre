@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import io
+
 import pandas as pd
 import panel as pn
 from bokeh.models.widgets.tables import NumberFormatter
 
 from app.service import run_pricing
 from app.state import WorkbenchState
+from pyre import ExperienceModelData
+from pyre.io_excel import write_experience_rating_results
 
 AMOUNT = NumberFormatter(format="0,0", text_align="right")
 TITLES = {
@@ -46,7 +50,31 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         pd.DataFrame(), show_index=False, disabled=True, titles=TITLES, formatters=FORMATTERS
     )
 
+    # Holds the ExperienceModelData from the last *successful* run, so a
+    # click on "Export to Excel" always reflects the run that produced the
+    # tables on screen -- never whatever is currently (possibly unsaved, or
+    # since-changed) sitting in state.
+    last_run_model_data: list[ExperienceModelData] = []
+
+    def _export_results() -> io.BytesIO:
+        buffer = io.BytesIO()
+        write_experience_rating_results(last_run_model_data[0], buffer)
+        buffer.seek(0)
+        return buffer
+
+    export_button = pn.widgets.FileDownload(
+        label="Export to Excel",
+        filename="pricing_results.xlsx",
+        callback=_export_results,
+        button_type="default",
+        visible=False,
+    )
+
     def _on_run(_event):
+        # Hidden up front for every run: only the success path at the end of
+        # the try block turns it back on, so no exception type -- caught
+        # below or not -- can leave a stale run's export live.
+        export_button.visible = False
         if not state.is_ready_to_price():
             status.object = (
                 "Load claims + exposures and configure a contract with at least one layer first."
@@ -55,16 +83,24 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
             return
         try:
             contract = state.build_contract()
+            model_data = ExperienceModelData(
+                claims=state.claims, exposures=state.exposures, ri_contract=contract
+            )
             state.results = run_pricing(state.claims, state.exposures, contract)
             results_table.value = state.results.by_layer_year
             exposures_table.value = state.results.exposures_by_year
             status.object = "Pricing run complete. See the tables below."
             status.alert_type = "success"
+            last_run_model_data[:] = [model_data]
+            export_button.visible = True
         except NotImplementedError as exc:
             status.object = f"Unsupported layer configuration: {exc}"
             status.alert_type = "danger"
         except ValueError as exc:
             status.object = f"Could not run pricing: {exc}"
+            status.alert_type = "danger"
+        except Exception as exc:
+            status.object = f"Pricing run failed: {exc}"
             status.alert_type = "danger"
 
     run_button.on_click(_on_run)
@@ -77,4 +113,5 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         results_table,
         "### Exposures by modelling year",
         exposures_table,
+        export_button,
     )

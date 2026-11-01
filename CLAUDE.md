@@ -25,6 +25,7 @@ hatch run brand:build           # regenerate app/assets/ AND docs/assets/ (Freyj
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
 pip install -e ".[excel]"       # install with headless Excel (.xlsx) read/write support
+pip install -e ".[panel,excel]" # same, plus the workbench's "Export to Excel" button
 hatch run panel:serve           # serve app/main.py at localhost (panel serve, --show --autoreload)
 ```
 
@@ -54,7 +55,7 @@ Commands above). Layout:
 |------|---------|
 | `app/service.py` | Pure-Python core (no `import panel`) — CSV parsing into `Claims`/`Exposures`, form-dict → `RIContractMetadata`/`RILayer`, `run_pricing()` → `PricingResults` (pandas DataFrames). Unit-tested in `tests/test_app_service.py` without a running server. |
 | `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results. |
-| `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py`. Only these and `app/main.py` import `panel`. |
+| `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py` (results page has an "Export to Excel" button, `pyre.io_excel.write_experience_rating_results` into an in-memory buffer — needs the `excel` extra too). Only these and `app/main.py` import `panel`. |
 | `app/main.py` | Entrypoint (`panel serve app/main.py`). Deliberately **not** named `app.py` — Bokeh's script loader would register the running script as a module named `app`, colliding with and shadowing the `app` package itself. |
 | `app/theme.py` | Freyja Consulting branding (Panel-only — `FreyjaDesign`, header/footer, favicon, dark-mode toggle). Colours/type come only from `app/assets/freyja.css`. |
 | `app/assets/` | Brand assets: `brand/*.svg` (wordmark, favicon — text pre-converted to outlines), `fonts/*.woff2` (self-hosted Montserrat subset + `OFL.txt`), `freyja.css` (per-component shadow-DOM stylesheet, light + derived dark palette via `:host-context(.freyja-dark)`), `freyja-page.css` (document-level `raw_css`, incl. `@font-face`), `theme-init.js` (dark-mode toggle logic — loaded via `pn.config.js_files`, **not** inlined in an HTML pane, since Panel renders pane content via `innerHTML` and browsers don't execute `<script>` tags inserted that way). Regenerate the brand assets via `hatch run brand:build` (see Commands) — SVG output is deterministic, woff2 is not (subsetting order), so only the SVGs are diffed to confirm a clean rebuild. |
@@ -109,7 +110,7 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 131 tests collected
+├── tests/                     # unittest.TestCase style; 140 tests collected
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
@@ -117,11 +118,11 @@ pyre/
 
 ## Known Test State (develop)
 
-**Expected: 0 failed, 131 passed** (when ignoring `test_exposure_curve_fitting.py`,
+**Expected: 0 failed, 140 passed** (when ignoring `test_exposure_curve_fitting.py`,
 **with the `excel` extra installed** — `pip install -e ".[excel]"`, or via
 `hatch run pytest`, since `openpyxl` is listed in `[tool.hatch.envs.default]`).
-Without `openpyxl` installed, `tests/test_io_excel.py`'s 25 tests skip
-cleanly instead of failing (106 passed, 25 skipped).
+Without `openpyxl` installed, `tests/test_io_excel.py`'s 29 tests skip
+cleanly instead of failing (111 passed, 29 skipped).
 
 All previously-documented pre-existing bugs have now been fixed, each with
 its own regression test — notably `Trending.calculate_trend_factor`'s
@@ -129,9 +130,11 @@ directionality (`tests/test_trending.py`), a full rewrite of
 `IBNERPatternExtractor` to match its intended API
 (`tests/test_ibner_pattern_extractor.py`), `_earned_pct`'s missing
 lower-bound clamp and `earned_exposure_value`'s proration
-(`tests/test_exposures.py`), and a day-count convention fix (actual/actual,
-not 30/360). Fixing `earned_exposure_value` also surfaced and fixed a
-previously-masked bug in `aggregate_exposures`
+(`tests/test_exposures.py`), a day-count convention fix (actual/actual,
+not 30/360), and `write_table`'s in-memory buffer target silently losing
+every sheet but the last one when called more than once on the same
+buffer (`tests/test_io_excel.py`). Fixing `earned_exposure_value` also
+surfaced and fixed a previously-masked bug in `aggregate_exposures`
 (`experience_preparer.py`) — it used the contract's inception date as a
 shared `analysis_date` for every exposure regardless of modelling year;
 each exposure now uses its own period end. No pre-existing failures remain.
