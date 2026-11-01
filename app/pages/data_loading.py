@@ -82,6 +82,8 @@ def build_data_loading_page(state: WorkbenchState) -> pn.Column:
     exposures_file.param.watch(_on_exposures_upload, "value")
     load_demo_button.on_click(_on_load_demo)
 
+    _refresh_status()
+
     return pn.Column(
         "## Load claims and exposures",
         pn.Row(
