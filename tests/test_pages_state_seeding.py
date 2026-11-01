@@ -59,3 +59,10 @@ class TestDataLoadingSeeding(unittest.TestCase):
         status = next(obj for obj in page if hasattr(obj, "alert_type"))
 
         self.assertEqual(status.alert_type, "success")
+
+    def test_status_unchanged_when_state_is_empty(self):
+        page = build_data_loading_page(WorkbenchState())
+        status = next(obj for obj in page if hasattr(obj, "alert_type"))
+
+        self.assertEqual(status.object, "No data loaded yet.")
+        self.assertEqual(status.alert_type, "warning")

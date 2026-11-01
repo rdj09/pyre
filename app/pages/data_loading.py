@@ -30,7 +30,10 @@ def build_data_loading_page(state: WorkbenchState) -> pn.Column:
     def _refresh_status():
         n_claims = len(state.claims) if state.claims is not None else 0
         n_exposures = len(state.exposures) if state.exposures is not None else 0
-        if state.claims is not None and state.exposures is not None:
+        if state.claims is None and state.exposures is None:
+            status.object = "No data loaded yet."
+            status.alert_type = "warning"
+        elif state.claims is not None and state.exposures is not None:
             status.object = (
                 f"Loaded {n_claims} claim(s) and {n_exposures} exposure(s). "
                 "Ready to configure a contract."
