@@ -101,8 +101,20 @@ dependencies = [
   "panel>=1.4",
   "pandas>=2.0",
 ]
+[tool.hatch.envs.panel.env-vars]
+PYTHONPATH = "."
 [tool.hatch.envs.panel.scripts]
-serve = "panel serve app/main.py --show --autoreload"
+serve = "panel serve app/main.py --static-dirs assets=app/assets --show --autoreload"
+
+[tool.hatch.envs.brand]
+detached = true
+dependencies = [
+  "fonttools>=4.47",
+  "brotli",
+  "uharfbuzz>=0.39",
+]
+[tool.hatch.envs.brand.scripts]
+build = "python scripts/build_brand_assets.py"
 
 [tool.hatch.envs.excel]
 dependencies = [

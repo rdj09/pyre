@@ -24,3 +24,4 @@ src/pyre/models/Exposure/__pycache__/exposure_curve_functions.cpython-313.pyc
 src/pyre/models/Exposure/__pycache__/exposure_rating_cost.cpython-313.pyc
 app/__pycache__/*
 app/pages/__pycache__/*
+.cache/montserrat/
