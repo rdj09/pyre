@@ -14,8 +14,14 @@ if TYPE_CHECKING:
     from ..models.Exposure.exposure_rating_cost import ExposureModel
 
 BY_LAYER_YEAR_COLUMNS = [
-    "layer_id", "layer_name", "modelling_year", "ceded_paid",
-    "ceded_incurred", "claim_count", "earned_premium", "loss_ratio",
+    "layer_id",
+    "layer_name",
+    "modelling_year",
+    "ceded_paid",
+    "ceded_incurred",
+    "claim_count",
+    "earned_premium",
+    "loss_ratio",
 ]
 
 
@@ -44,7 +50,9 @@ def write_experience_rating_results(
     )
 
 
-def write_exposure_rating_results(exposure_model: "ExposureModel", path: str | Path | BinaryIO) -> None:
+def write_exposure_rating_results(
+    exposure_model: "ExposureModel", path: str | Path | BinaryIO
+) -> None:
     """Write ExposureModel.calculate_all_shares() to one 'ExposureShares' sheet."""
     shares = exposure_model.calculate_all_shares()
 

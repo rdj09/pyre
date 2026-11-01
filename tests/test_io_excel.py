@@ -454,8 +454,14 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
         self.assertEqual(
             by_layer_year[0],
             [
-                "layer_id", "layer_name", "modelling_year", "ceded_paid",
-                "ceded_incurred", "claim_count", "earned_premium", "loss_ratio",
+                "layer_id",
+                "layer_name",
+                "modelling_year",
+                "ceded_paid",
+                "ceded_incurred",
+                "claim_count",
+                "earned_premium",
+                "loss_ratio",
             ],
         )
         self.assertEqual(by_layer_year[1][:7], [1, "XOL Layer", 2022, 0.0, 150000.0, 1, 1000000.0])
@@ -477,10 +483,18 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
         by_layer_year = [list(row) for row in wb["ByLayerYear"].iter_rows(values_only=True)]
         self.assertEqual(
             by_layer_year,
-            [[
-                "layer_id", "layer_name", "modelling_year", "ceded_paid",
-                "ceded_incurred", "claim_count", "earned_premium", "loss_ratio",
-            ]],
+            [
+                [
+                    "layer_id",
+                    "layer_name",
+                    "modelling_year",
+                    "ceded_paid",
+                    "ceded_incurred",
+                    "claim_count",
+                    "earned_premium",
+                    "loss_ratio",
+                ]
+            ],
         )
 
     def test_rerunning_overwrites_rather_than_duplicating_rows(self):

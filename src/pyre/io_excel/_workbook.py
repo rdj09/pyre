@@ -29,12 +29,12 @@ def write_table(
     these functions at dedicated output files, not at a workbook that
     already has charts/pivots you want to keep.
     """
-    is_filesystem_path = isinstance(path, (str, Path))
-    target = Path(path) if is_filesystem_path else path
-
-    if is_filesystem_path:
+    target: Path | BinaryIO
+    if isinstance(path, (str, Path)):
+        target = Path(path)
         has_existing_content = target.exists()
     else:
+        target = path
         start = target.tell()
         target.seek(0, 2)
         has_existing_content = target.tell() > 0
@@ -53,7 +53,7 @@ def write_table(
     for row in rows:
         worksheet.append(list(row))
 
-    if not is_filesystem_path:
+    if not isinstance(target, Path):
         target.seek(0)
         target.truncate()
     workbook.save(target)
