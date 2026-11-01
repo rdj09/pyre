@@ -55,9 +55,9 @@ Commands above). Layout:
 | `app/service.py` | Pure-Python core (no `import panel`) — CSV parsing into `Claims`/`Exposures`, form-dict → `RIContractMetadata`/`RILayer`, `run_pricing()` → `PricingResults` (pandas DataFrames). Unit-tested in `tests/test_app_service.py` without a running server. |
 | `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results. |
 | `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py`. Only these and `app/main.py` import `panel`. |
-| `app/main.py` | Entrypoint (`panel serve app/main.py`). Deliberately **not** named `app.py` — Bokeh's script loader would register the running script as a module named `app`, colliding with and shadowing the `app` package itself. |
-| `app/theme.py` | Freyja Consulting branding (Panel-only — `FreyjaDesign`, header/footer, favicon, dark-mode toggle). Colours/type come only from `app/assets/freyja.css`. |
-| `app/assets/` | Brand assets: `brand/*.svg` (wordmark, favicon — text pre-converted to outlines), `fonts/*.woff2` (self-hosted Montserrat subset + `OFL.txt`), `freyja.css` (per-component shadow-DOM stylesheet, light + derived dark palette via `:host-context(.freyja-dark)`), `freyja-page.css` (document-level `raw_css`, incl. `@font-face`), `theme-init.js` (dark-mode toggle logic — loaded via `pn.config.js_files`, **not** inlined in an HTML pane, since Panel renders pane content via `innerHTML` and browsers don't execute `<script>` tags inserted that way). Regenerate the brand assets via `hatch run brand:build` (see Commands) — SVG output is deterministic, woff2 is not (subsetting order), so only the SVGs are diffed to confirm a clean rebuild. |
+| `app/main.py` | Entrypoint (`panel serve app/main.py`). **Not** `app.py` — Bokeh's script loader would register it as module `app`, shadowing the `app` package. |
+| `app/theme.py` | Freyja branding (Panel-only — design, header/footer, favicon, dark-mode toggle). Colours/type only from `app/assets/freyja.css`. |
+| `app/assets/` | Brand SVGs/woff2, `freyja.css` (light + dark palette via `:host-context(.freyja-dark)`), `freyja-page.css` (document-level CSS), `theme-init.js` (dark-mode toggle — loaded via `pn.config.js_files`, **not** inlined in an HTML pane: Panel renders panes via `innerHTML`, which never executes `<script>` tags). Regenerate via `hatch run brand:build`; only the SVGs are diffed (woff2 subsetting order isn't deterministic). |
 | `run_app.py` | Top-level launcher (`python run_app.py`); serves `app/assets/` at `./assets`. |
 | `scripts/build_brand_assets.py` | Regenerates `app/assets/` from the Freyja brand guide. Run via `hatch run brand:build`. |
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
@@ -69,18 +69,13 @@ from the layer-type selector — `RILayer.loss_to_layer_fn` raises
 
 ### Key design patterns (post-refactor, develop branch)
 
-**`@dataclass` for data-holding classes.** `ClaimDevelopmentHistory`, `ClaimsMetaData`, `ExposureMetaData`, `ExposureValues`, `RILayer`, `RIContractMetadata` are `@dataclass`. Follow this pattern for new data classes.
-- Required fields first (no default), optional fields after.
-- Cross-field validation in `__post_init__`.
-- Post-construction mutation validation via `__setattr__` override where needed (e.g., `ExposureMetaData` date ordering, `ExposureValues` non-negative check).
-- Computed read-only values stay as `@property` (never removed by dataclass conversion).
-- **Exception**: `ClaimDevelopmentHistory` validates list lengths lazily (only in `cumulative_reserved_amount`) — do not add construction-time validation.
+**`@dataclass` for data-holding classes** (`ClaimDevelopmentHistory`, `ClaimsMetaData`, `ExposureMetaData`, `ExposureValues`, `RILayer`, `RIContractMetadata`). Required fields before optional; cross-field validation in `__post_init__`; mutation validation via `__setattr__` where needed (e.g. date ordering, non-negative checks); computed values stay `@property`. Exception: `ClaimDevelopmentHistory` validates list lengths lazily, only in `cumulative_reserved_amount` — no construction-time check.
 
-**Centralized enums.** All enums live in `src/pyre/enums.py`. Never define enums in domain modules — always `from pyre.enums import X`.
+**Centralized enums** — all in `src/pyre/enums.py`, never in domain modules: `from pyre.enums import X`.
 
-**`ItemContainer[T]`.** `Claims` and `Exposures` inherit from `ItemContainer`. Both take a `list[T]` in `__init__` and expose a domain alias property (`claims`, `exposures`) with a setter. Domain-specific properties (`modelling_years`, `currencies`, `exposure_ids`, etc.) live on the subclass, not the base.
+**`ItemContainer[T]`** — base for `Claims`/`Exposures`; both take `list[T]`, expose a domain alias property with setter; domain-specific properties (`modelling_years`, etc.) live on the subclass.
 
-**Public API.** `from pyre import Claims` works. All public names are re-exported from `src/pyre/__init__.py` via subpackage `__init__.py` files. Add new public classes there when creating them.
+**Public API** — `from pyre import Claims` works; names are re-exported from `src/pyre/__init__.py` via subpackage `__init__.py`. Add new public classes there.
 
 ### Data flow
 
@@ -117,28 +112,18 @@ pyre/
 
 ## Known Test State (develop)
 
-**Expected: 0 failed, 131 passed** (when ignoring `test_exposure_curve_fitting.py`,
-**with the `excel` extra installed** — `pip install -e ".[excel]"`, or via
-`hatch run pytest`, since `openpyxl` is listed in `[tool.hatch.envs.default]`).
-Without `openpyxl` installed, `tests/test_io_excel.py`'s 25 tests skip
-cleanly instead of failing (106 passed, 25 skipped).
+**Expected: 0 failed, 131 passed** (ignore `test_exposure_curve_fitting.py`,
+**with the `excel` extra installed**). Without `openpyxl`, `test_io_excel.py`'s
+25 tests skip instead of failing (106 passed, 25 skipped). No known
+pre-existing failures remain — if `pytest` is red on `develop`, it's new.
 
-All previously-documented pre-existing bugs have now been fixed, each with
-its own regression test — notably `Trending.calculate_trend_factor`'s
-directionality (`tests/test_trending.py`), a full rewrite of
-`IBNERPatternExtractor` to match its intended API
-(`tests/test_ibner_pattern_extractor.py`), `_earned_pct`'s missing
-lower-bound clamp and `earned_exposure_value`'s proration
-(`tests/test_exposures.py`), and a day-count convention fix (actual/actual,
-not 30/360). Fixing `earned_exposure_value` also surfaced and fixed a
-previously-masked bug in `aggregate_exposures`
-(`experience_preparer.py`) — it used the contract's inception date as a
-shared `analysis_date` for every exposure regardless of modelling year;
-each exposure now uses its own period end. No pre-existing failures remain.
+`test_exposure_curve_fitting.py` errors at **collection** (needs `scipy`,
+not installed) — always `--ignore` or skip it.
 
-`tests/test_exposure_curve_fitting.py` causes a **collection error** (requires `scipy`, not installed). Always `--ignore` it or skip it.
-
-**Double-import trap**: `test_claims.py` imports from `src.pyre.claims.claims` (explicit src path) while also importing from `pyre.exceptions.exceptions`. With `pythonpath=["src"]`, both `src.pyre.*` and `pyre.*` are importable and produce distinct module objects. `assertRaises(ClaimsException)` will fail if the exception is raised by a module loaded under the other path.
+**Double-import trap**: some tests import via `src.pyre.*` instead of
+`pyre.*`. Under `pythonpath=["src", "."]` both resolve to distinct module
+objects, so `assertRaises(SomeException)` can fail if the exception was
+raised under the other import path. Write new code/tests against `pyre.*`.
 
 ## Tooling (configured in pyproject.toml)
 
@@ -149,13 +134,9 @@ each exposure now uses its own period end. No pre-existing failures remain.
 
 ## Git Branches
 
-- **main**: stable/production — kept in sync with `develop` (fast-forward only)
-- **develop**: active development — both branches pushed and in sync with `origin`
-- **gh-pages**: docs hosting, deployed via `hatch run docs:deploy` (see Commands)
-
-No other local branches or worktrees exist — the former `.worktrees/refactor`
-worktree and its `feature/shiny-webapp-data-injection`/`refactor/pyre-v1`
-branches (both already fully-merged ancestors of `develop`) have been removed.
+- **main**: stable/production — fast-forward only from `develop`
+- **develop**: active development
+- **gh-pages**: docs hosting, deployed via `hatch run docs:deploy`
 
 ## Important Notes
 
