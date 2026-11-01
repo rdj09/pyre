@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import io
+from typing import Callable, Optional
 
 import pandas as pd
 import panel as pn
@@ -45,7 +46,9 @@ FORMATTERS = {
 }
 
 
-def build_results_page(state: WorkbenchState) -> pn.Column:
+def build_results_page(
+    state: WorkbenchState, on_save: Optional[Callable[[], None]] = None
+) -> pn.Column:
     status = pn.pane.Alert(
         "Load data and configure a contract, then run pricing.", alert_type="warning"
     )
@@ -203,6 +206,8 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         export_button.visible = True
         status.object = f"Saved version #{new_version_id}."
         status.alert_type = "success"
+        if on_save is not None:
+            on_save()
 
     def _on_recalculate(_event):
         if state.loaded_version_id is None:

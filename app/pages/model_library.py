@@ -4,7 +4,11 @@ Catalog of saved pricing versions (Task 1-8's `app/db.py` repository layer)
 with Load / Copy / Delete / Mark Final actions. Loading a version mutates
 the shared `WorkbenchState` and then calls the `on_load` callback so the
 caller (`app/main.py`) can rebuild the other tabs against the newly-loaded
-state.
+state. Copy and Delete change the *set* of saved versions (not just this
+page's own catalog), so they additionally call the optional `on_change`
+callback -- letting the caller (e.g. the Compare tab's version picker)
+refresh its own stale options too. Mark Final only flips a boolean flag on
+an existing version, so it does not call `on_change`.
 """
 
 from __future__ import annotations
@@ -59,7 +63,11 @@ def _version_options(summaries: list[VersionSummary]) -> dict[str, int]:
     return {f"{summary.id}: {summary.label}": summary.id for summary in summaries}
 
 
-def build_model_library_page(state: WorkbenchState, on_load: Callable[[], None]) -> pn.Column:
+def build_model_library_page(
+    state: WorkbenchState,
+    on_load: Callable[[], None],
+    on_change: Optional[Callable[[], None]] = None,
+) -> pn.Column:
     status = pn.pane.Alert(
         "Select a version below to Load, Copy, Delete, or mark Final.", alert_type="warning"
     )
@@ -125,6 +133,8 @@ def build_model_library_page(state: WorkbenchState, on_load: Callable[[], None])
         _refresh_catalog()
         status.object = f"Copied version #{version_id} to new version #{new_id} ('{new_label}')."
         status.alert_type = "success"
+        if on_change is not None:
+            on_change()
 
     def _on_delete(_event):
         version_id = _selected_id()
@@ -138,6 +148,8 @@ def build_model_library_page(state: WorkbenchState, on_load: Callable[[], None])
         _refresh_catalog()
         status.object = f"Deleted version #{version_id}."
         status.alert_type = "success"
+        if on_change is not None:
+            on_change()
 
     def _on_mark_final(_event):
         version_id = _selected_id()
