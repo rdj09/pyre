@@ -268,11 +268,16 @@ class ExperienceModelData:
                 }
         """
         exposures_by_year = {}
-        # Use current date for exposure value calculations
-        analysis_date = self.ri_contract.contract_meta_data.inception_date
 
         for exposure in self.trended_exposures:
             year = exposure.modelling_year
+
+            # This aggregates historical (already-completed) exposure periods for a
+            # burn-cost analysis, so each exposure is treated as fully earned by the
+            # end of its own period -- not relative to this contract's inception
+            # date, which has no relationship to a given exposure's own period and
+            # could predate or postdate it entirely.
+            analysis_date = exposure.exposure_meta.exposure_period_end
 
             # Calculate written and earned values using Exposure methods
             written_val = exposure.written_exposure_value(analysis_date)

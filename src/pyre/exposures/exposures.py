@@ -180,10 +180,13 @@ class Exposure:
             return 0.0
         if self._exposure_meta.aggregate:  # No need for == True
             return 0.0  # TODO: Implement parallelogram method when handling aggregate exposures
-        return min(
-            (analysis_date - self._exposure_meta.exposure_period_start).days
-            / self._exposure_meta.exposure_term_length_days,
-            1.0,
+        return max(
+            min(
+                (analysis_date - self._exposure_meta.exposure_period_start).days
+                / self._exposure_meta.exposure_term_length_days,
+                1.0,
+            ),
+            0.0,
         )
 
     def earned_exposure_value(self, analysis_date: date) -> float:
@@ -193,13 +196,13 @@ class Exposure:
             analysis_date (date): The date for which to calculate the earned exposure value.
 
         Returns:
-            float: The earned exposure value. If the exposure type is EARNED, this is the full
-                  exposure value. Otherwise, it's the exposure value multiplied by the earned percentage.
+            float: The exposure value prorated by the elapsed fraction of the exposure
+                  period as of analysis_date (0.0 before the period starts, the full
+                  value once it ends). This applies regardless of exposure_type --
+                  what fraction has earned by a given date doesn't depend on how the
+                  stored exposure_value was itself measured.
         """
-        if self._exposure_meta.exposure_type == ExposureBasis.EARNED:
-            return self._exposure_values.exposure_value
-        else:
-            return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
+        return self._exposure_values.exposure_value * self._earned_pct(analysis_date)
 
     def __repr__(self) -> str:
         return (
