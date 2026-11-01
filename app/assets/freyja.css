@@ -46,6 +46,27 @@
   color: var(--freyja-navy);
 }
 
+/* ---- Dark mode: toggled via a .freyja-dark class on <html> (app/theme.py's
+   theme_toggle()), reaching into each component's shadow root via
+   :host-context() -- confirmed working against this repo's Playwright-tested
+   Chromium version before this block was written.
+   This palette is derived, not part of the official Freyja brand guide
+   (light mode only) -- flagged for visual sign-off. */
+:host-context(.freyja-dark) {
+  --freyja-navy: #FAF9F9;
+  --freyja-offwhite: #0A1826;
+  --freyja-slate: #8C98A6;
+  --freyja-lightblue: #8EBED5;
+  --freyja-cream: #2E2612;
+  --freyja-white: #122A42;
+  --freyja-slate-deep: #A9B4C0;
+  --freyja-navy-10: #27425C;
+  --freyja-gold-20: #332A18;
+  --freyja-lightblue-20: #16222B;
+  --freyja-green: #6FAF7B;
+  --freyja-red: #D9695A;
+}
+
 /* ---- Headings (Markdown panes) ---- */
 h1, h2, h3, h4 {
   font-family: var(--freyja-font);
@@ -225,6 +246,19 @@ div .tabulator .tabulator-header .tabulator-col,
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+/* The table header stays a fixed dark accent bar in both themes (like the
+   page header) -- pinned to literal values, not --freyja-navy/-offwhite,
+   since those swap in dark mode and would otherwise invert this to a
+   bright white bar. */
+:host-context(.freyja-dark) .tabulator .tabulator-header,
+:host-context(.freyja-dark) .tabulator .tabulator-header .tabulator-header-contents,
+:host-context(.freyja-dark) div .tabulator .tabulator-headers,
+:host-context(.freyja-dark) div .tabulator .tabulator-header .tabulator-col,
+:host-context(.freyja-dark) .pnx-tabulator.tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+  background-color: #0A2E50;
+  color: #FAF9F9;
+  border-color: #0A2E50;
+}
 .tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-sorter .tabulator-arrow {
   border-bottom-color: var(--freyja-slate);
 }
@@ -279,3 +313,27 @@ div .tabulator .tabulator-header .tabulator-col,
 }
 .freyja-footer p { margin: 0 0 0.15rem; }
 .freyja-footer a { color: var(--freyja-slate-deep); }
+
+/* ---- Theme toggle (HTML pane from app.theme, sits in the always-Navy
+   header -- fixed off-white icon colour, not the swappable --freyja-offwhite
+   variable, so it stays visible on the header in both light and dark mode. ---- */
+.freyja-theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #FAF9F9;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.freyja-theme-toggle:hover { background: rgba(250, 249, 249, 0.12); }
+.freyja-theme-toggle:focus { outline: none; }
+.freyja-theme-toggle:focus-visible {
+  outline: 2px solid var(--freyja-gold);
+  outline-offset: 2px;
+}

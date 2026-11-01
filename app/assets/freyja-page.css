@@ -22,6 +22,21 @@ body {
   color: #0A2E50;
 }
 
+/* Dark mode: toggled via .freyja-dark on <html> (app/theme.py's
+   theme_toggle()). #header stays the same flat Navy bar in both modes --
+   it's already the brand's dark accent, not the page surface. */
+html.freyja-dark body {
+  background-color: #0A1826;
+  color: #FAF9F9;
+}
+/* Bootstrap's own base CSS puts a hardcoded white background on the main
+   content column, outside any Panel component's shadow root (so
+   freyja.css's :host-context() can't reach it) -- let the dark body
+   background underneath show through instead. */
+html.freyja-dark .col {
+  background-color: transparent !important;
+}
+
 /* Header: flat Navy bar with a Gold rule; no drop shadow */
 #header {
   box-shadow: none !important;
