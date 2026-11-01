@@ -1,11 +1,14 @@
-"""Build the Freyja Consulting brand assets used by the Treaty Pricing Workbench.
+"""Build the Freyja Consulting brand assets used by the Treaty Pricing Workbench
+and the MkDocs documentation site.
 
-Outputs (committed to the repo; rerun only if the brand changes):
-  app/assets/brand/freyja-wordmark-offwhite.svg   wordmark for the Navy header
-  app/assets/brand/freyja-wordmark-navy.svg       wordmark for light backgrounds (README, docs)
-  app/assets/brand/favicon.svg                    browser-tab icon
-  app/assets/fonts/Montserrat-{400,500,600,700}.woff2   Latin-subset web fonts
-  app/assets/fonts/OFL.txt                        Montserrat licence (SIL OFL 1.1)
+Outputs (committed to the repo; rerun only if the brand changes), written
+identically under both app/assets/ (Panel app) and docs/assets/ (MkDocs,
+which can only serve static files from inside its docs_dir):
+  <root>/brand/freyja-wordmark-offwhite.svg   wordmark for the Navy header
+  <root>/brand/freyja-wordmark-navy.svg       wordmark for light backgrounds (README, docs)
+  <root>/brand/favicon.svg                    browser-tab icon
+  <root>/fonts/Montserrat-{400,500,600,700}.woff2   Latin-subset web fonts
+  <root>/fonts/OFL.txt                        Montserrat licence (SIL OFL 1.1)
 
 Text in the SVGs is converted to outlines, so they render identically whether or
 not Montserrat is installed. Montserrat (SIL OFL 1.1) is downloaded once from
@@ -30,6 +33,7 @@ from fontTools.ttLib import TTFont
 
 REPO = Path(__file__).resolve().parent.parent
 ASSETS = REPO / "app" / "assets"
+DOCS_ASSETS = REPO / "docs" / "assets"
 CACHE = REPO / ".cache" / "montserrat"
 SRC = "https://raw.githubusercontent.com/JulietaUla/Montserrat/master/"
 WEIGHTS = {
@@ -146,17 +150,21 @@ def main() -> None:
     )
     args = ap.parse_args()
     fonts = {w: fetch(f"fonts/ttf/Montserrat-{n}.ttf", args.fonts_dir) for w, n in WEIGHTS.items()}
-    brand = ASSETS / "brand"
-    brand.mkdir(parents=True, exist_ok=True)
-    (brand / "freyja-wordmark-offwhite.svg").write_text(wordmark(fonts, OFFWHITE), encoding="utf-8")
-    (brand / "freyja-wordmark-navy.svg").write_text(wordmark(fonts, NAVY), encoding="utf-8")
-    (brand / "favicon.svg").write_text(favicon(fonts), encoding="utf-8")
-    web_fonts(fonts, ASSETS / "fonts")
     licence = fetch("OFL.txt", args.fonts_dir)
-    (ASSETS / "fonts" / "OFL.txt").write_bytes(licence.read_bytes())
-    for p in sorted(ASSETS.rglob("*")):
-        if p.is_file():
-            print(f"{p.relative_to(REPO)}  {p.stat().st_size:,} bytes")
+
+    for root in (ASSETS, DOCS_ASSETS):
+        brand = root / "brand"
+        brand.mkdir(parents=True, exist_ok=True)
+        (brand / "freyja-wordmark-offwhite.svg").write_text(wordmark(fonts, OFFWHITE), encoding="utf-8")
+        (brand / "freyja-wordmark-navy.svg").write_text(wordmark(fonts, NAVY), encoding="utf-8")
+        (brand / "favicon.svg").write_text(favicon(fonts), encoding="utf-8")
+        web_fonts(fonts, root / "fonts")
+        (root / "fonts" / "OFL.txt").write_bytes(licence.read_bytes())
+
+    for root in (ASSETS, DOCS_ASSETS):
+        for p in sorted(root.rglob("*")):
+            if p.is_file():
+                print(f"{p.relative_to(REPO)}  {p.stat().st_size:,} bytes")
 
 
 if __name__ == "__main__":
