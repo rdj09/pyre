@@ -16,13 +16,15 @@ def write_table(
 
     `path` may be a filesystem path (str/Path) or any writable binary stream
     (e.g. io.BytesIO) -- used by the Panel app to serve a download without
-    touching disk. For a filesystem path that already exists, the named
-    sheet is replaced (re-running a report overwrites cleanly) while any
-    other existing sheets are preserved. A stream target has nothing to
-    merge into, so it always gets a fresh workbook.
+    touching disk. If `path` already has content -- an existing file, or a
+    stream a previous write_table call already wrote a workbook into -- the
+    named sheet is replaced (re-running a report overwrites cleanly, and
+    multiple calls on the same stream accumulate sheets) while any other
+    existing sheets are preserved. An empty target (a new file, or a fresh
+    stream) gets a new workbook.
 
-    Warning: the filesystem-path case loads and re-saves the whole workbook
-    via openpyxl, which does not round-trip every part of an .xlsx file --
+    Warning: the merge path loads and re-saves the whole workbook via
+    openpyxl, which does not round-trip every part of an .xlsx file --
     charts, images, and pivot tables already at `path` will be lost. Point
     these functions at dedicated output files, not at a workbook that
     already has charts/pivots you want to keep.
@@ -30,7 +32,15 @@ def write_table(
     is_filesystem_path = isinstance(path, (str, Path))
     target = Path(path) if is_filesystem_path else path
 
-    if is_filesystem_path and target.exists():
+    if is_filesystem_path:
+        has_existing_content = target.exists()
+    else:
+        start = target.tell()
+        target.seek(0, 2)
+        has_existing_content = target.tell() > 0
+        target.seek(start)
+
+    if has_existing_content:
         workbook = load_workbook(target)
         if sheet_name in workbook.sheetnames:
             del workbook[sheet_name]
@@ -43,4 +53,7 @@ def write_table(
     for row in rows:
         worksheet.append(list(row))
 
+    if not is_filesystem_path:
+        target.seek(0)
+        target.truncate()
     workbook.save(target)

@@ -91,6 +91,19 @@ class TestWriteTable(unittest.TestCase):
         values = [list(row) for row in wb["Sheet1"].iter_rows(values_only=True)]
         self.assertEqual(values, [["a", "b"], [1, 2]])
 
+    def test_two_calls_on_the_same_buffer_both_sheets_present(self):
+        import io
+
+        from pyre.io_excel._workbook import write_table
+
+        buffer = io.BytesIO()
+        write_table(headers=["a"], rows=[[1]], path=buffer, sheet_name="First")
+        write_table(headers=["b"], rows=[[2]], path=buffer, sheet_name="Second")
+
+        buffer.seek(0)
+        wb = openpyxl.load_workbook(buffer)
+        self.assertEqual(set(wb.sheetnames), {"First", "Second"})
+
 
 @unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
 class TestReadClaims(unittest.TestCase):

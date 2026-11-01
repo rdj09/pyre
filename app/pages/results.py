@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import io
+
 import pandas as pd
 import panel as pn
 from bokeh.models.widgets.tables import NumberFormatter
 
 from app.service import run_pricing
 from app.state import WorkbenchState
+from pyre import ExperienceModelData
+from pyre.io_excel import write_experience_rating_results
 
 AMOUNT = NumberFormatter(format="0,0", text_align="right")
 TITLES = {
@@ -46,12 +50,30 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         pd.DataFrame(), show_index=False, disabled=True, titles=TITLES, formatters=FORMATTERS
     )
 
+    def _export_results():
+        model_data = ExperienceModelData(
+            claims=state.claims, exposures=state.exposures, ri_contract=state.build_contract()
+        )
+        buffer = io.BytesIO()
+        write_experience_rating_results(model_data, buffer)
+        buffer.seek(0)
+        return buffer
+
+    export_button = pn.widgets.FileDownload(
+        label="Export to Excel",
+        filename="pricing_results.xlsx",
+        callback=_export_results,
+        button_type="default",
+        visible=False,
+    )
+
     def _on_run(_event):
         if not state.is_ready_to_price():
             status.object = (
                 "Load claims + exposures and configure a contract with at least one layer first."
             )
             status.alert_type = "danger"
+            export_button.visible = False
             return
         try:
             contract = state.build_contract()
@@ -60,12 +82,15 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
             exposures_table.value = state.results.exposures_by_year
             status.object = "Pricing run complete. See the tables below."
             status.alert_type = "success"
+            export_button.visible = True
         except NotImplementedError as exc:
             status.object = f"Unsupported layer configuration: {exc}"
             status.alert_type = "danger"
+            export_button.visible = False
         except ValueError as exc:
             status.object = f"Could not run pricing: {exc}"
             status.alert_type = "danger"
+            export_button.visible = False
 
     run_button.on_click(_on_run)
 
@@ -77,4 +102,5 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         results_table,
         "### Exposures by modelling year",
         exposures_table,
+        export_button,
     )
