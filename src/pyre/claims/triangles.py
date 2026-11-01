@@ -466,59 +466,71 @@ class IBNERPatternExtractor:
         self.origin_years = triangle.origin_years
         self.dev_periods = triangle.dev_periods
 
-        self.N = {oy: {} for oy in self.origin_years}
-        self.D = {oy: {} for oy in self.origin_years}
+        self._N_triangle: Dict[int, Dict[int, float]] = {oy: {} for oy in self.origin_years}
+        self._D_triangle: Dict[int, Dict[int, float]] = {oy: {} for oy in self.origin_years}
         self._compute_N_and_D()
 
     def _compute_N_and_D(self):
         """
-        Compute the N and D triangles from cumulative data.
+        Compute the N (cumulative) and D (age-to-age development factor) triangles.
         """
         for oy in self.origin_years:
-            cumulative = [self.triangle[oy].get(d, None) for d in self.dev_periods]
+            cumulative = [self.triangle.get(oy, {}).get(d) for d in self.dev_periods]
             for idx, d in enumerate(self.dev_periods):
-                if idx >= len(cumulative) or cumulative[idx] is None:
-                    self.N[oy][d] = None
-                    self.D[oy][d] = None
+                current = cumulative[idx]
+                if current is None:
+                    self._N_triangle[oy][d] = None
+                    self._D_triangle[oy][d] = None
                     continue
 
-                current = cumulative[idx]
+                self._N_triangle[oy][d] = current
                 if idx == 0:
-                    self.N[oy][d] = current
-                    self.D[oy][d] = None
+                    # Raw value here; get_D_triangle() normalizes the first period to 1.0.
+                    self._D_triangle[oy][d] = current
                 else:
                     prev = cumulative[idx - 1]
-                    if current is None or prev is None:
-                        self.N[oy][d] = None
-                        self.D[oy][d] = None
-                    else:
-                        self.D[oy][d] = prev - current
-                        self.N[oy][d] = current - prev + self.D[oy][d]
+                    self._D_triangle[oy][d] = (current / prev) if prev is not None else None
 
-    def get_N_triangle(self) -> Dict[int, Dict[int, float]]:
+    def get_N_triangle(self) -> Triangle:
         """
-        Returns the N triangle (new claims).
+        Returns the N triangle (cumulative values) as a Triangle instance.
         """
-        return self.N
+        return Triangle(triangle=self._N_triangle)
 
-    def get_D_triangle(self) -> Dict[int, Dict[int, float]]:
+    def get_D_triangle(self) -> Triangle:
         """
-        Returns the D triangle (IBNER development).
+        Returns the D triangle (age-to-age development factors, first period normalized to 1.0).
         """
-        return self.D
+        normalized: Dict[int, Dict[int, float]] = {}
+        for oy in self.origin_years:
+            normalized[oy] = {}
+            for idx, d in enumerate(self.dev_periods):
+                value = self._D_triangle[oy].get(d)
+                if value is None:
+                    continue
+                normalized[oy][d] = 1.0 if idx == 0 else value
+        return Triangle(triangle=normalized)
 
     def get_IBNER_pattern(self) -> Dict[int, float]:
         """
-        Returns the average D (IBNER) pattern per development year.
+        Returns, per origin year, the product of the average age-to-age development
+        factors for every development period after that year's latest available data.
         """
-        sums = {d: 0.0 for d in self.dev_periods}
-        counts = {d: 0 for d in self.dev_periods}
+        d_triangle = self.get_D_triangle().triangle
+        avg_ratio: Dict[int, float] = {}
+        for d in self.dev_periods:
+            vals = [d_triangle[oy][d] for oy in self.origin_years if d in d_triangle.get(oy, {})]
+            if vals:
+                avg_ratio[d] = sum(vals) / len(vals)
 
+        pattern: Dict[int, float] = {}
         for oy in self.origin_years:
-            for d in self.dev_periods:
-                val = self.D.get(oy, {}).get(d)
-                if val is not None:
-                    sums[d] += val
-                    counts[d] += 1
-
-        return {d: (sums[d] / counts[d]) if counts[d] > 0 else None for d in self.dev_periods}
+            available = [d for d in self.dev_periods if d in self.triangle.get(oy, {})]
+            latest = max(available) if available else None
+            factor = 1.0
+            if latest is not None:
+                for d in self.dev_periods:
+                    if d > latest:
+                        factor *= avg_ratio.get(d, 1.0)
+            pattern[oy] = factor
+        return pattern
