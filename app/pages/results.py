@@ -104,7 +104,12 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         filename="pricing_results.xlsx",
         callback=_export_results,
         button_type="default",
-        visible=False,
+        # Visible up front when a cached version is already loaded (e.g. on
+        # (re)building this page after loading one elsewhere) -- that's
+        # exactly the "no live run this session" case _export_results
+        # branches on above. A run/recalculate re-asserts this on success
+        # and clears it up front on failure, same as before.
+        visible=state.loaded_version_id is not None,
     )
 
     def _run_pricing_and_refresh() -> ExperienceModelData | None:
@@ -178,6 +183,7 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
             )
         state.loaded_version_id = new_version_id
         recalculate_button.visible = True
+        export_button.visible = True
         status.object = f"Saved version #{new_version_id}."
         status.alert_type = "success"
 
