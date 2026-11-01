@@ -1,4 +1,5 @@
 import contextlib
+import dataclasses
 import pickle
 import sqlite3
 from dataclasses import dataclass
@@ -297,3 +298,131 @@ def delete_version(path: Path, version_id: int) -> None:
     with _connect(path) as conn:
         conn.execute("DELETE FROM pricing_versions WHERE id = ?", (version_id,))
         conn.commit()
+
+
+@dataclass
+class LayerFieldChange:
+    layer_id: int
+    field: str
+    old_value: Any
+    new_value: Any
+
+
+@dataclass
+class ResultsRowDiff:
+    layer_id: int
+    layer_name: str
+    modelling_year: int
+    ceded_paid_old: float
+    ceded_paid_new: float
+    ceded_incurred_old: float
+    ceded_incurred_new: float
+    loss_ratio_old: Optional[float]
+    loss_ratio_new: Optional[float]
+
+
+@dataclass
+class VersionDiff:
+    claims_count_old: int
+    claims_count_new: int
+    claims_total_incurred_old: float
+    claims_total_incurred_new: float
+    exposures_count_old: int
+    exposures_count_new: int
+    exposures_total_value_old: float
+    exposures_total_value_new: float
+    layer_changes: list[LayerFieldChange]
+    results_changes: list[ResultsRowDiff]
+
+
+def _claims_count_and_total_incurred(claims: Optional[Claims]) -> tuple[int, float]:
+    if claims is None:
+        return 0, 0.0
+    count = len(claims.claims)
+    total_incurred = sum(
+        claim.capped_claim_development_history.latest_incurred for claim in claims.claims
+    )
+    return count, total_incurred
+
+
+def _exposures_count_and_total_value(exposures: Optional[Exposures]) -> tuple[int, float]:
+    if exposures is None:
+        return 0, 0.0
+    count = len(exposures.exposures)
+    total_value = sum(exposure.exposure_values.exposure_value for exposure in exposures.exposures)
+    return count, total_value
+
+
+def diff_versions(path: Path, version_id_old: int, version_id_new: int) -> VersionDiff:
+    snapshot_old, by_layer_year_old, _ = load_version(path, version_id_old)
+    snapshot_new, by_layer_year_new, _ = load_version(path, version_id_new)
+
+    claims_count_old, claims_total_incurred_old = _claims_count_and_total_incurred(
+        snapshot_old.claims
+    )
+    claims_count_new, claims_total_incurred_new = _claims_count_and_total_incurred(
+        snapshot_new.claims
+    )
+    exposures_count_old, exposures_total_value_old = _exposures_count_and_total_value(
+        snapshot_old.exposures
+    )
+    exposures_count_new, exposures_total_value_new = _exposures_count_and_total_value(
+        snapshot_new.exposures
+    )
+
+    layers_old = {layer.layer_id: layer for layer in snapshot_old.layers}
+    layers_new = {layer.layer_id: layer for layer in snapshot_new.layers}
+    layer_changes: list[LayerFieldChange] = []
+    for layer_id in layers_old.keys() & layers_new.keys():
+        layer_old = layers_old[layer_id]
+        layer_new = layers_new[layer_id]
+        for field in dataclasses.fields(RILayer):
+            old_value = getattr(layer_old, field.name)
+            new_value = getattr(layer_new, field.name)
+            if old_value != new_value:
+                layer_changes.append(
+                    LayerFieldChange(
+                        layer_id=layer_id,
+                        field=field.name,
+                        old_value=old_value,
+                        new_value=new_value,
+                    )
+                )
+
+    results_old_by_key = {
+        (row["layer_id"], row["modelling_year"]): row for row in by_layer_year_old
+    }
+    results_new_by_key = {
+        (row["layer_id"], row["modelling_year"]): row for row in by_layer_year_new
+    }
+    results_changes: list[ResultsRowDiff] = []
+    for key in results_old_by_key.keys() & results_new_by_key.keys():
+        row_old = results_old_by_key[key]
+        row_new = results_new_by_key[key]
+        layer_id, modelling_year = key
+        results_changes.append(
+            ResultsRowDiff(
+                layer_id=layer_id,
+                layer_name=row_new["layer_name"],
+                modelling_year=modelling_year,
+                ceded_paid_old=row_old["ceded_paid"],
+                ceded_paid_new=row_new["ceded_paid"],
+                ceded_incurred_old=row_old["ceded_incurred"],
+                ceded_incurred_new=row_new["ceded_incurred"],
+                loss_ratio_old=row_old["loss_ratio"],
+                loss_ratio_new=row_new["loss_ratio"],
+            )
+        )
+
+    return VersionDiff(
+        claims_count_old=claims_count_old,
+        claims_count_new=claims_count_new,
+        claims_total_incurred_old=claims_total_incurred_old,
+        claims_total_incurred_new=claims_total_incurred_new,
+        exposures_count_old=exposures_count_old,
+        exposures_count_new=exposures_count_new,
+        exposures_total_value_old=exposures_total_value_old,
+        exposures_total_value_new=exposures_total_value_new,
+        layer_changes=layer_changes,
+        results_changes=results_changes,
+    )

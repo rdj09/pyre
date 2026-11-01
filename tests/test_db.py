@@ -259,5 +259,60 @@ class TestDeleteVersion(unittest.TestCase):
         self.assertEqual(remaining[child_id].parent_id, None)
 
 
+class TestDiffVersions(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "test.db"
+        init_db(self.path)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def _layer(self, layer_id, occurrence_limit):
+        from pyre import RILayer
+        from pyre.treaty import ContractType
+        return RILayer(
+            layer_id=layer_id, layer_name="L", layer_type=ContractType.EXCESS_OF_LOSS,
+            occurrence_attachment=100_000.0, occurrence_limit=occurrence_limit,
+            aggregate_attachment=0.0, aggregate_limit=0.0, subject_lines_of_business=[],
+            subject_lob_exposure_amounts=[], full_subject_premium=0.0, written_line=1.0,
+            signed_line=1.0, number_of_reinstatements=0, reinstatement_cost={},
+        )
+
+    def test_detects_a_changed_layer_field_and_a_changed_result(self):
+        from app.db import ModelSnapshot, diff_versions, save_results, save_version
+
+        id_old = save_version(self.path, ModelSnapshot(None, None, None, [self._layer(1, 200_000.0)]), label="old")
+        id_new = save_version(self.path, ModelSnapshot(None, None, None, [self._layer(1, 300_000.0)]), label="new")
+        save_results(self.path, id_old,
+            [{"layer_id": 1, "layer_name": "L", "modelling_year": 2022, "ceded_paid": 0.0,
+              "ceded_incurred": 100.0, "claim_count": 1, "earned_premium": 1000.0, "loss_ratio": 0.1}], [])
+        save_results(self.path, id_new,
+            [{"layer_id": 1, "layer_name": "L", "modelling_year": 2022, "ceded_paid": 0.0,
+              "ceded_incurred": 150.0, "claim_count": 1, "earned_premium": 1000.0, "loss_ratio": 0.15}], [])
+
+        diff = diff_versions(self.path, id_old, id_new)
+
+        self.assertIn(
+            ("occurrence_limit", 200_000.0, 300_000.0),
+            [(c.field, c.old_value, c.new_value) for c in diff.layer_changes],
+        )
+        self.assertEqual(len(diff.results_changes), 1)
+        self.assertEqual(diff.results_changes[0].ceded_incurred_old, 100.0)
+        self.assertEqual(diff.results_changes[0].ceded_incurred_new, 150.0)
+
+    def test_no_overlap_returns_empty_diff_lists_not_an_error(self):
+        from app.db import ModelSnapshot, diff_versions, save_version
+
+        id_old = save_version(self.path, ModelSnapshot(None, None, None, [self._layer(1, 200_000.0)]), label="old")
+        id_new = save_version(self.path, ModelSnapshot(None, None, None, [self._layer(2, 300_000.0)]), label="new")
+
+        diff = diff_versions(self.path, id_old, id_new)
+
+        self.assertEqual(diff.layer_changes, [])
+        self.assertEqual(diff.results_changes, [])
+        self.assertEqual(diff.claims_count_old, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
