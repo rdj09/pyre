@@ -291,3 +291,9 @@ def copy_version(path: Path, version_id: int, new_label: str) -> int:
         save_results(path, new_version_id, by_layer_year, exposures_by_year)
 
     return new_version_id
+
+
+def delete_version(path: Path, version_id: int) -> None:
+    with _connect(path) as conn:
+        conn.execute("DELETE FROM pricing_versions WHERE id = ?", (version_id,))
+        conn.commit()

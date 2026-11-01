@@ -219,5 +219,45 @@ class TestCopyVersion(unittest.TestCase):
         self.assertEqual(exposures_by_year, [])
 
 
+class TestDeleteVersion(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "test.db"
+        init_db(self.path)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_delete_removes_the_version_and_cascades_its_results(self):
+        from app.db import ModelSnapshot, _connect, delete_version, save_results, save_version
+
+        version_id = save_version(self.path, ModelSnapshot(None, None, None, []), label="v1")
+        save_results(
+            self.path, version_id,
+            [{"layer_id": 1, "layer_name": "L", "modelling_year": 2022, "ceded_paid": 0.0,
+              "ceded_incurred": 0.0, "claim_count": 0, "earned_premium": 0.0, "loss_ratio": None}],
+            [],
+        )
+
+        delete_version(self.path, version_id)
+
+        with _connect(self.path) as conn:
+            self.assertEqual(conn.execute("SELECT COUNT(*) FROM pricing_versions").fetchone()[0], 0)
+            self.assertEqual(
+                conn.execute("SELECT COUNT(*) FROM pricing_results_by_layer_year").fetchone()[0], 0
+            )
+
+    def test_deleting_a_version_with_children_orphans_rather_than_blocks(self):
+        from app.db import ModelSnapshot, copy_version, delete_version, list_versions, save_version
+
+        parent_id = save_version(self.path, ModelSnapshot(None, None, None, []), label="parent")
+        child_id = copy_version(self.path, parent_id, new_label="child")
+
+        delete_version(self.path, parent_id)  # must not raise
+
+        remaining = {s.id: s for s in list_versions(self.path)}
+        self.assertEqual(remaining[child_id].parent_id, None)
+
+
 if __name__ == "__main__":
     unittest.main()
