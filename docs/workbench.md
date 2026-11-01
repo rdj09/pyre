@@ -13,10 +13,18 @@ general data explorer or rate-monitoring dashboard.
 
 ```bash
 pip install -e ".[panel]"       # installs panel>=1.4, pandas>=2.0
-hatch run panel:serve           # panel serve app/main.py --show --autoreload
+hatch run panel:serve           # panel serve app/main.py --static-dirs assets=app/assets --show --autoreload
 # or, without Hatch:
 python run_app.py
 ```
+
+The app serves branding assets (fonts, wordmark, favicon) from `app/assets/`
+at `./assets`. `run_app.py` passes this to `pn.serve()` directly; the
+`panel:serve` Hatch script passes `--static-dirs` and also sets
+`PYTHONPATH=.` — without it, `panel serve app/main.py` puts `app/` itself on
+`sys.path` instead of the repo root, and `from app.pages import ...` fails
+with `ModuleNotFoundError: No module named 'app'`. Running `panel serve` by
+hand needs the same: `PYTHONPATH=. panel serve app/main.py --static-dirs assets=app/assets`.
 
 ## Layout
 
@@ -26,7 +34,33 @@ python run_app.py
 | `app/state.py` | Panel-free shared state (`WorkbenchState`). |
 | `app/pages/` | Panel UI: `contract_config.py`, `data_loading.py`, `results.py`. |
 | `app/main.py` | Entrypoint (`panel serve app/main.py`). Not named `app.py` — Bokeh's script loader would otherwise register the running script as a module named `app`, shadowing the `app` package. |
+| `app/theme.py` | Freyja Consulting branding (Panel-only — colours, type, header/footer, favicon). See "Branding" below. |
+| `app/assets/` | Brand assets: `brand/` (wordmark + favicon SVGs), `fonts/` (self-hosted Montserrat woff2 + licence), `freyja.css` (component stylesheet), `freyja-page.css` (document-level stylesheet). |
+| `scripts/build_brand_assets.py` | Regenerates everything under `app/assets/` — run via `hatch run brand:build`. |
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
+
+## Branding
+
+The workbench is styled to the Freyja Consulting brand — pyRE is the product,
+Freyja is the endorser (header "Maintained by", footer legal line). All
+colours come from the CSS custom properties defined once in
+`app/assets/freyja.css`; don't introduce colours outside that file. The
+wordmark and favicon are SVGs with text already converted to outlines, so
+they render correctly even without Montserrat installed.
+
+To rebuild the brand assets (e.g. after a brand-guide change):
+
+```bash
+hatch run brand:build
+# or, without Hatch:
+pip install fonttools brotli uharfbuzz
+python scripts/build_brand_assets.py
+```
+
+This downloads Montserrat (SIL OFL 1.1) once into `.cache/montserrat/`
+(gitignored) and regenerates the SVGs and woff2 subsets under
+`app/assets/`. The SVG output is deterministic — rerunning the build should
+produce no `git diff` for `app/assets/brand/*.svg`.
 
 ## Walkthrough
 

@@ -20,6 +20,8 @@ ruff format src/pyre/           # auto-format
 hatch run docs:serve            # local docs at localhost:8000
 hatch run docs:deploy           # publish to gh-pages
 
+hatch run brand:build           # regenerate app/assets/ (Freyja wordmark, favicon, Montserrat woff2)
+
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
 pip install -e ".[excel]"       # install with headless Excel (.xlsx) read/write support
@@ -54,7 +56,10 @@ Commands above). Layout:
 | `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results. |
 | `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py`. Only these and `app/main.py` import `panel`. |
 | `app/main.py` | Entrypoint (`panel serve app/main.py`). Deliberately **not** named `app.py` — Bokeh's script loader would register the running script as a module named `app`, colliding with and shadowing the `app` package itself. |
-| `run_app.py` | Top-level launcher (`python run_app.py`). |
+| `app/theme.py` | Freyja Consulting branding (Panel-only — `FreyjaDesign`, header/footer, favicon). Colours/type come only from `app/assets/freyja.css`. |
+| `app/assets/` | Brand assets: `brand/*.svg` (wordmark, favicon — text pre-converted to outlines), `fonts/*.woff2` (self-hosted Montserrat subset + `OFL.txt`), `freyja.css` (per-component shadow-DOM stylesheet), `freyja-page.css` (document-level `raw_css`, incl. `@font-face`). Regenerate via `hatch run brand:build` (see Commands) — SVG output is deterministic, woff2 is not (subsetting order), so only the SVGs are diffed to confirm a clean rebuild. |
+| `run_app.py` | Top-level launcher (`python run_app.py`); serves `app/assets/` at `./assets`. |
+| `scripts/build_brand_assets.py` | Regenerates `app/assets/` from the Freyja brand guide. Run via `hatch run brand:build`. |
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
 
 v1 scope is a single-contract pricing workbench (not a general data explorer or
