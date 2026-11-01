@@ -20,7 +20,7 @@ ruff format src/pyre/           # auto-format
 hatch run docs:serve            # local docs at localhost:8000
 hatch run docs:deploy           # publish to gh-pages
 
-hatch run brand:build           # regenerate app/assets/ (Freyja wordmark, favicon, Montserrat woff2)
+hatch run brand:build           # regenerate app/assets/ AND docs/assets/ (Freyja wordmark, favicon, Montserrat woff2)
 
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
@@ -56,8 +56,8 @@ Commands above). Layout:
 | `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results. |
 | `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py`. Only these and `app/main.py` import `panel`. |
 | `app/main.py` | Entrypoint (`panel serve app/main.py`). Deliberately **not** named `app.py` — Bokeh's script loader would register the running script as a module named `app`, colliding with and shadowing the `app` package itself. |
-| `app/theme.py` | Freyja Consulting branding (Panel-only — `FreyjaDesign`, header/footer, favicon). Colours/type come only from `app/assets/freyja.css`. |
-| `app/assets/` | Brand assets: `brand/*.svg` (wordmark, favicon — text pre-converted to outlines), `fonts/*.woff2` (self-hosted Montserrat subset + `OFL.txt`), `freyja.css` (per-component shadow-DOM stylesheet), `freyja-page.css` (document-level `raw_css`, incl. `@font-face`). Regenerate via `hatch run brand:build` (see Commands) — SVG output is deterministic, woff2 is not (subsetting order), so only the SVGs are diffed to confirm a clean rebuild. |
+| `app/theme.py` | Freyja Consulting branding (Panel-only — `FreyjaDesign`, header/footer, favicon, dark-mode toggle). Colours/type come only from `app/assets/freyja.css`. |
+| `app/assets/` | Brand assets: `brand/*.svg` (wordmark, favicon — text pre-converted to outlines), `fonts/*.woff2` (self-hosted Montserrat subset + `OFL.txt`), `freyja.css` (per-component shadow-DOM stylesheet, light + derived dark palette via `:host-context(.freyja-dark)`), `freyja-page.css` (document-level `raw_css`, incl. `@font-face`), `theme-init.js` (dark-mode toggle logic — loaded via `pn.config.js_files`, **not** inlined in an HTML pane, since Panel renders pane content via `innerHTML` and browsers don't execute `<script>` tags inserted that way). Regenerate the brand assets via `hatch run brand:build` (see Commands) — SVG output is deterministic, woff2 is not (subsetting order), so only the SVGs are diffed to confirm a clean rebuild. |
 | `run_app.py` | Top-level launcher (`python run_app.py`); serves `app/assets/` at `./assets`. |
 | `scripts/build_brand_assets.py` | Regenerates `app/assets/` from the Freyja brand guide. Run via `hatch run brand:build`. |
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
@@ -109,45 +109,32 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; ~125 tests collected
+├── tests/                     # unittest.TestCase style; 131 tests collected
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
 ```
 
-## Known Test State (develop, as of the io_excel subpackage addition)
+## Known Test State (develop)
 
-**Expected: 22 failed, 109 passed** (when ignoring `test_exposure_curve_fitting.py`,
+**Expected: 0 failed, 131 passed** (when ignoring `test_exposure_curve_fitting.py`,
 **with the `excel` extra installed** — `pip install -e ".[excel]"`, or via
 `hatch run pytest`, since `openpyxl` is listed in `[tool.hatch.envs.default]`).
 Without `openpyxl` installed, `tests/test_io_excel.py`'s 25 tests skip
-cleanly instead of failing (22 failed, 84 passed, 25 skipped) —
-`tests/test_exposure_rating_cost.py`'s 6 tests always run regardless, since
-that module is pure `pyre` core with no `openpyxl` dependency.
+cleanly instead of failing (106 passed, 25 skipped).
 
-Four pre-existing bugs have been fixed so far, each with its own regression
-test: `RILayer.loss_to_layer_fn` (`tests/test_treaty.py::TestRILayerLossToLayerFn`),
-`Trending.trend_exposures`'s method/property mismatch
-(`tests/test_trending.py::TestTrendExposuresPropertyFix`),
-`Triangle.from_claims` (`tests/test_triangles.py::TestTriangleFromClaims` — it
-read a nonexistent `claim.modelling_year` instead of
-`claim.claims_meta_data.modelling_year`, and iterated the paid/incurred lists
-with `.items()` as if they were dicts), and `ExposureModel._calculate_single_exposure_share`
-(`tests/test_exposure_rating_cost.py::TestCalculateAllShares` — an indentation
-bug meant the curve-position/share calculation only ran inside the `else`
-branch, silently dropping any layer whose limit+attachment fit inside the
-policy limit). The remaining failures below are still **pre-existing** and
-out of scope — do not attempt to fix them without understanding they pre-date
-these changes:
-
-| Failure group | Count | Root cause |
-|---|---|---|
-| `test_trending.py` | 9 | `trend_exposures`'s `exposure.modelling_year()`/`exposure.exposure_values()` method-vs-property bug is **fixed**; these 9 now fail for a *different*, separate, still-unfixed reason: `calculate_trend_factor`'s directionality is wrong whenever `origin_year != base_year` (e.g. divides instead of multiplies, or vice versa) — only matters for non-default (non-1.0) trend factors |
-| `test_ibner_pattern_extractor.py` | 4 | `IBNERPatternExtractor` internal API diverged from test expectations |
-| `test_claims.py` modelling year | 4 | Test expects years set by a *different* test method (broken test isolation — data in setUp doesn't match expected values) |
-| `test_claims.py` + `test_exposures.py` append/len | 2 | Tests expect `append` not to mutate in place (tests written incorrectly) |
-| `test_triangles.py` fit_curve | 1 | ZeroDivisionError in curve fitting |
-| `test_exposures.py` earned_pct/earned_value | 2 | `exposure_type` defaults to `ExposureBasis.EARNED` so the method returns full value, not prorated |
+All previously-documented pre-existing bugs have now been fixed, each with
+its own regression test — notably `Trending.calculate_trend_factor`'s
+directionality (`tests/test_trending.py`), a full rewrite of
+`IBNERPatternExtractor` to match its intended API
+(`tests/test_ibner_pattern_extractor.py`), `_earned_pct`'s missing
+lower-bound clamp and `earned_exposure_value`'s proration
+(`tests/test_exposures.py`), and a day-count convention fix (actual/actual,
+not 30/360). Fixing `earned_exposure_value` also surfaced and fixed a
+previously-masked bug in `aggregate_exposures`
+(`experience_preparer.py`) — it used the contract's inception date as a
+shared `analysis_date` for every exposure regardless of modelling year;
+each exposure now uses its own period end. No pre-existing failures remain.
 
 `tests/test_exposure_curve_fitting.py` causes a **collection error** (requires `scipy`, not installed). Always `--ignore` it or skip it.
 
@@ -174,4 +161,4 @@ branches (both already fully-merged ancestors of `develop`) have been removed.
 
 - `models/Experience/frequency_severity.py`: class is `SeverityFit` (was `severity_fit`).
 - Relative imports within `pyre` package — always use `from ..enums import X` style, not absolute `from pyre.enums import X`, inside `src/pyre/`.
-- Full docs: https://rdj09.github.io/pyre/ — `hatch run docs:serve` locally.
+- Full docs: https://rdj09.github.io/pyre/ — `hatch run docs:serve` locally. The MkDocs site is Freyja-branded too (custom palette via `docs/stylesheets/freyja-docs.css`, logo/favicon/fonts in `docs/assets/`, kept in sync with `app/assets/` by `scripts/build_brand_assets.py`).
