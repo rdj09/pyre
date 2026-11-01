@@ -159,21 +159,38 @@ def build_results_page(state: WorkbenchState) -> pn.Column:
         export_button.visible = True
 
     def _on_save_version(_event):
-        snapshot = ModelSnapshot(
-            claims=state.claims,
-            exposures=state.exposures,
-            contract_metadata=state.contract_metadata,
-            layers=state.layers,
-        )
+        # Only a live run this session has an ExperienceModelData to derive
+        # results from -- a draft-only save (no run yet) saves inputs alone.
+        has_results_to_save = state.results is not None and last_run_model_data
+        if has_results_to_save:
+            # Build the snapshot from the *same* model_data that produced the
+            # results being saved alongside it -- not live state, which may
+            # have been edited (e.g. on "Configure contract") since that run.
+            # This guarantees the saved inputs_blob always matches its own
+            # saved results; there is no drift to be internally inconsistent.
+            model_data = last_run_model_data[0]
+            snapshot = ModelSnapshot(
+                claims=model_data.claims,
+                exposures=model_data.exposures,
+                contract_metadata=model_data.ri_contract.contract_meta_data,
+                layers=list(model_data.ri_contract.layers),
+            )
+        else:
+            # No results to pair the snapshot with, so nothing to be
+            # inconsistent with -- a plain draft save of live state.
+            snapshot = ModelSnapshot(
+                claims=state.claims,
+                exposures=state.exposures,
+                contract_metadata=state.contract_metadata,
+                layers=state.layers,
+            )
         new_version_id = save_version(
             DB_PATH,
             snapshot,
             label=version_label_input.value,
             parent_id=state.loaded_version_id,
         )
-        # Only a live run this session has an ExperienceModelData to derive
-        # results from -- a draft-only save (no run yet) saves inputs alone.
-        if state.results is not None and last_run_model_data:
+        if has_results_to_save:
             model_data = last_run_model_data[0]
             save_results(
                 DB_PATH,
