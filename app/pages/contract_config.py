@@ -6,6 +6,7 @@ from datetime import date
 
 import pandas as pd
 import panel as pn
+from bokeh.models.widgets.tables import NumberFormatter
 
 from app.service import build_contract_metadata, build_layer
 from app.state import WorkbenchState
@@ -20,6 +21,26 @@ SELECTABLE_LAYER_TYPES = [
     ContractType.AGGREGATE_STOP_LOSS,
     ContractType.QUOTA_SHARE,
 ]
+
+LAYER_TITLES = {
+    "layer_id": "Layer ID",
+    "layer_name": "Layer",
+    "layer_type": "Type",
+    "occurrence_attachment": "Attachment",
+    "occurrence_limit": "Limit",
+    "full_subject_premium": "Subject premium",
+    "written_line": "Written line",
+    "signed_line": "Signed line",
+}
+_AMOUNT = NumberFormatter(format="0,0", text_align="right")
+_LINE = NumberFormatter(format="0.0%", text_align="right")
+LAYER_FORMATTERS = {
+    "occurrence_attachment": _AMOUNT,
+    "occurrence_limit": _AMOUNT,
+    "full_subject_premium": _AMOUNT,
+    "written_line": _LINE,
+    "signed_line": _LINE,
+}
 
 LAYER_COLUMNS = [
     "layer_id",
@@ -59,6 +80,8 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
         show_index=False,
         disabled=True,
         name="Layers",
+        titles=LAYER_TITLES,
+        formatters=LAYER_FORMATTERS,
     )
 
     layer_id = pn.widgets.IntInput(name="Layer ID", value=1)
@@ -74,7 +97,7 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
     written_line = pn.widgets.FloatInput(name="Written line", value=1.0)
     signed_line = pn.widgets.FloatInput(name="Signed line", value=1.0)
 
-    add_layer_button = pn.widgets.Button(name="Add layer", button_type="primary")
+    add_layer_button = pn.widgets.Button(name="Add layer", button_type="default")
     save_contract_button = pn.widgets.Button(name="Save contract metadata", button_type="primary")
 
     def _on_add_layer(_event):

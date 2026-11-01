@@ -15,6 +15,7 @@ from app.pages.contract_config import build_contract_config_page
 from app.pages.data_loading import build_data_loading_page
 from app.pages.results import build_results_page
 from app.state import WorkbenchState
+from app.theme import branded_template
 
 pn.extension("tabulator")
 
@@ -28,9 +29,7 @@ def build_app() -> pn.template.BootstrapTemplate:
         ("3. Run pricing", build_results_page(state)),
     )
 
-    template = pn.template.BootstrapTemplate(title="pyRE Treaty Pricing Workbench")
-    template.main.append(tabs)
-    return template
+    return branded_template(tabs)
 
 
 build_app().servable()
