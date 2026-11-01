@@ -276,3 +276,18 @@ def set_final(path: Path, version_id: int, is_final: bool) -> None:
             (int(is_final), now, version_id),
         )
         conn.commit()
+
+
+def copy_version(path: Path, version_id: int, new_label: str) -> int:
+    snapshot, by_layer_year, exposures_by_year = load_version(path, version_id)
+
+    # Save the copied snapshot with the new label and parent_id pointing to the original
+    new_version_id = save_version(
+        path, snapshot, label=new_label, parent_id=version_id, is_final=False
+    )
+
+    # If the original has results, copy them to the new version
+    if by_layer_year or exposures_by_year:
+        save_results(path, new_version_id, by_layer_year, exposures_by_year)
+
+    return new_version_id

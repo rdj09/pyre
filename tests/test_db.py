@@ -187,5 +187,37 @@ class TestListVersionsAndSetFinal(unittest.TestCase):
         self.assertEqual(list_versions(self.path, final_only=True), [])
 
 
+class TestCopyVersion(unittest.TestCase):
+    def setUp(self):
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.path = Path(self._tmpdir.name) / "test.db"
+        init_db(self.path)
+
+    def tearDown(self):
+        self._tmpdir.cleanup()
+
+    def test_copy_produces_an_independent_version_pointing_at_its_parent(self):
+        from pyre import Claims
+        from app.db import ModelSnapshot, copy_version, list_versions, load_version, save_version
+
+        original_id = save_version(self.path, ModelSnapshot(Claims([]), None, None, []), label="original")
+        copy_id = copy_version(self.path, original_id, new_label="copy")
+
+        self.assertNotEqual(copy_id, original_id)
+        summaries = {s.id: s for s in list_versions(self.path)}
+        self.assertEqual(summaries[copy_id].parent_id, original_id)
+        self.assertEqual(summaries[copy_id].label, "copy")
+
+    def test_copying_a_draft_with_no_results_succeeds(self):
+        from app.db import ModelSnapshot, copy_version, load_version, save_version
+
+        original_id = save_version(self.path, ModelSnapshot(None, None, None, []), label="draft")
+        copy_id = copy_version(self.path, original_id, new_label="draft copy")
+
+        _, by_layer_year, exposures_by_year = load_version(self.path, copy_id)
+        self.assertEqual(by_layer_year, [])
+        self.assertEqual(exposures_by_year, [])
+
+
 if __name__ == "__main__":
     unittest.main()
