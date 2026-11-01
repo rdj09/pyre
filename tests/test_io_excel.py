@@ -442,16 +442,33 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
             by_layer_year[0],
             [
                 "layer_id", "layer_name", "modelling_year", "ceded_paid",
-                "ceded_incurred", "claim_count", "earned_premium",
+                "ceded_incurred", "claim_count", "earned_premium", "loss_ratio",
             ],
         )
-        self.assertEqual(by_layer_year[1][0], 1)
-        self.assertEqual(by_layer_year[1][1], "XOL Layer")
-        self.assertEqual(by_layer_year[1][2], 2022)
+        self.assertEqual(by_layer_year[1][:7], [1, "XOL Layer", 2022, 0.0, 150000.0, 1, 1000000.0])
+        self.assertAlmostEqual(by_layer_year[1][7], 0.15)
 
         exposures_by_year = [list(row) for row in wb["ExposuresByYear"].iter_rows(values_only=True)]
         self.assertEqual(exposures_by_year[0], ["modelling_year", "written", "earned"])
         self.assertEqual(exposures_by_year[1][0], 2022)
+
+    def test_no_claims_still_writes_a_valid_header_only_sheet(self):
+        from pyre.claims.claims import Claims
+        from pyre.io_excel.results_io import write_experience_rating_results
+
+        self.model_data.claims = Claims([])
+
+        write_experience_rating_results(self.model_data, self.path)  # must not raise
+
+        wb = openpyxl.load_workbook(self.path)
+        by_layer_year = [list(row) for row in wb["ByLayerYear"].iter_rows(values_only=True)]
+        self.assertEqual(
+            by_layer_year,
+            [[
+                "layer_id", "layer_name", "modelling_year", "ceded_paid",
+                "ceded_incurred", "claim_count", "earned_premium", "loss_ratio",
+            ]],
+        )
 
     def test_rerunning_overwrites_rather_than_duplicating_rows(self):
         from pyre.io_excel.results_io import write_experience_rating_results
