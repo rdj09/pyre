@@ -110,7 +110,7 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 138 tests collected
+├── tests/                     # unittest.TestCase style; 140 tests collected
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
@@ -118,11 +118,11 @@ pyre/
 
 ## Known Test State (develop)
 
-**Expected: 0 failed, 138 passed** (when ignoring `test_exposure_curve_fitting.py`,
+**Expected: 0 failed, 140 passed** (when ignoring `test_exposure_curve_fitting.py`,
 **with the `excel` extra installed** — `pip install -e ".[excel]"`, or via
 `hatch run pytest`, since `openpyxl` is listed in `[tool.hatch.envs.default]`).
-Without `openpyxl` installed, `tests/test_io_excel.py`'s 28 tests skip
-cleanly instead of failing (110 passed, 28 skipped).
+Without `openpyxl` installed, `tests/test_io_excel.py`'s 29 tests skip
+cleanly instead of failing (111 passed, 29 skipped).
 
 All previously-documented pre-existing bugs have now been fixed, each with
 its own regression test — notably `Trending.calculate_trend_factor`'s
