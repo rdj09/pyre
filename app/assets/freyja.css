@@ -1,0 +1,281 @@
+/* Freyja Consulting brand - component stylesheet.
+   Loaded into every Panel component's shadow root by app.theme.FreyjaDesign.
+   Only the colours below may be used. */
+
+:host,
+:root {
+  --freyja-navy: #0A2E50;
+  --freyja-gold: #C9A076;
+  --freyja-offwhite: #FAF9F9;
+  --freyja-slate: #8C98A6;
+  --freyja-lightblue: #8EBED5;
+  --freyja-cream: #F9F5E3;
+  --freyja-white: #FFFFFF;
+  --freyja-slate-deep: #5C6A79;
+  --freyja-navy-10: #E6EAEE;
+  --freyja-gold-20: #F4ECE4;
+  --freyja-lightblue-20: #E8F2F7;
+  --freyja-green: #4F7F5A;
+  --freyja-red: #A94438;
+  --freyja-font: "Montserrat", Arial, sans-serif;
+  --freyja-radius: 0.33rem;
+
+  /* Panel design variables */
+  --design-primary-color: var(--freyja-navy);
+  --design-primary-text-color: var(--freyja-offwhite);
+  --design-secondary-color: var(--freyja-gold);
+  --design-secondary-text-color: var(--freyja-navy);
+  --design-background-color: var(--freyja-offwhite);
+  --design-background-text-color: var(--freyja-navy);
+  --design-surface-color: var(--freyja-white);
+  --design-surface-text-color: var(--freyja-navy);
+
+  /* Bootstrap / Bokeh variables */
+  --bokeh-base-font: var(--freyja-font);
+  --bs-font-sans-serif: var(--freyja-font);
+  --bs-body-font-family: var(--freyja-font);
+  --bs-body-color: var(--freyja-navy);
+  --bs-body-bg: var(--freyja-offwhite);
+  --bs-primary: var(--freyja-navy);
+  --bs-primary-rgb: 10, 46, 80;
+  --bs-border-color: var(--freyja-slate);
+  --bs-link-color: var(--freyja-navy);
+  --bs-link-hover-color: var(--freyja-navy);
+
+  font-family: var(--freyja-font);
+  color: var(--freyja-navy);
+}
+
+/* ---- Headings (Markdown panes) ---- */
+h1, h2, h3, h4 {
+  font-family: var(--freyja-font);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--freyja-navy);
+}
+p, li { line-height: 1.5; }
+a { color: var(--freyja-navy); text-decoration: none; }
+a:hover { text-decoration: underline; text-decoration-color: var(--freyja-gold); }
+
+/* ---- Buttons: primary = Gold call to action; default = Navy outline ---- */
+.bk-btn {
+  font-family: var(--freyja-font);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.8rem;
+  border-radius: var(--freyja-radius);
+  box-shadow: none;
+}
+.bk-btn.bk-btn-primary,
+:host(.solid) .bk-btn.bk-btn-primary {
+  --bs-btn-bg: var(--freyja-gold);
+  --bs-btn-color: var(--freyja-navy);
+  --bs-btn-border-color: var(--freyja-gold);
+  --bs-btn-hover-bg: var(--freyja-navy);
+  --bs-btn-hover-color: var(--freyja-offwhite);
+  --bs-btn-hover-border-color: var(--freyja-navy);
+  --bs-btn-active-bg: var(--freyja-navy);
+  --bs-btn-active-color: var(--freyja-offwhite);
+  --bs-btn-active-border-color: var(--freyja-navy);
+  --bs-btn-focus-shadow-rgb: 201, 160, 118;
+  background-color: var(--freyja-gold);
+  border-color: var(--freyja-gold);
+  color: var(--freyja-navy);
+}
+.bk-btn.bk-btn-primary:hover,
+:host(.solid) .bk-btn.bk-btn-primary:hover {
+  background-color: var(--freyja-navy);
+  border-color: var(--freyja-navy);
+  color: var(--freyja-offwhite);
+}
+.bk-btn.bk-btn-default,
+:host(.solid) .bk-btn.bk-btn-default {
+  --bs-btn-bg: var(--freyja-white);
+  --bs-btn-color: var(--freyja-navy);
+  --bs-btn-border-color: var(--freyja-navy);
+  --bs-btn-hover-bg: var(--freyja-navy);
+  --bs-btn-hover-color: var(--freyja-offwhite);
+  --bs-btn-hover-border-color: var(--freyja-navy);
+  --bs-btn-focus-shadow-rgb: 201, 160, 118;
+  background-color: var(--freyja-white);
+  border: 1px solid var(--freyja-navy);
+  color: var(--freyja-navy);
+}
+.bk-btn.bk-btn-default:hover,
+:host(.solid) .bk-btn.bk-btn-default:hover {
+  background-color: var(--freyja-navy);
+  color: var(--freyja-offwhite);
+}
+.bk-btn:focus {
+  outline: none;
+}
+.bk-btn:focus-visible {
+  outline: 2px solid var(--freyja-gold);
+  outline-offset: 2px;
+}
+
+/* ---- Inputs ---- */
+.bk-input,
+.bk-input-group input,
+select.bk-input {
+  font-family: var(--freyja-font);
+  color: var(--freyja-navy);
+  background-color: var(--freyja-white);
+  border: 1px solid var(--freyja-slate);
+  border-radius: var(--freyja-radius);
+}
+.bk-input:focus,
+.bk-input-group input:focus {
+  border-color: var(--freyja-navy);
+  box-shadow: 0 0 0 2px var(--freyja-gold-20);
+  outline: none;
+}
+label,
+.bk-input-group > label {
+  font-family: var(--freyja-font);
+  font-weight: 500;
+  color: var(--freyja-slate-deep);
+}
+
+/* ---- Tabs: Navy text, Gold underline on the active tab ----
+   Selectors mirror Panel's Bootstrap theme (panel/theme/css/bootstrap.css) so they win on order. */
+:host(.bk-above) .bk-header {
+  border-bottom: 1px solid var(--freyja-navy-10);
+}
+:host(.bk-above) .bk-header .bk-tab {
+  font-family: var(--freyja-font);
+  font-weight: 500;
+  color: var(--freyja-slate-deep);
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 0.55rem 1rem;
+}
+:host(.bk-above) .bk-header .bk-tab:hover,
+.bk-header .bk-tab:focus {
+  color: var(--freyja-navy);
+  border-color: transparent;
+  border-bottom-color: var(--freyja-navy-10);
+}
+:host(.bk-above) .bk-header .bk-tab.bk-active {
+  color: var(--freyja-navy);
+  font-weight: 600;
+  background: none;
+  border-color: transparent;
+  border-bottom: 3px solid var(--freyja-gold);
+}
+
+/* ---- Alerts (pn.pane.Alert): status colour as a left rule, Navy text ---- */
+:host(.alert) {
+  font-family: var(--freyja-font);
+  color: var(--freyja-navy);
+  border: 0;
+  border-left: 4px solid var(--freyja-slate);
+  border-radius: 0 var(--freyja-radius) var(--freyja-radius) 0;
+  padding: 0.6rem 1rem;
+}
+:host(.alert-warning) {
+  color: var(--freyja-navy);
+  background-color: var(--freyja-cream);
+  border-left-color: var(--freyja-gold);
+}
+:host(.alert-success) {
+  color: var(--freyja-navy);
+  background-color: var(--freyja-white);
+  border-left-color: var(--freyja-green);
+}
+:host(.alert-danger) {
+  color: var(--freyja-navy);
+  background-color: var(--freyja-white);
+  border-left-color: var(--freyja-red);
+}
+:host(.alert-info),
+:host(.alert-primary),
+:host(.alert-secondary),
+:host(.alert-light),
+:host(.alert-dark) {
+  color: var(--freyja-navy);
+  background-color: var(--freyja-lightblue-20);
+  border-left-color: var(--freyja-lightblue);
+}
+
+/* ---- Tabulator tables: Navy header, White/Cream banding, hairline rules ----
+   Selectors mirror Panel's Bootstrap theme so they win on order. */
+.tabulator {
+  font-family: var(--freyja-font);
+  font-size: 0.85rem;
+  color: var(--freyja-navy);
+  background-color: var(--freyja-white);
+  border: 0;
+}
+.tabulator .tabulator-header,
+.tabulator .tabulator-header .tabulator-header-contents,
+div .tabulator .tabulator-headers,
+div .tabulator .tabulator-header .tabulator-col,
+.pnx-tabulator.tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover {
+  background-color: var(--freyja-navy);
+  color: var(--freyja-offwhite);
+  border-color: var(--freyja-navy);
+}
+.tabulator .tabulator-header .tabulator-col .tabulator-col-title {
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-sorter .tabulator-arrow {
+  border-bottom-color: var(--freyja-slate);
+}
+.pnx-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row {
+  background-color: var(--freyja-white);
+  color: var(--freyja-navy);
+  border-bottom: 1px solid var(--freyja-navy-10);
+}
+.pnx-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-row-even {
+  background-color: var(--freyja-cream);
+  color: var(--freyja-navy);
+}
+.pnx-tabulator.tabulator .tabulator-tableholder .tabulator-table .tabulator-row.tabulator-selectable:hover {
+  background-color: var(--freyja-gold-20);
+  color: var(--freyja-navy);
+}
+.tabulator-row .tabulator-cell {
+  border-right: 0;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.tabulator .tabulator-tableholder .tabulator-placeholder span {
+  color: var(--freyja-slate-deep);
+  font-weight: 500;
+}
+
+/* ---- Header endorsement and footer (HTML panes from app.theme) ---- */
+.freyja-endorse {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  float: right;
+  text-decoration: none;
+}
+.freyja-endorse:hover { text-decoration: none; opacity: 0.9; }
+.freyja-endorse__label {
+  font: 700 0.62rem/1 var(--freyja-font);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--freyja-lightblue);
+}
+.freyja-endorse__mark svg {
+  display: block;
+  height: 14px;
+  width: auto;
+}
+.freyja-footer {
+  margin-top: 2.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--freyja-navy-10);
+  font: 400 0.75rem/1.5 var(--freyja-font);
+  color: var(--freyja-slate-deep);
+}
+.freyja-footer p { margin: 0 0 0.15rem; }
+.freyja-footer a { color: var(--freyja-slate-deep); }

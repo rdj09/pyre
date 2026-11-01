@@ -1,0 +1,40 @@
+/* Freyja Consulting brand - document-level stylesheet (template raw_css).
+   Fonts are self-hosted from app/assets/fonts (served at ./assets by
+   `panel serve --static-dirs assets=app/assets` and run_app.py). */
+
+@font-face { font-family: "Montserrat"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("assets/fonts/Montserrat-400.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("assets/fonts/Montserrat-500.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("assets/fonts/Montserrat-600.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("assets/fonts/Montserrat-700.woff2") format("woff2"); }
+
+:root {
+  --bokeh-base-font: "Montserrat", Arial, sans-serif;
+  --bs-body-font-family: "Montserrat", Arial, sans-serif;
+}
+
+body {
+  font-family: "Montserrat", Arial, sans-serif;
+  background-color: #FAF9F9;
+  color: #0A2E50;
+}
+
+/* Header: flat Navy bar with a Gold rule; no drop shadow */
+#header {
+  box-shadow: none !important;
+  border-bottom: 3px solid #C9A076;
+}
+#header .title,
+#header .app-header a.title {
+  font-family: "Montserrat", Arial, sans-serif;
+  font-weight: 600;
+  color: #FAF9F9;
+  letter-spacing: 0.01em;
+}
+#header-items {
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
