@@ -121,15 +121,23 @@ def inverse_power_fit(age_to_age_factors: List[float], time_periods: List[float]
 def residuals_standardised(actual: List[float], expected: List[float], num_parameters: int) -> List[float]:
     # Calculate residuals
     residuals = [a - e for a, e in zip(actual, expected)]
-    
+
     # Calculate sigma^2 (variance estimate)
     n = len(actual)
-    sigma_squared = sum((a - e) ** 2 for a, e in zip(actual, expected)) / (n - num_parameters)
+    denom = n - num_parameters
+    sigma_squared = (
+        sum((a - e) ** 2 for a, e in zip(actual, expected)) / denom if denom > 0 else 0.0
+    )
     sigma = sqrt(sigma_squared)
-    
+    if sigma == 0.0:
+        # Zero residual degrees of freedom (a saturated fit) or a perfect fit with
+        # degrees of freedom to spare -- there's no meaningful way to standardize,
+        # and dividing by zero below would raise. Report zero deviation instead.
+        return [0.0 for _ in residuals]
+
     # Calculate standardized residuals
     standardized_residuals = [residual / sigma for residual in residuals]
-    
+
     return standardized_residuals
 
 

@@ -1,14 +1,15 @@
 import unittest
 from datetime import date
 
-from src.pyre.claims.claims import (
-    ClaimYearType,
-    ClaimDevelopmentHistory,
-    ClaimsMetaData,
+from pyre.claims.claims import (
     Claim,
+    ClaimDevelopmentHistory,
     Claims,
+    ClaimsMetaData,
+    ClaimYearType,
 )
 from pyre.exceptions.exceptions import ClaimsException
+
 
 class TestClaimDevelopmentHistory(unittest.TestCase):
     def setUp(self):
@@ -112,14 +113,17 @@ class TestClaimsMetaData(unittest.TestCase):
 
     def test_modelling_year_accident_year(self):
         self.meta_data.claim_year_basis = ClaimYearType.ACCIDENT_YEAR
+        self.meta_data.loss_date = date(2022, 2, 2)
         self.assertEqual(self.meta_data.modelling_year, 2022)
 
     def test_modelling_year_underwriting_year(self):
         self.meta_data.claim_year_basis = ClaimYearType.UNDERWRITING_YEAR
+        self.meta_data.policy_inception_date = date(2023, 3, 3)
         self.assertEqual(self.meta_data.modelling_year, 2023)
 
     def test_modelling_year_reported_year(self):
         self.meta_data.claim_year_basis = ClaimYearType.REPORTED_YEAR
+        self.meta_data.report_date = date(2024, 4, 4)
         self.assertEqual(self.meta_data.modelling_year, 2024)
 
     def test_modelling_year_invalid_basis(self):
@@ -128,7 +132,10 @@ class TestClaimsMetaData(unittest.TestCase):
         self.meta_data.claim_year_basis = DummyYearType()
         with self.assertRaises(ClaimsException) as context:
             _ = self.meta_data.modelling_year
-        self.assertEqual(context.exception.claim_id, self.meta_data.claim_id)
+        # ClaimsException stores the id under the generic .identifier attribute
+        # (GeneralException's field) -- claim_id is only the constructor's
+        # keyword name, not an attribute on the raised instance.
+        self.assertEqual(context.exception.identifier, self.meta_data.claim_id)
         self.assertEqual(context.exception.message, "Required date missing from data")
 
 class TestClaim(unittest.TestCase):
@@ -253,7 +260,7 @@ class TestClaims(unittest.TestCase):
         )
         claim3 = Claim(meta3, hist3)
         self.claims.append(claim3)
-        self.assertEqual(len(self.claims), 2)
+        self.assertEqual(len(self.claims), 3)
 
     def test_getitem_and_slice(self):
         self.assertIs(self.claims[0], self.claim1)

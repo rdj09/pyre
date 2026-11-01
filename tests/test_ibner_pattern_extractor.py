@@ -29,18 +29,21 @@ class TestIBNERPatternExtractor(unittest.TestCase):
         self.assertEqual(self.extractor._D_triangle[2020][24], 150/100)
     
     def test_get_N_triangle(self):
+        # Triangle.__getitem__ takes a (origin_year, dev_period) tuple key -- not
+        # chained bracket access -- matching how Triangle is indexed everywhere
+        # else in this codebase.
         N_triangle = self.extractor.get_N_triangle()
         self.assertIsInstance(N_triangle, Triangle)
-        self.assertEqual(N_triangle[2020][12], 100)
-        self.assertEqual(N_triangle[2020][24], 150)
-        self.assertEqual(N_triangle[2020][36], 175)
-    
+        self.assertEqual(N_triangle[2020, 12], 100)
+        self.assertEqual(N_triangle[2020, 24], 150)
+        self.assertEqual(N_triangle[2020, 36], 175)
+
     def test_get_D_triangle(self):
         D_triangle = self.extractor.get_D_triangle()
         self.assertIsInstance(D_triangle, Triangle)
-        self.assertEqual(D_triangle[2020][12], 1.0)
-        self.assertEqual(D_triangle[2020][24], 1.5)
-        self.assertEqual(D_triangle[2020][36], 175/150)
+        self.assertEqual(D_triangle[2020, 12], 1.0)
+        self.assertEqual(D_triangle[2020, 24], 1.5)
+        self.assertEqual(D_triangle[2020, 36], 175/150)
     
     def test_get_IBNER_pattern(self):
         pattern = self.extractor.get_IBNER_pattern()
