@@ -25,6 +25,7 @@ hatch run brand:build           # regenerate app/assets/ AND docs/assets/ (Freyj
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
 pip install -e ".[excel]"       # install with headless Excel (.xlsx) read/write support
+pip install -e ".[panel,excel]" # same, plus the workbench's "Export to Excel" button
 hatch run panel:serve           # serve app/main.py at localhost (panel serve, --show --autoreload)
 ```
 
@@ -104,7 +105,7 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 131 tests collected
+├── tests/                     # unittest.TestCase style; 140 tests collected
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml

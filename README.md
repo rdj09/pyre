@@ -37,6 +37,11 @@ cd pyre
 pip install -e .
 ```
 
+Optional extras: `pip install -e ".[panel]"` for the Panel treaty pricing
+workbench, `pip install -e ".[excel]"` for headless Excel I/O, or
+`pip install -e ".[panel,excel]"` for both — the latter is required for the
+workbench's "Export to Excel" button.
+
 ## Quick Start
 
 Here's a simple example of how to use the package to analyze claims data:

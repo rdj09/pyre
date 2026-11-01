@@ -97,7 +97,7 @@ addopts = "--tb=short"
 pythonpath = ["src", "."]
 
 [tool.hatch.envs.panel]
-dependencies = [
+extra-dependencies = [
   "panel>=1.4",
   "pandas>=2.0",
 ]

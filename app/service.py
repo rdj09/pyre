@@ -28,6 +28,10 @@ from pyre import (
     RIContractMetadata,
     RILayer,
 )
+from pyre.models.Experience.experience_preparer import (
+    summarize_by_layer_year,
+    summarize_exposures_by_year,
+)
 from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
 
 CLAIMS_REQUIRED_COLUMNS = [
@@ -226,32 +230,8 @@ def run_pricing(claims: Claims, exposures: Exposures, ri_contract: RIContract) -
     """
     model_data = ExperienceModelData(claims=claims, exposures=exposures, ri_contract=ri_contract)
 
-    layer_names = {layer.layer_id: layer.layer_name for layer in ri_contract.layers}
-
-    aggregate_claims = model_data.aggregate_subject_contract_claims
-    aggregate_exposures = model_data.aggregate_exposures
-
-    rows = []
-    for layer_id, year_agg in aggregate_claims.items():
-        for modelling_year, values in year_agg.items():
-            earned_premium = aggregate_exposures.get(modelling_year, {}).get("earned", 0.0)
-            ceded_incurred = values["latest_incurred"]
-            loss_ratio = (ceded_incurred / earned_premium) if earned_premium else None
-            rows.append(
-                {
-                    "layer_id": layer_id,
-                    "layer_name": layer_names.get(layer_id, str(layer_id)),
-                    "modelling_year": modelling_year,
-                    "ceded_paid": values["latest_paid"],
-                    "ceded_incurred": ceded_incurred,
-                    "claim_count": values["total_count"],
-                    "earned_premium": earned_premium,
-                    "loss_ratio": loss_ratio,
-                }
-            )
-
     by_layer_year = pd.DataFrame(
-        rows,
+        summarize_by_layer_year(model_data),
         columns=[
             "layer_id",
             "layer_name",
@@ -265,10 +245,7 @@ def run_pricing(claims: Claims, exposures: Exposures, ri_contract: RIContract) -
     ).sort_values(["layer_id", "modelling_year"], ignore_index=True)
 
     exposures_by_year = pd.DataFrame(
-        [
-            {"modelling_year": year, "written": v["written"], "earned": v["earned"]}
-            for year, v in sorted(aggregate_exposures.items())
-        ],
+        summarize_exposures_by_year(model_data),
         columns=["modelling_year", "written", "earned"],
     )
 

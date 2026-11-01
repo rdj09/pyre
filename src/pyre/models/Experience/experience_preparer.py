@@ -290,3 +290,49 @@ class ExperienceModelData:
             exposures_by_year[year]["earned"] += earned_val
 
         return exposures_by_year
+
+
+def summarize_by_layer_year(model_data: ExperienceModelData) -> List[Dict[str, Any]]:
+    """One row per (layer_id, modelling_year) from model_data's aggregated claims/exposures.
+
+    Keys: layer_id, layer_name, modelling_year, ceded_paid, ceded_incurred,
+    claim_count, earned_premium, loss_ratio (None when earned_premium is 0,
+    to avoid ZeroDivisionError and avoid a silently-wrong 0.0/inf value).
+    Rows are sorted by (layer_id, modelling_year), matching the order the
+    Panel app's results table and write_experience_rating_results both
+    present -- not the dict-insertion order aggregate_subject_contract_claims
+    happens to iterate in.
+    """
+    layer_names = {layer.layer_id: layer.layer_name for layer in model_data.ri_contract.layers}
+    aggregate_claims = model_data.aggregate_subject_contract_claims
+    aggregate_exposures = model_data.aggregate_exposures
+
+    rows: List[Dict[str, Any]] = []
+    for layer_id, year_agg in aggregate_claims.items():
+        for modelling_year, values in year_agg.items():
+            earned_premium = aggregate_exposures.get(modelling_year, {}).get("earned", 0.0)
+            ceded_incurred = values["latest_incurred"]
+            loss_ratio = (ceded_incurred / earned_premium) if earned_premium else None
+            rows.append(
+                {
+                    "layer_id": layer_id,
+                    "layer_name": layer_names.get(layer_id, str(layer_id)),
+                    "modelling_year": modelling_year,
+                    "ceded_paid": values["latest_paid"],
+                    "ceded_incurred": ceded_incurred,
+                    "claim_count": values["total_count"],
+                    "earned_premium": earned_premium,
+                    "loss_ratio": loss_ratio,
+                }
+            )
+    rows.sort(key=lambda row: (row["layer_id"], row["modelling_year"]))
+    return rows
+
+
+def summarize_exposures_by_year(model_data: ExperienceModelData) -> List[Dict[str, Any]]:
+    """One row per modelling_year. Keys: modelling_year, written, earned."""
+    aggregate_exposures = model_data.aggregate_exposures
+    return [
+        {"modelling_year": year, "written": values["written"], "earned": values["earned"]}
+        for year, values in sorted(aggregate_exposures.items())
+    ]
