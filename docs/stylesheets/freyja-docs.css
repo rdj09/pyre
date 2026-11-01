@@ -1,0 +1,23 @@
+@font-face { font-family: "Montserrat"; font-weight: 400; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/Montserrat-400.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 500; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/Montserrat-500.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 600; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/Montserrat-600.woff2") format("woff2"); }
+@font-face { font-family: "Montserrat"; font-weight: 700; font-style: normal; font-display: swap;
+  src: url("../assets/fonts/Montserrat-700.woff2") format("woff2"); }
+
+:root {
+  --md-primary-fg-color: #0A2E50;
+  --md-primary-fg-color--light: #0A2E50;
+  --md-primary-fg-color--dark: #0A2E50;
+  --md-primary-bg-color: #FAF9F9;
+  --md-accent-fg-color: #C9A076;
+  --md-default-bg-color: #FAF9F9;
+  --md-typeset-a-color: #0A2E50;
+  --md-text-font: "Montserrat", Arial, sans-serif;
+  --md-code-font: "Roboto Mono", monospace; /* code blocks keep a mono font -- brand rule covers prose/UI type only */
+}
+.md-typeset h1, .md-typeset h2, .md-typeset h3 { color: #0A2E50; font-weight: 600; }
+.md-header, .md-tabs { background-color: #0A2E50; }
+.md-footer { background-color: #0A2E50; }

@@ -2,8 +2,11 @@ site_name: pyRE - python package for non-life reinsurance pricing
 site_url: https://rdj09.github.io/pyre/
 theme:
   name: material
+  logo: assets/brand/freyja-wordmark-offwhite.svg
+  favicon: assets/brand/favicon.svg
+  font: false
   palette:
-    primary: teal
+    scheme: default
   highlightjs: true
 plugins:
   - search
@@ -12,6 +15,8 @@ plugins:
         python:
           paths: [src]
   - social
+extra_css:
+  - stylesheets/freyja-docs.css
 markdown_extensions:
   - admonition
   - pymdownx.highlight

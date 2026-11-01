@@ -155,7 +155,9 @@ def main() -> None:
     for root in (ASSETS, DOCS_ASSETS):
         brand = root / "brand"
         brand.mkdir(parents=True, exist_ok=True)
-        (brand / "freyja-wordmark-offwhite.svg").write_text(wordmark(fonts, OFFWHITE), encoding="utf-8")
+        (brand / "freyja-wordmark-offwhite.svg").write_text(
+            wordmark(fonts, OFFWHITE), encoding="utf-8"
+        )
         (brand / "freyja-wordmark-navy.svg").write_text(wordmark(fonts, NAVY), encoding="utf-8")
         (brand / "favicon.svg").write_text(favicon(fonts), encoding="utf-8")
         web_fonts(fonts, root / "fonts")
