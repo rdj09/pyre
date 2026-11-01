@@ -73,6 +73,41 @@ def _claim_2022():
     )
 
 
+def _claim(claim_id: str, year: int):
+    return Claim(
+        ClaimsMetaData(
+            claim_id=claim_id,
+            currency="USD",
+            contract_limit=2_000_000.0,
+            loss_date=date(year, 3, 1),
+        ),
+        ClaimDevelopmentHistory(
+            development_months=[12],
+            cumulative_dev_paid=[50000.0],
+            cumulative_dev_incurred=[120000.0],
+        ),
+    )
+
+
+def _layer(layer_id: int, layer_name: str):
+    return RILayer(
+        layer_id=layer_id,
+        layer_name=layer_name,
+        layer_type=ContractType.EXCESS_OF_LOSS,
+        occurrence_attachment=0.0,
+        occurrence_limit=1_000_000.0,
+        aggregate_attachment=0.0,
+        aggregate_limit=0.0,
+        subject_lines_of_business=[],
+        subject_lob_exposure_amounts=[],
+        full_subject_premium=0.0,
+        written_line=1.0,
+        signed_line=1.0,
+        number_of_reinstatements=0,
+        reinstatement_cost={},
+    )
+
+
 def _exposure_2022():
     return Exposure(
         ExposureMetaData(
@@ -119,6 +154,18 @@ class TestSummarizeByLayerYear(unittest.TestCase):
         rows = summarize_by_layer_year(model_data)
 
         self.assertEqual(rows, [])
+
+    def test_rows_are_sorted_by_layer_id_then_modelling_year(self):
+        claims = Claims([_claim("A", 2021), _claim("B", 2019), _claim("C", 2020)])
+        layers = [_layer(2, "Layer 2"), _layer(1, "Layer 1")]
+        model_data = _build_model_data(claims, Exposures([]), layers)
+
+        rows = summarize_by_layer_year(model_data)
+
+        self.assertEqual(
+            [(r["layer_id"], r["modelling_year"]) for r in rows],
+            [(1, 2019), (1, 2020), (1, 2021), (2, 2019), (2, 2020), (2, 2021)],
+        )
 
 
 class TestSummarizeExposuresByYear(unittest.TestCase):

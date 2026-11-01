@@ -298,6 +298,10 @@ def summarize_by_layer_year(model_data: ExperienceModelData) -> List[Dict[str, A
     Keys: layer_id, layer_name, modelling_year, ceded_paid, ceded_incurred,
     claim_count, earned_premium, loss_ratio (None when earned_premium is 0,
     to avoid ZeroDivisionError and avoid a silently-wrong 0.0/inf value).
+    Rows are sorted by (layer_id, modelling_year), matching the order the
+    Panel app's results table and write_experience_rating_results both
+    present -- not the dict-insertion order aggregate_subject_contract_claims
+    happens to iterate in.
     """
     layer_names = {layer.layer_id: layer.layer_name for layer in model_data.ri_contract.layers}
     aggregate_claims = model_data.aggregate_subject_contract_claims
@@ -321,6 +325,7 @@ def summarize_by_layer_year(model_data: ExperienceModelData) -> List[Dict[str, A
                     "loss_ratio": loss_ratio,
                 }
             )
+    rows.sort(key=lambda row: (row["layer_id"], row["modelling_year"]))
     return rows
 
 

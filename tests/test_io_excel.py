@@ -100,9 +100,19 @@ class TestWriteTable(unittest.TestCase):
         write_table(headers=["a"], rows=[[1]], path=buffer, sheet_name="First")
         write_table(headers=["b"], rows=[[2]], path=buffer, sheet_name="Second")
 
+        raw = buffer.getvalue()
+        # Exactly one end-of-central-directory record means one merged
+        # workbook -- the original bug produced two complete, independently
+        # valid zip archives concatenated back-to-back (one EOCD each),
+        # where openpyxl's reader happened to resolve only the trailing
+        # one's sheet, silently discarding "First".
+        self.assertEqual(raw.count(b"PK\x05\x06"), 1)
+
         buffer.seek(0)
         wb = openpyxl.load_workbook(buffer)
         self.assertEqual(set(wb.sheetnames), {"First", "Second"})
+        self.assertEqual([list(r) for r in wb["First"].iter_rows(values_only=True)], [["a"], [1]])
+        self.assertEqual([list(r) for r in wb["Second"].iter_rows(values_only=True)], [["b"], [2]])
 
 
 @unittest.skipUnless(HAS_OPENPYXL, "openpyxl not installed; pip install -e '.[excel]'")
@@ -470,6 +480,20 @@ class TestWriteExperienceRatingResults(unittest.TestCase):
         exposures_by_year = [list(row) for row in wb["ExposuresByYear"].iter_rows(values_only=True)]
         self.assertEqual(exposures_by_year[0], ["modelling_year", "written", "earned"])
         self.assertEqual(exposures_by_year[1][0], 2022)
+
+    def test_writes_both_sheets_to_an_in_memory_buffer(self):
+        import io
+
+        from pyre.io_excel.results_io import write_experience_rating_results
+
+        buffer = io.BytesIO()
+        write_experience_rating_results(self.model_data, buffer)
+
+        buffer.seek(0)
+        wb = openpyxl.load_workbook(buffer)
+        self.assertEqual(set(wb.sheetnames), {"ByLayerYear", "ExposuresByYear"})
+        by_layer_year = [list(row) for row in wb["ByLayerYear"].iter_rows(values_only=True)]
+        self.assertEqual(by_layer_year[1][:7], [1, "XOL Layer", 2022, 0.0, 150000.0, 1, 1000000.0])
 
     def test_no_claims_still_writes_a_valid_header_only_sheet(self):
         from pyre.claims.claims import Claims
