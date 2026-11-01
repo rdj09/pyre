@@ -12,6 +12,7 @@ breaking `from app.pages import ...` et al.
 import panel as pn
 
 from app.db import DB_PATH, init_db
+from app.pages.compare import build_compare_page
 from app.pages.contract_config import build_contract_config_page
 from app.pages.data_loading import build_data_loading_page
 from app.pages.model_library import build_model_library_page
@@ -41,6 +42,7 @@ def build_app() -> pn.template.BootstrapTemplate:
             tabs[i] = pair
 
     tabs.append(("4. Saved Models", build_model_library_page(state, on_load=_on_load)))
+    tabs.append(("5. Compare", build_compare_page(state)))
 
     return branded_template(tabs)
 
