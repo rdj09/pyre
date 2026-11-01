@@ -161,7 +161,7 @@ class TestExposures(unittest.TestCase):
         )
         exp3 = Exposure(meta3, values3)
         self.exposures.append(exp3)
-        self.assertEqual(len(self.exposures), 2)  # If append does not mutate in place, adjust as needed
+        self.assertEqual(len(self.exposures), 3)
 
     def test_getitem_and_slice(self):
         self.assertIs(self.exposures[0], self.exp1)
