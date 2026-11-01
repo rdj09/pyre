@@ -1,7 +1,7 @@
 # Panel Workbench Model Versioning & SQLite Backend Design
 
 **Date:** 2026-11-01
-**Status:** Draft (pending builder check)
+**Status:** Approved
 **Scope:** A SQLite-backed persistence and versioning layer for the Panel treaty pricing workbench (`app/`) — save/load/copy/delete pricing models, mark versions final vs. optional, a catalog dashboard, and a version-comparison view.
 **Backward compatibility:** Fully additive. No changes to any existing public `pyre` signature.
 
@@ -155,6 +155,63 @@ rows directly — no recomputation. A separate, explicit "Recalculate"
 action rebuilds `ExperienceModelData` from the version's pickled inputs,
 re-runs `run_pricing`, and lets the user choose to overwrite this
 version's cached results or save the fresh results as a new version.
+
+### Load drops back into the fully editable forms
+
+Loading a version repopulates `app/pages/contract_config.py` and
+`app/pages/data_loading.py`'s tabs with the saved values, fully
+editable from there — the user keeps working on it exactly as if
+they'd built it live this session, rather than landing on a read-only
+snapshot they'd have to Copy before touching.
+
+This requires retrofitting both pages, which today build every widget
+from hardcoded literal defaults (`date.today()`, `"C-0001"`, an empty
+`layer_rows` list, etc.) with no path for `state` to seed them. Each
+widget's initial value needs to fall back to the corresponding field on
+`state` (`state.contract_metadata`, `state.layers`,
+`state.claims`/`state.exposures`) when already populated, instead of
+the current literal. "Load" itself then becomes: set those `state`
+fields from the unpickled `ModelSnapshot`, then rebuild and swap in the
+three main tabs (`build_contract_config_page(state)`,
+`build_data_loading_page(state)`, `build_results_page(state)`) so the
+now-state-seeded widgets render. This is the one piece of this design
+that modifies existing page behavior rather than only adding new files —
+flagged explicitly so the implementation plan scopes it as its own task
+with its own tests, not a one-line aside inside a bigger task.
+
+### Exporting a loaded-but-not-recalculated version (builder's call)
+
+`results.py`'s existing "Export to Excel" button needs a live
+`ExperienceModelData` object, which a cached-results load never
+produces (by design — Load doesn't recompute). Rather than disabling
+export until Recalculate, a loaded version's "Export to Excel" writes
+directly from its **cached** `pricing_results_by_layer_year`/
+`pricing_results_exposures_by_year` rows via `write_table` (the same
+primitive `write_experience_rating_results` already uses), bypassing
+`ExperienceModelData` entirely. The live "Run pricing" page keeps using
+the existing `ExperienceModelData`-based export unchanged.
+
+### SQLite connection lifecycle (builder's call)
+
+One connection opened and closed per repository call (a context-managed
+`sqlite3.connect(path)` per function in `app/db.py`), not a long-lived
+module-level connection. `panel serve` can host multiple browser
+sessions in one process, each with its own `WorkbenchState`; `sqlite3`
+connections aren't safely shared across threads, and per-call
+open/close sidesteps that with no meaningful performance cost for an
+occasional-click save/load/compare workload. `PRAGMA foreign_keys = ON`
+is set on every connection open.
+
+### Catalog grouping (builder's call)
+
+The dashboard groups and counts by the denormalized `contract_id`
+column, not by walking `parent_id` lineage to a root ancestor. "High
+level summary of counts... against contract details" reads as a direct
+catalog of saved versions grouped by the contract identity actually
+displayed, not a reconstructed deal-level rollup across renewals (which
+would also be ambiguous the moment a copy changes its `contract_id`).
+Lineage stays available for the Compare view's parent/child navigation,
+just not for dashboard grouping.
 
 ### Storage location
 
