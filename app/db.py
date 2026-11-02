@@ -333,6 +333,8 @@ class VersionDiff:
     exposures_total_value_new: float
     layer_changes: list[LayerFieldChange]
     results_changes: list[ResultsRowDiff]
+    layers_added: list[int]
+    layers_removed: list[int]
 
 
 def _claims_count_and_total_incurred(claims: Optional[Claims]) -> tuple[int, float]:
@@ -372,8 +374,10 @@ def diff_versions(path: Path, version_id_old: int, version_id_new: int) -> Versi
 
     layers_old = {layer.layer_id: layer for layer in snapshot_old.layers}
     layers_new = {layer.layer_id: layer for layer in snapshot_new.layers}
+    layers_added = sorted(layers_new.keys() - layers_old.keys())
+    layers_removed = sorted(layers_old.keys() - layers_new.keys())
     layer_changes: list[LayerFieldChange] = []
-    for layer_id in layers_old.keys() & layers_new.keys():
+    for layer_id in sorted(layers_old.keys() & layers_new.keys()):
         layer_old = layers_old[layer_id]
         layer_new = layers_new[layer_id]
         for field in dataclasses.fields(RILayer):
@@ -396,7 +400,7 @@ def diff_versions(path: Path, version_id_old: int, version_id_new: int) -> Versi
         (row["layer_id"], row["modelling_year"]): row for row in by_layer_year_new
     }
     results_changes: list[ResultsRowDiff] = []
-    for key in results_old_by_key.keys() & results_new_by_key.keys():
+    for key in sorted(results_old_by_key.keys() & results_new_by_key.keys()):
         row_old = results_old_by_key[key]
         row_new = results_new_by_key[key]
         layer_id, modelling_year = key
@@ -425,4 +429,6 @@ def diff_versions(path: Path, version_id_old: int, version_id_new: int) -> Versi
         exposures_total_value_new=exposures_total_value_new,
         layer_changes=layer_changes,
         results_changes=results_changes,
+        layers_added=layers_added,
+        layers_removed=layers_removed,
     )

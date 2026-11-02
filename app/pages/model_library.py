@@ -20,6 +20,7 @@ import panel as pn
 
 from app.db import (
     DB_PATH,
+    IncompatibleSnapshotError,
     VersionSummary,
     copy_version,
     delete_version,
@@ -105,7 +106,12 @@ def build_model_library_page(
             status.object = "Select a version to load first."
             status.alert_type = "warning"
             return
-        snapshot, by_layer_year, exposures_by_year = load_version(DB_PATH, version_id)
+        try:
+            snapshot, by_layer_year, exposures_by_year = load_version(DB_PATH, version_id)
+        except IncompatibleSnapshotError as exc:
+            status.object = str(exc)
+            status.alert_type = "danger"
+            return
         state.claims = snapshot.claims
         state.exposures = snapshot.exposures
         state.contract_metadata = snapshot.contract_metadata
@@ -143,11 +149,20 @@ def build_model_library_page(
             status.alert_type = "warning"
             return
         delete_version(DB_PATH, version_id)
-        if state.loaded_version_id == version_id:
+        was_loaded = state.loaded_version_id == version_id
+        if was_loaded:
+            # Deleting the version currently loaded into tabs 1-3 would
+            # otherwise leave those tabs' widgets (notably results.py's
+            # Export button and its cached last_run_model_data) pointing at
+            # a version_id that no longer exists -- rebuild them fresh via
+            # the same mechanism Load uses, not just this tab's own catalog.
             state.loaded_version_id = None
+            state.results = None
         _refresh_catalog()
         status.object = f"Deleted version #{version_id}."
         status.alert_type = "success"
+        if was_loaded:
+            on_load()
         if on_change is not None:
             on_change()
 

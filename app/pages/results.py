@@ -9,10 +9,17 @@ import pandas as pd
 import panel as pn
 from bokeh.models.widgets.tables import NumberFormatter
 
-from app.db import DB_PATH, ModelSnapshot, load_version, save_results, save_version
+from app.db import (
+    DB_PATH,
+    IncompatibleSnapshotError,
+    ModelSnapshot,
+    load_version,
+    save_results,
+    save_version,
+)
 from app.service import run_pricing
 from app.state import WorkbenchState
-from pyre import ExperienceModelData
+from pyre import Claims, ExperienceModelData, Exposures, RIContract
 from pyre.io_excel import write_experience_rating_results
 from pyre.io_excel._workbook import write_table
 from pyre.io_excel.results_io import BY_LAYER_YEAR_COLUMNS
@@ -67,6 +74,16 @@ def build_results_page(
         pd.DataFrame(), show_index=False, disabled=True, titles=TITLES, formatters=FORMATTERS
     )
 
+    # A version loaded elsewhere (the Saved Models tab) sets state.results
+    # from its cached rows before this page is (re)built -- show them
+    # immediately rather than the tables/status staying at their
+    # never-run-yet defaults until the next click.
+    if state.results is not None:
+        results_table.value = state.results.by_layer_year
+        exposures_table.value = state.results.exposures_by_year
+        status.object = f"Showing cached results for loaded version #{state.loaded_version_id}."
+        status.alert_type = "success"
+
     # Holds the ExperienceModelData from the last *successful* run, so a
     # click on "Export to Excel" always reflects the run that produced the
     # tables on screen -- never whatever is currently (possibly unsaved, or
@@ -79,9 +96,14 @@ def build_results_page(
         # straight from its saved rows; a live run this session (whether or
         # not a version is also loaded) always reflects what's on screen.
         if state.loaded_version_id is not None and not last_run_model_data:
-            _snapshot, by_layer_year, exposures_by_year = load_version(
-                DB_PATH, state.loaded_version_id
-            )
+            try:
+                _snapshot, by_layer_year, exposures_by_year = load_version(
+                    DB_PATH, state.loaded_version_id
+                )
+            except IncompatibleSnapshotError as exc:
+                status.object = str(exc)
+                status.alert_type = "danger"
+                return io.BytesIO(b"")
             write_table(
                 headers=BY_LAYER_YEAR_COLUMNS,
                 rows=[[row[col] for col in BY_LAYER_YEAR_COLUMNS] for row in by_layer_year],
@@ -107,33 +129,31 @@ def build_results_page(
         filename="pricing_results.xlsx",
         callback=_export_results,
         button_type="default",
-        # Visible up front when a cached version is already loaded (e.g. on
-        # (re)building this page after loading one elsewhere) -- that's
-        # exactly the "no live run this session" case _export_results
-        # branches on above. A run/recalculate re-asserts this on success
-        # and clears it up front on failure, same as before.
-        visible=state.loaded_version_id is not None,
+        # Visible up front only when a cached version with actual results is
+        # already loaded (e.g. on (re)building this page after loading one
+        # elsewhere) -- a loaded *draft* (no results) has nothing to export.
+        # A run/recalculate/save re-asserts this on success and clears it up
+        # front on failure, same as before.
+        visible=state.loaded_version_id is not None and state.results is not None,
     )
 
-    def _run_pricing_and_refresh() -> ExperienceModelData | None:
-        """Builds the contract, runs pricing, and refreshes the on-screen tables.
+    def _run_pricing_and_refresh(
+        claims: Claims, exposures: Exposures, contract: RIContract
+    ) -> ExperienceModelData | None:
+        """Runs pricing against the given inputs and refreshes the on-screen tables.
 
-        Shared by "Run pricing" and "Recalculate" -- both need the identical
-        construction. Returns the ExperienceModelData used on success, or
-        None on validation/pricing failure (status has already been set).
+        Shared by "Run pricing" (live state) and "Recalculate" (the loaded
+        version's own stored inputs, never live state -- see
+        `_on_recalculate`) -- both need identical construction and error
+        handling, just a different input source. Returns the
+        ExperienceModelData used on success, or None on pricing failure
+        (status has already been set).
         """
-        if not state.is_ready_to_price():
-            status.object = (
-                "Load claims + exposures and configure a contract with at least one layer first."
-            )
-            status.alert_type = "danger"
-            return None
         try:
-            contract = state.build_contract()
             model_data = ExperienceModelData(
-                claims=state.claims, exposures=state.exposures, ri_contract=contract
+                claims=claims, exposures=exposures, ri_contract=contract
             )
-            state.results = run_pricing(state.claims, state.exposures, contract)
+            state.results = run_pricing(claims, exposures, contract)
             results_table.value = state.results.by_layer_year
             exposures_table.value = state.results.exposures_by_year
             return model_data
@@ -153,7 +173,14 @@ def build_results_page(
         # turns it back on, so no exception type -- caught below or not --
         # can leave a stale run's export live.
         export_button.visible = False
-        model_data = _run_pricing_and_refresh()
+        if not state.is_ready_to_price():
+            status.object = (
+                "Load claims + exposures and configure a contract with at least one layer first."
+            )
+            status.alert_type = "danger"
+            return
+        contract = state.build_contract()
+        model_data = _run_pricing_and_refresh(state.claims, state.exposures, contract)
         if model_data is None:
             return
         status.object = "Pricing run complete. See the tables below."
@@ -203,7 +230,9 @@ def build_results_page(
             )
         state.loaded_version_id = new_version_id
         recalculate_button.visible = True
-        export_button.visible = True
+        # A draft-only save has no results to export -- only switch the
+        # export button on when results were actually saved alongside it.
+        export_button.visible = bool(has_results_to_save)
         status.object = f"Saved version #{new_version_id}."
         status.alert_type = "success"
         if on_save is not None:
@@ -213,7 +242,32 @@ def build_results_page(
         if state.loaded_version_id is None:
             return
         export_button.visible = False
-        model_data = _run_pricing_and_refresh()
+        # Rebuilds from the *loaded version's own stored inputs*, never live
+        # state -- state.layers/state.contract_metadata may have been edited
+        # on "Configure contract" since this version was loaded, and
+        # recalculating against that live (possibly-edited) state would
+        # overwrite the version's cached results with numbers that no longer
+        # match its own stored inputs_blob (the exact inconsistency
+        # _on_save_version already guards against for the save path).
+        try:
+            snapshot, _, _ = load_version(DB_PATH, state.loaded_version_id)
+        except IncompatibleSnapshotError as exc:
+            status.object = str(exc)
+            status.alert_type = "danger"
+            return
+        if (
+            snapshot.claims is None
+            or snapshot.exposures is None
+            or snapshot.contract_metadata is None
+            or not snapshot.layers
+        ):
+            status.object = (
+                "This version has no complete claims/exposures/contract to recalculate from."
+            )
+            status.alert_type = "danger"
+            return
+        contract = RIContract(contract_meta_data=snapshot.contract_metadata, layers=snapshot.layers)
+        model_data = _run_pricing_and_refresh(snapshot.claims, snapshot.exposures, contract)
         if model_data is None:
             return
         last_run_model_data[:] = [model_data]

@@ -313,6 +313,45 @@ class TestDiffVersions(unittest.TestCase):
         self.assertEqual(diff.results_changes, [])
         self.assertEqual(diff.claims_count_old, 0)
 
+    def test_added_and_removed_layers_are_reported_not_silently_dropped(self):
+        # The renewal workflow the version tree exists for: copy a version and
+        # add a whole new layer. layer_id-intersection diffing alone makes
+        # this look like "nothing changed" -- layers_added/layers_removed
+        # must surface it instead.
+        from app.db import ModelSnapshot, diff_versions, save_version
+
+        id_old = save_version(
+            self.path, ModelSnapshot(None, None, None, [self._layer(1, 200_000.0)]), label="old"
+        )
+        id_new = save_version(
+            self.path,
+            ModelSnapshot(None, None, None, [self._layer(1, 200_000.0), self._layer(2, 300_000.0)]),
+            label="new",
+        )
+
+        diff = diff_versions(self.path, id_old, id_new)
+
+        self.assertEqual(diff.layers_added, [2])
+        self.assertEqual(diff.layers_removed, [])
+        self.assertEqual(diff.layer_changes, [])  # layer 1 itself is unchanged
+
+    def test_removed_layer_is_reported(self):
+        from app.db import ModelSnapshot, diff_versions, save_version
+
+        id_old = save_version(
+            self.path,
+            ModelSnapshot(None, None, None, [self._layer(1, 200_000.0), self._layer(2, 300_000.0)]),
+            label="old",
+        )
+        id_new = save_version(
+            self.path, ModelSnapshot(None, None, None, [self._layer(1, 200_000.0)]), label="new"
+        )
+
+        diff = diff_versions(self.path, id_old, id_new)
+
+        self.assertEqual(diff.layers_added, [])
+        self.assertEqual(diff.layers_removed, [2])
+
 
 if __name__ == "__main__":
     unittest.main()

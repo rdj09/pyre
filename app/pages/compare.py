@@ -20,6 +20,7 @@ import panel as pn
 
 from app.db import (
     DB_PATH,
+    IncompatibleSnapshotError,
     LayerFieldChange,
     ResultsRowDiff,
     VersionDiff,
@@ -77,14 +78,22 @@ def _order_old_new(
 
 
 def _summary_markdown(diff: VersionDiff) -> str:
-    return (
+    lines = [
         f"**Claims:** {diff.claims_count_old} -> {diff.claims_count_new}, "
         f"total incurred {diff.claims_total_incurred_old:,.0f} -> "
-        f"{diff.claims_total_incurred_new:,.0f}\n\n"
+        f"{diff.claims_total_incurred_new:,.0f}",
         f"**Exposures:** {diff.exposures_count_old} -> {diff.exposures_count_new}, "
         f"total value {diff.exposures_total_value_old:,.0f} -> "
-        f"{diff.exposures_total_value_new:,.0f}"
-    )
+        f"{diff.exposures_total_value_new:,.0f}",
+    ]
+    # layer_changes only covers layer ids present on both sides -- a layer
+    # added or removed entirely (the renewal workflow this view exists for)
+    # would otherwise look identical to "nothing changed".
+    if diff.layers_added:
+        lines.append(f"**Layers added:** {', '.join(str(i) for i in diff.layers_added)}")
+    if diff.layers_removed:
+        lines.append(f"**Layers removed:** {', '.join(str(i) for i in diff.layers_removed)}")
+    return "\n\n".join(lines)
 
 
 def build_compare_page(state: WorkbenchState) -> pn.Column:
@@ -131,7 +140,12 @@ def build_compare_page(state: WorkbenchState) -> pn.Column:
             return
 
         id_old, id_new = _order_old_new(id_a, summary_a, id_b, summary_b)
-        diff = diff_versions(DB_PATH, id_old, id_new)
+        try:
+            diff = diff_versions(DB_PATH, id_old, id_new)
+        except IncompatibleSnapshotError as exc:
+            status.object = str(exc)
+            status.alert_type = "danger"
+            return
 
         layer_changes_table.value = _layer_changes_frame(diff.layer_changes)
         results_changes_table.value = _results_changes_frame(diff.results_changes)
