@@ -567,10 +567,48 @@ class Triangle:
         return result
 
 
-# TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
 class IBNERPatternExtractor:
     """
-    Extracts IBNER patterns from either a Claims object or a Triangle object.
+    Extracts an IBNER-sensitive development pattern from a claims `Triangle`.
+
+    The N-triangle / D-triangle terminology and the underlying idea of
+    separating genuine IBNR emergence from IBNER (incurred-but-not-enough-
+    reported) development on already-known claims follow:
+
+        Schnieper, R. (1991), "Separating True IBNR and IBNER Claims,"
+        ASTIN Bulletin, 21(1), pp. 111-127.
+        https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
+
+    **This class approximates, rather than reimplements, Schnieper's
+    estimator.** In his paper, N_ij is the amount of genuinely new (IBNR)
+    claims first recorded in development year j, and D_ij is the net
+    decrease in already-known claims amount between development year j-1
+    and j (the IBNER component) -- both derived from claim-level detail
+    (which individual claims were already known versus newly reported
+    each period). That decomposition is not recoverable from an
+    already-aggregated cumulative triangle alone, which is the only input
+    this class ever receives.
+
+    This was checked directly against Schnieper's own worked example
+    (Section 2.1, p.113-114: 3 accident years, E_1=20, E_2=25, E_3=32
+    claims; X-triangle rows [3, 5, 6.5], [2.5, 5], [5.5]; his N-triangle
+    rows [3, 3, 1], [2.5, 3.5], [5.5]; his D-triangle rows [-, 1, -0.5],
+    [-, 1], [-]). Feeding his X-triangle into this class reproduces his
+    X-triangle as `_N_triangle` (because this class's `_N_triangle` is
+    just the raw cumulative input), not his N-triangle, and produces
+    age-to-age *ratios* as `_D_triangle`, not his absolute IBNER
+    decreases -- so no golden-value test against that example is included
+    here; it would not (and should not be made to) pass against this
+    simplified implementation.
+
+    In other words: `_N_triangle` here is the cumulative triangle itself,
+    and `_D_triangle` is the ordinary age-to-age development factor
+    between consecutive cumulative values. `get_IBNER_pattern` applies the
+    average of those ratios across every development period beyond each
+    origin year's latest observation -- a simplified, chain-ladder-style
+    proxy for Schnieper's claim-level IBNER adjustment, useful as a quick
+    IBNER-aware development pattern but not a statistically equivalent
+    estimator to the one in the cited paper.
     """
 
     def __init__(self, triangle: Triangle):

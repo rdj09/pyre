@@ -155,6 +155,18 @@ projection methods individually.
 does not return or store fitted distribution parameters. Treat its
 signature as a placeholder for future work, not a working API.
 
+`SeverityFit`'s `ibner_dev_pattern` argument is designed to be populated
+from `IBNERPatternExtractor.get_IBNER_pattern()`
+(`pyre.claims.triangles` — see [Claims](claims.md#working-with-claims-triangles)).
+Its N-triangle/D-triangle terminology follows the underlying method in
+Schnieper, R. (1991), *Separating True IBNR and IBNER Claims*, ASTIN
+Bulletin, 21(1), pp. 111-127 —
+[casact.org](https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf).
+`IBNERPatternExtractor` approximates that method using only the
+aggregated cumulative triangle rather than claim-level detail — see its
+class docstring for the exact divergence, checked against Schnieper's own
+worked numerical example in the paper.
+
 ## Exposure Rating
 
 ### Exposure curves
