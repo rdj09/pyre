@@ -1,7 +1,14 @@
-from typing import Any, Callable, Dict, Optional
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
 from .exposure_curve_functions import ExposureCurveType, calculate_curve
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
+
+if TYPE_CHECKING:
+    # `exposure_curve_fitting` hard-imports scipy/matplotlib at module level
+    # (requires the `curve-fitting` extra). Only import it for type-checking
+    # here so that importing `pyre` -- which has no required runtime
+    # dependencies -- never requires scipy/matplotlib to be installed.
+    from .exposure_curve_fitting import ExposureCurveFitter
 
 # citation https://www.casact.org/sites/default/files/presentation/reinsure_2009_handouts_cs1-rosin.pdf "STACKING"
 
@@ -20,6 +27,80 @@ class ExposureModel:
         self._selected_curve = selected_curve
         self._curve_parameters = curve_parameters
         self._ilf_function = ilf_function
+
+    @classmethod
+    def from_fitted_curve(
+        cls,
+        fitter: "ExposureCurveFitter",
+        exposures: Exposures,
+        ri_contract: RIContract,
+        ilf_function: Optional[Callable[[float], float]] = None,
+    ) -> "ExposureModel":
+        """Build an `ExposureModel` from a fitted `ExposureCurveFitter`.
+
+        Runs ``fitter.fit_all_curves()`` (requires the `curve-fitting` extra
+        -- the `fitter` argument must already be constructed with the
+        observed ``positions``/``values``), picks the curve type with the
+        highest R-squared -- mirroring the selection logic in
+        `exposure_curve_fitting.select_best_curve` -- and translates its
+        fitted parameters into the ``selected_curve``/``curve_parameters``
+        shape `ExposureModel.__init__` expects.
+
+        Args:
+            fitter: An `ExposureCurveFitter` already constructed with
+                observed positions/values.
+            exposures: The `Exposures` collection to price.
+            ri_contract: The `RIContract` whose layers to price against.
+            ilf_function: Optional ILF function, passed straight through to
+                `__init__`.
+
+        Returns:
+            ExposureModel: configured with the best-fit curve type/parameters.
+
+        Raises:
+            ValueError: if no curve could be fitted successfully (mirrors
+                `select_best_curve`).
+        """
+        results = fitter.fit_all_curves()
+
+        best_curve_name: Optional[str] = None
+        best_params: Optional[tuple] = None
+        best_r_squared = -1.0
+
+        for curve_name, params in results.items():
+            r_squared = params[-1]  # R-squared is always the last element
+            if r_squared > best_r_squared:
+                best_r_squared = r_squared
+                best_curve_name = curve_name
+                best_params = params
+
+        if best_curve_name is None or best_params is None:
+            raise ValueError("No curves could be fitted successfully")
+
+        curve_type = getattr(ExposureCurveType, best_curve_name)
+
+        if best_curve_name == "RIEBESELL":
+            curve_parameters: Dict[str, Any] = {
+                "z_value": best_params[0],
+                "base_limit": fitter.base_value,
+            }
+        elif best_curve_name == "MIXED_EXPONENTIAL":
+            curve_parameters = {
+                "parameters_mus": best_params[0],
+                "parameter_weights": best_params[1],
+            }
+        elif best_curve_name == "MBBEFD":
+            curve_parameters = {"curve": best_params[0]}
+        else:
+            raise ValueError(f"Unsupported curve type: {best_curve_name}")
+
+        return cls(
+            exposures=exposures,
+            ri_contract=ri_contract,
+            selected_curve=curve_type,
+            curve_parameters=curve_parameters,
+            ilf_function=ilf_function,
+        )
 
     # selected_policy_limit = policy_limit_lower_Bound + band_mid_point * (
     #             policy_limit_upper_Bound - policy_limit_lower_Bound)
