@@ -64,9 +64,10 @@ Commands above). Layout:
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
 
 v1 scope is a single-contract pricing workbench (not a general data explorer or
-rate-monitoring dashboard). `SURPLUS_SHARE` layers are intentionally excluded
-from the layer-type selector — `RILayer.loss_to_layer_fn` raises
-`NotImplementedError` for that type (no `sum_insured` concept modelled yet).
+rate-monitoring dashboard). `RILayer.loss_to_layer_fn` now supports
+`SURPLUS_SHARE` (requires `RILayer.sum_insured` to be set; raises `ValueError`
+otherwise) but the layer type is still excluded from the Panel layer-type
+selector pending UI re-enablement.
 
 ### Key design patterns (post-refactor, develop branch)
 

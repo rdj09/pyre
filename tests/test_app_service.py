@@ -130,7 +130,12 @@ class TestRunPricing(unittest.TestCase):
         self.assertAlmostEqual(by_year.loc[2023, "ceded_incurred"], 200000.0)
         self.assertAlmostEqual(by_year.loc[2023, "loss_ratio"], 200000.0 / 1200000.0)
 
-    def test_run_pricing_with_surplus_share_layer_raises(self):
+    def test_run_pricing_with_surplus_share_layer_without_sum_insured_raises(self):
+        # SURPLUS_SHARE is now implemented (pyre.treaty.contracts.RILayer
+        # .loss_to_layer_fn), but still requires sum_insured to be set --
+        # build_layer doesn't pass it through from the form yet, so this
+        # layer defaults to sum_insured=None and loss_to_layer_fn raises
+        # ValueError instead of computing a recovery.
         metadata = build_contract_metadata(
             {
                 "contract_id": "C-0002",
@@ -150,7 +155,7 @@ class TestRunPricing(unittest.TestCase):
             }
         )
         contract = RIContract(contract_meta_data=metadata, layers=[surplus_layer])
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(ValueError):
             run_pricing(self.claims, self.exposures, contract)
 
 
