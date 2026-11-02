@@ -10,7 +10,11 @@ from pyre import (
     RIContractMetadata,
     RILayer,
 )
-from pyre.models.Exposure.exposure_curve_functions import ExposureCurveType, mbbefd_curve
+from pyre.models.Exposure.exposure_curve_functions import (
+    ExposureCurveType,
+    mbbefd_curve,
+    swissRe_c_values,
+)
 from pyre.models.Exposure.exposure_rating_cost import ExposureModel
 from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
 
@@ -181,6 +185,62 @@ class TestCalculateAllShares(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             model.calculate_all_shares()
+
+
+class TestCalculateExposureCurveAdapter(unittest.TestCase):
+    """Covers the calculate_curve adapter (task 13): ExposureModel.calculate_exposure_curve
+    must work uniformly for every ExposureCurveType member, not just MBBEFD."""
+
+    def test_calculate_exposure_curve_works_for_all_curve_types_without_typeerror(self):
+        cases = [
+            (ExposureCurveType.MBBEFD, {"curve": swissRe_c_values.COMMERCIAL_LINES_MEDIUM}),
+            (
+                ExposureCurveType.RIEBESELL,
+                {
+                    "attachment": 100_000,
+                    "limit": 400_000,
+                    "z_value": 0.1,
+                    "base_limit": 1_000_000,
+                },
+            ),
+            (
+                ExposureCurveType.MIXED_EXPONENTIAL,
+                {
+                    "parameters_mus": [10.0, 20.0, 30.0],
+                    "parameter_weights": [1.0, 1.0, 1.0],
+                },
+            ),
+        ]
+        for curve_type, params in cases:
+            with self.subTest(curve_type=curve_type):
+                model = ExposureModel(
+                    exposures=None,
+                    ri_contract=None,
+                    selected_curve=curve_type,
+                    curve_parameters=params,
+                )
+                result = model.calculate_exposure_curve(curve_type, params, position=0.5)
+                self.assertIsInstance(result, float)
+
+    def test_adapter_matches_calling_underlying_function_directly(self):
+        # Same inputs through the adapter and through mbbefd_curve() directly must
+        # produce the same value -- proves the adapter doesn't change behavior.
+        params = {"curve": swissRe_c_values.COMMERCIAL_LINES_MEDIUM}
+        model = ExposureModel(
+            exposures=None,
+            ri_contract=None,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters=params,
+        )
+
+        adapter_result = model.calculate_exposure_curve(
+            ExposureCurveType.MBBEFD, params, position=0.5
+        )
+        direct_result = mbbefd_curve(
+            curve=swissRe_c_values.COMMERCIAL_LINES_MEDIUM, curve_position=0.5
+        )
+
+        self.assertEqual(adapter_result, direct_result)
 
 
 if __name__ == "__main__":

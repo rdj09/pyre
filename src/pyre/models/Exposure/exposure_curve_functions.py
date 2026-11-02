@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from math import log, exp
-from typing import Union
+from typing import Any, Dict, Union
 
 
 class ExposureCurveType(Enum):
@@ -100,13 +100,13 @@ class swissRe_c_values(Enum):
 
 
 def mixed_exponential_curve(
-    paramaters_mus: list[float], parameter_weights: list[float], curve_position_value: float
+    parameters_mus: list[float], parameter_weights: list[float], curve_position_value: float
 ) -> float:
     """_summary_
 
         citation: https://www.casact.org/sites/default/files/database/proceed_proceed99_99578.pdf
     Args:
-        paramaters_mus (list[float]): _description_
+        parameters_mus (list[float]): _description_
         parameter_weights (list[float]): _description_
         curve_position_value (float): _description_
 
@@ -114,7 +114,7 @@ def mixed_exponential_curve(
         float: _description_
     """
     total_limited_severity = 0
-    for mu, weight in zip(paramaters_mus, parameter_weights):
+    for mu, weight in zip(parameters_mus, parameter_weights):
         if mu != 0:
             contributing_limiting_severity = (1 - exp((-1 / mu) * curve_position_value)) * mu
             total_limited_severity += contributing_limiting_severity * weight
@@ -166,19 +166,71 @@ exposure_curve_calculation = {
     ExposureCurveType.MBBEFD: mbbefd_curve,
 }
 
-# def calculate_curve(curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float) -> float:
-#     """Calculate curve value based on curve type and parameters.
-#
-#     Args:
-#         curve_type: Type of curve to use
-#         parameters: Dictionary containing curve-specific parameters
-#         position: Position on the curve
-#
-#     Returns:
-#         float: Calculated curve value
-#     """
-#     if curve_type not in exposure_curve_calculation:
-#         raise ValueError(f"Unsupported curve type: {curve_type}")
-#
-#     func = exposure_curve_calculation[curve_type]
-#     return func(**parameters, curve_position=position)
+def calculate_curve(
+    curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float
+) -> float:
+    """Calculate curve value based on curve type and parameters.
+
+    Uniform `(curve_type, parameters, position) -> float` adapter over the three
+    underlying curve functions, which do NOT share a common signature:
+
+    - `mbbefd_curve(curve, curve_position)` already matches directly -- `position`
+      is passed straight through as `curve_position`.
+    - `mixed_exponential_curve(parameters_mus, parameter_weights,
+      curve_position_value)` takes the same ratio but under a differently-named
+      parameter (`curve_position_value`, not `curve_position`).
+    - `riebesell_curve(attachment, limit, z_value, base_limit)` has no
+      `curve_position`-shaped parameter at all -- its natural domain is
+      attachment/limit *amounts*, not a [0, 1] position ratio. See the docstring
+      below for the semantic mapping chosen for RIEBESELL.
+
+    Args:
+        curve_type: Type of curve to use
+        parameters: Dictionary containing curve-specific parameters
+        position: Position on the curve, as a ratio (typically in [0, 1])
+
+    Returns:
+        float: Calculated curve value
+
+    Raises:
+        ValueError: if curve_type is not a recognised ExposureCurveType member
+    """
+    if curve_type not in exposure_curve_calculation:
+        raise ValueError(f"Unsupported curve type: {curve_type}")
+
+    if curve_type == ExposureCurveType.MBBEFD:
+        return mbbefd_curve(curve=parameters["curve"], curve_position=position)
+
+    if curve_type == ExposureCurveType.MIXED_EXPONENTIAL:
+        return mixed_exponential_curve(
+            parameters_mus=parameters["parameters_mus"],
+            parameter_weights=parameters["parameter_weights"],
+            curve_position_value=position,
+        )
+
+    if curve_type == ExposureCurveType.RIEBESELL:
+        # Riebesell's own formula is expressed in attachment/limit *amounts*
+        # relative to a `base_limit`, not in a [0, 1] "curve_position" ratio the
+        # way mbbefd_curve and mixed_exponential_curve are. To give RIEBESELL a
+        # position-based evaluation that is comparable to the other two curve
+        # types (so callers like ExposureModel._calculate_single_exposure_share
+        # can treat all three uniformly), we adopt this reading: `position` is
+        # the fraction of `base_limit` at which the curve is evaluated, i.e. an
+        # attachment point `position * base_limit` with no limit above it
+        # (`limit=None`) -- this is exactly Riebesell's "loss at attachment"
+        # formula, `((attachment) / base_limit) ** log2(1 + z_value)`, which is
+        # the same shape of calculation mbbefd_curve/mixed_exponential_curve
+        # perform for a given position. Any `attachment`/`limit` values present
+        # in `parameters` are therefore NOT used by this adapter -- only
+        # `z_value` and `base_limit` are -- since a direct attachment/limit pair
+        # would conflict with a position-driven evaluation. This is a
+        # deliberate, documented choice of the most natural reading, not a
+        # citation-grade derivation.
+        return riebesell_curve(
+            attachment=position * parameters["base_limit"],
+            limit=None,
+            z_value=parameters["z_value"],
+            base_limit=parameters["base_limit"],
+        )
+
+    raise ValueError(f"Unsupported curve type: {curve_type}")
