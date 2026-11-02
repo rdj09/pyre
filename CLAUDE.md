@@ -54,8 +54,9 @@ Commands above). Layout:
 | Path | Purpose |
 |------|---------|
 | `app/service.py` | Pure-Python core (no `import panel`) — CSV parsing into `Claims`/`Exposures`, form-dict → `RIContractMetadata`/`RILayer`, `run_pricing()` → `PricingResults` (pandas DataFrames). Unit-tested in `tests/test_app_service.py` without a running server. |
-| `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results. |
-| `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py`, `results.py`. Only these and `app/main.py` import `panel`. |
+| `app/state.py` | Panel-free shared state (`WorkbenchState`) holding the current contract/layers/claims/exposures/results, plus `loaded_version_id` (the saved version currently loaded, if any). |
+| `app/db.py` | SQLite model-versioning repository (stdlib `sqlite3` + `pickle`, no new deps) — `save_version`/`load_version`/`list_versions`/`copy_version`/`delete_version`/`set_final`/`diff_versions`. Relational tables for version/lineage metadata and cached per-layer-year/exposure results; full input object graph (claims/exposures/contract+layers) pickled into `inputs_blob`. `IncompatibleSnapshotError` on a pyre-version mismatch when unpickling. DB file: `data/workbench.db` (gitignored, created on first run via `init_db`). Unit-tested in `tests/test_db.py`. |
+| `app/pages/` | Panel UI pages: `contract_config.py`, `data_loading.py` (both seed their widgets from `WorkbenchState` if already populated, e.g. after loading a saved version), `results.py` (Run/Save Version/Recalculate + "Export to Excel" via `pyre.io_excel.write_experience_rating_results` into an in-memory buffer — needs the `excel` extra), `model_library.py` ("Saved Models" tab — catalog/Load/Copy/Delete/Mark Final), `compare.py` ("Compare" tab — pick two saved versions, view `diff_versions`). Only these and `app/main.py` import `panel`. |
 | `app/main.py` | Entrypoint (`panel serve app/main.py`). **Not** `app.py` — Bokeh's script loader would register it as module `app`, shadowing the `app` package. |
 | `app/theme.py` | Freyja branding (Panel-only — design, header/footer, favicon, dark-mode toggle). Colours/type only from `app/assets/freyja.css`. |
 | `app/assets/` | Brand SVGs/woff2, `freyja.css` (light + dark palette via `:host-context(.freyja-dark)`), `freyja-page.css` (document-level CSS), `theme-init.js` (dark-mode toggle — loaded via `pn.config.js_files`, **not** inlined in an HTML pane: Panel renders panes via `innerHTML`, which never executes `<script>` tags). Regenerate via `hatch run brand:build`; only the SVGs are diffed (woff2 subsetting order isn't deterministic). |
@@ -105,7 +106,7 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 140 tests collected
+├── tests/                     # unittest.TestCase style; 162 tests collected
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
@@ -113,9 +114,9 @@ pyre/
 
 ## Known Test State (develop)
 
-**Expected: 0 failed, 131 passed** (ignore `test_exposure_curve_fitting.py`,
+**Expected: 0 failed, 162 passed** (ignore `test_exposure_curve_fitting.py`,
 **with the `excel` extra installed**). Without `openpyxl`, `test_io_excel.py`'s
-25 tests skip instead of failing (106 passed, 25 skipped). No known
+29 tests skip instead of failing (133 passed, 29 skipped). No known
 pre-existing failures remain — if `pytest` is red on `develop`, it's new.
 
 `test_exposure_curve_fitting.py` errors at **collection** (needs `scipy`,
