@@ -32,6 +32,12 @@ panel = [
 excel = [
   "openpyxl>=3.1",
 ]
+curve-fitting = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
+]
 
 
 [project.urls]
@@ -119,6 +125,14 @@ build = "python scripts/build_brand_assets.py"
 [tool.hatch.envs.excel]
 dependencies = [
   "openpyxl>=3.1",
+]
+
+[tool.hatch.envs.curve-fitting]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "matplotlib>=3.7",
 ]
 
 [tool.hatch.envs.docs]

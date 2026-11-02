@@ -25,6 +25,7 @@ hatch run brand:build           # regenerate app/assets/ AND docs/assets/ (Freyj
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
 pip install -e ".[excel]"       # install with headless Excel (.xlsx) read/write support
+pip install -e ".[curve-fitting]" # install with curve-fitting deps (numpy/scipy/pandas/matplotlib)
 pip install -e ".[panel,excel]" # same, plus the workbench's "Export to Excel" button
 hatch run panel:serve           # serve app/main.py at localhost (panel serve, --show --autoreload)
 ```
