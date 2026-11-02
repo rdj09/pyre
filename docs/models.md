@@ -101,8 +101,16 @@ these exact figures end-to-end.
 
 ### Trending
 
-`Trending` applies compounding annual trend factors to move claims/exposures
-from their origin year to a common base year.
+`Trending` moves claims/exposures from their origin year to a common base
+year using pre-computed cumulative trend indices.
+
+Each dict value is a **cumulative index relative to `base_year`**, not a
+standalone annual rate — `trend_factors[base_year]` is `1.0`, and
+`calculate_trend_factor` is a direct lookup into these indices (it does not
+itself compound annual rates). The caller is responsible for supplying the
+correct cumulative index for every year it looks up, including years before
+`base_year` (e.g. with 5% p.a. compounding and `base_year=2022`, year 2020's
+entry is `1 / 1.05**2`).
 
 ```python
 from pyre.models.trending import Trending
@@ -117,18 +125,9 @@ trended_claims = trending.trend_claims(claims)
 factor = trending.calculate_trend_factor(2022, for_claims=False)  # 1.03
 ```
 
-!!! warning "Known limitation — trend direction for `origin_year > base_year`"
-    `calculate_trend_factor` divides by the annual factors when
-    `origin_year > base_year` instead of multiplying (or vice versa,
-    depending on how you read the convention) — the formula is only
-    verified correct for `origin_year <= base_year`. It only matters when
-    trend factors are not all `1.0`; the default trend factors used by
-    `ExperienceModelData` (all `1.0`) never exercise the bug, which is why
-    the pricing workbench is unaffected. Tracked by the 9 failures under
-    `test_trending.py` in the test suite — see the repository's test-state
-    notes. Citation for the underlying method: Deters, I. (2017),
-    *The Mathematics of On-Leveling* —
-    [casact.org](https://www.casact.org/sites/default/files/database/forum_17spforum_03-deters.pdf).
+Citation for the underlying method: Deters, I. (2017),
+*The Mathematics of On-Leveling* —
+[casact.org](https://www.casact.org/sites/default/files/database/forum_17spforum_03-deters.pdf).
 
 ### Burn cost
 

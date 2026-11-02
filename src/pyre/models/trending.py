@@ -11,11 +11,21 @@ class Trending:
     This class provides methods to apply trend factors to claims and exposures,
     adjusting their values to account for inflation or other time-based changes.
 
+    Each dict value is a **cumulative index relative to `base_year`**, not a
+    standalone annual rate: `trend_factors[base_year]` must be `1.0`, and
+    `trend_factors[y]` is the compounded trend between year `y` and
+    `base_year` in either direction (so it is `< 1.0` for `y < base_year` and
+    `> 1.0` for `y > base_year`, under positive annual trend). For example,
+    with 5% p.a. compounding and `base_year=2022`, year 2020's entry is
+    `1 / 1.05**2` (not `1.05**-2`'s complement or any other per-year rate) --
+    `calculate_trend_factor` is a direct lookup into these pre-computed
+    cumulative indices, it does not itself compound annual rates.
+
     Attributes:
-        exposure_trend_factors (Dict[int, float]): Mapping of year to annual trend factor for exposures
-            (e.g., {2020: 1.02, 2021: 1.03, ...}).
-        claim_trend_factors (Dict[int, float]): Mapping of year to annual trend factor for claims
-            (e.g., {2020: 1.02, 2021: 1.03, ...}).
+        exposure_trend_factors (Dict[int, float]): Mapping of year to cumulative trend index
+            (relative to base_year) for exposures (e.g., {2020: 0.95, 2021: 0.98, 2022: 1.0}).
+        claim_trend_factors (Dict[int, float]): Mapping of year to cumulative trend index
+            (relative to base_year) for claims (e.g., {2020: 0.95, 2021: 0.98, 2022: 1.0}).
         base_year (int): The year to which all data will be trended.
     """
 
@@ -30,10 +40,11 @@ class Trending:
         Initialize the Trending class with trend factors and a base year.
 
         Args:
-            exposure_trend_factors (Dict[int, float]): Mapping of year to annual trend factor for exposures
-                (e.g., {2020: 1.02, 2021: 1.03, ...}).
-            claim_trend_factors (Dict[int, float], optional): Mapping of year to annual trend factor for claims.
-                If None, exposure_trend_factors will be used for claims as well.
+            exposure_trend_factors (Dict[int, float]): Mapping of year to cumulative trend index
+                (relative to base_year) for exposures (e.g., {2020: 0.95, 2021: 0.98, 2022: 1.0}).
+            claim_trend_factors (Dict[int, float], optional): Mapping of year to cumulative trend index
+                (relative to base_year) for claims. If None, exposure_trend_factors will be used for
+                claims as well.
             trend_factors (Dict[int, float], optional): For backward compatibility. If provided, both
                 exposure_trend_factors and claim_trend_factors will be set to this value.
             base_year (int): The year to which all data will be trended.

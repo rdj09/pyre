@@ -120,6 +120,23 @@ class TestTrending(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.trending.calculate_trend_factor(2019, for_claims=False)
     
+    def test_calculate_trend_factor_for_origin_year_before_base_year(self):
+        """Golden value: 5% p.a. compounding, base_year=2022. Deters (2017),
+        'The Mathematics of On-Leveling,' CAS E-Forum, establishes that a
+        consistent on-leveling formula must be symmetric about the base year --
+        this pins that symmetry for a year *before* base_year, which no existing
+        test exercises (all prior fixtures only trend origin_year > base_year)."""
+        trending = Trending(
+            exposure_trend_factors={2020: 1 / 1.05**2, 2022: 1.0},
+            claim_trend_factors={2020: 1 / 1.05**2, 2022: 1.0},
+            base_year=2022,
+        )
+        factor = trending.calculate_trend_factor(2020, for_claims=False)
+        self.assertAlmostEqual(factor, 0.9070294784580498, places=6)
+        original_value = 100_000.0
+        trended = original_value / factor
+        self.assertAlmostEqual(trended, 100_000 * 1.05**2, places=2)
+
     def test_trend_exposures(self):
         # Trend the exposures
         trended_exposures = self.trending.trend_exposures(self.exposures)
