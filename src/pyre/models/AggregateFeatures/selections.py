@@ -5,6 +5,14 @@ from ...models.Exposure.exposure_rating_cost import ExposureModel
 
 
 class CredibilityWeight:
+    """Credibility methods used to weight experience vs. exposure (collective) estimates.
+
+    Implements Limited Fluctuation (Classical), Buhlmann, Buhlmann-Straub,
+    Greatest Accuracy, and Bayesian credibility. See Mahler, H.C. and Dean,
+    C.G., "Credibility", Ch.8 in Foundations of Casualty Actuarial Science,
+    4th ed., Casualty Actuarial Society.
+    """
+
     def __init__(self, experience_data: ExperienceModelData, exposure_data: ExposureModel) -> None:
         """
         Initialize the CredibilityWeight class with experience and exposure data.
@@ -355,7 +363,10 @@ class Selections:
         """
         # Get claim count if not provided
         if "claim_count" not in kwargs and hasattr(self.experience_data, "subject_contract_claims"):
-            kwargs["claim_count"] = len(self.experience_data.subject_contract_claims())
+            kwargs["claim_count"] = sum(
+                len(claims_obj)
+                for claims_obj in self.experience_data.subject_contract_claims.values()
+            )
 
         # Calculate credibility based on the selected method
         if method == "limited_fluctuation":
@@ -420,7 +431,9 @@ class Selections:
             # Get loss data if not provided
             if "data" not in kwargs and hasattr(self.experience_data, "subject_contract_claims"):
                 kwargs["data"] = [
-                    claim.amount for claim in self.experience_data.subject_contract_claims()
+                    claim.capped_claim_development_history.latest_incurred
+                    for claims_obj in self.experience_data.subject_contract_claims.values()
+                    for claim in claims_obj.claims
                 ]
 
             # Get data for easier access
@@ -433,7 +446,9 @@ class Selections:
             # Get loss data if not provided
             if "data" not in kwargs and hasattr(self.experience_data, "subject_contract_claims"):
                 kwargs["data"] = [
-                    claim.amount for claim in self.experience_data.subject_contract_claims()
+                    claim.capped_claim_development_history.latest_incurred
+                    for claims_obj in self.experience_data.subject_contract_claims.values()
+                    for claim in claims_obj.claims
                 ]
 
             # Calculate data variance if not provided
