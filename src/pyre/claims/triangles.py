@@ -452,7 +452,70 @@ class Triangle:
 
         return params, metrics
 
-    # TODO output selected development pattern for the purpose of burn cost.
+    def get_selected_development_pattern(
+        self,
+        curve_type: CurveType,
+        tail_factor: float = 1.0,
+        c_values: List[float] = None,
+    ) -> Dict[int, float]:
+        """
+        Fit the selected curve type to this triangle's average age-to-age
+        factors and derive the resulting *cumulative-to-ultimate* development
+        pattern -- consumable by `BurnCostModel(..., development_pattern=...)`.
+
+        For each development period, the cumulative-to-ultimate factor is the
+        product of the fitted incremental age-to-age factors for every later
+        development period, multiplied by `tail_factor` to project the final
+        observed period to ultimate. The factors decrease monotonically as
+        development period increases, reaching `tail_factor` at the final
+        (latest) development period.
+
+        Args:
+            curve_type (CurveType): Type of curve to fit (see `fit_curve`).
+            tail_factor (float, optional): Factor applied beyond the final
+                observed development period to project to ultimate. Defaults
+                to 1.0 (no development tail beyond the data).
+            c_values (List[float], optional): Candidate c values for the
+                inverse power fit. Defaults to `fit_curve`'s default.
+
+        Returns:
+            Dict[int, float]: Mapping of development period to
+                cumulative-to-ultimate development factor.
+        """
+        params, _ = self.fit_curve(curve_type, c_values)
+
+        # Reconstruct the fitted *incremental* age-to-age factor for each
+        # "from" development period, reusing fit_curve's own `expected`
+        # formulas (not re-derived) -- one entry per period that has a
+        # transition to a later period, i.e. all but the last dev period.
+        fitted_ata: Dict[int, float] = {}
+        for dp in self.dev_periods[:-1]:
+            if curve_type == CurveType.EXPONENTIAL:
+                fitted_ata[dp] = 1 + exp(params["a"] + params["b"] * dp)
+            elif curve_type == CurveType.POWER:
+                fitted_ata[dp] = params["a"] * (params["b"] ** dp)
+            elif curve_type == CurveType.WEIBULL:
+                fitted_ata[dp] = 1 / (1 - exp(-params["a"] * (dp ** params["b"])))
+            elif curve_type == CurveType.INVERSE_POWER:
+                fitted_ata[dp] = 1 + params["a"] * ((dp + params["c"]) ** params["b"])
+            else:
+                raise ValueError(f"Unknown curve type: {curve_type}")
+
+        # Cumulative-to-ultimate factor at each dev period is the product of
+        # every later incremental factor, times the tail factor -- so walk
+        # the dev periods from latest to earliest, accumulating as we go.
+        pattern: Dict[int, float] = {}
+        if not self.dev_periods:
+            return pattern
+
+        reversed_periods = list(reversed(self.dev_periods))
+        cumulative = tail_factor
+        pattern[reversed_periods[0]] = cumulative
+        for dp in reversed_periods[1:]:
+            cumulative *= fitted_ata[dp]
+            pattern[dp] = cumulative
+
+        return pattern
 
 
 # TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf

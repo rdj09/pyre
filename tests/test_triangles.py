@@ -227,6 +227,133 @@ class TestTriangle(unittest.TestCase):
             triangle.fit_curve(curve_type="invalid_type")  # type: ignore
 
 
+class TestGetSelectedDevelopmentPattern(unittest.TestCase):
+    """Tests for Triangle.get_selected_development_pattern."""
+
+    def _build_exponential_decay_triangle(self):
+        """Build a synthetic triangle whose age-to-age factors follow an
+        exact exponential decay (rj = 1 + exp(a + b * dp)), so the fitted
+        curve recovers the pattern precisely regardless of averaging noise.
+        """
+        a_true, b_true = 0.0, -0.5
+        dev_periods = [1, 2, 3, 4, 5, 6]
+
+        # Age-to-age factor from each "from" period to the next one.
+        ata = {dp: 1 + exp(a_true + b_true * dp) for dp in dev_periods[:-1]}
+
+        # Full development chain starting at 100.0 for dev period 1.
+        full_chain = {1: 100.0}
+        for dp in dev_periods[1:]:
+            full_chain[dp] = full_chain[dp - 1] * ata[dp - 1]
+
+        # Classic triangle shape: origin year i (0-indexed) is observed
+        # through period (len(dev_periods) - i), so every origin year's
+        # observed factors match the same chain exactly.
+        origin_years = [2015, 2016, 2017, 2018, 2019, 2020]
+        triangle_data = {}
+        for i, oy in enumerate(origin_years):
+            max_dev = len(dev_periods) - i
+            triangle_data[oy] = {dp: full_chain[dp] for dp in dev_periods if dp <= max_dev}
+
+        return Triangle(triangle=triangle_data, origin_years=origin_years, dev_periods=dev_periods)
+
+    def test_get_selected_development_pattern_returns_cumulative_factors(self):
+        triangle = self._build_exponential_decay_triangle()
+
+        pattern = triangle.get_selected_development_pattern(CurveType.EXPONENTIAL)
+        dev_periods = sorted(pattern.keys())
+        # Cumulative-to-ultimate factors decrease monotonically toward 1.0
+        for earlier, later in zip(dev_periods, dev_periods[1:]):
+            self.assertGreaterEqual(pattern[earlier], pattern[later])
+        self.assertAlmostEqual(pattern[dev_periods[-1]], 1.0, places=2)
+
+    def test_tail_factor_applied_to_final_development_period(self):
+        triangle = self._build_exponential_decay_triangle()
+
+        pattern = triangle.get_selected_development_pattern(
+            CurveType.EXPONENTIAL, tail_factor=1.05
+        )
+        dev_periods = sorted(pattern.keys())
+        self.assertAlmostEqual(pattern[dev_periods[-1]], 1.05, places=6)
+
+    def test_development_pattern_feeds_burn_cost_model_without_error(self):
+        from pyre.models.Experience.burn_cost import BurnCostModel
+        from pyre.models.Experience.experience_preparer import ExperienceModelData
+        from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData
+        from pyre.exposures.exposures import Exposure, ExposureMetaData, Exposures, ExposureValues
+        from pyre.treaty.contracts import RIContract, RILayer
+        from pyre.enums import ClaimTriggerBasis, ContractType, IndexationClauseType
+
+        triangle = self._build_exponential_decay_triangle()
+        pattern = triangle.get_selected_development_pattern(CurveType.EXPONENTIAL)
+
+        claim = Claim(
+            ClaimsMetaData(
+                claim_id="CLM001",
+                currency="USD",
+                contract_limit=2_000_000.0,
+                loss_date=date(2020, 3, 1),
+            ),
+            ClaimDevelopmentHistory(
+                development_months=[12],
+                cumulative_dev_paid=[50000.0],
+                cumulative_dev_incurred=[120000.0],
+            ),
+        )
+        exposure = Exposure(
+            ExposureMetaData(
+                exposure_id="EXP2020",
+                exposure_name="2020 Premium",
+                exposure_period_start=date(2020, 1, 1),
+                exposure_period_end=date(2020, 12, 31),
+                currency="USD",
+            ),
+            ExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
+        )
+        layer = RILayer(
+            layer_id=1,
+            layer_name="XOL Layer",
+            layer_type=ContractType.EXCESS_OF_LOSS,
+            occurrence_attachment=0.0,
+            occurrence_limit=1_000_000.0,
+            aggregate_attachment=0.0,
+            aggregate_limit=0.0,
+            subject_lines_of_business=[],
+            subject_lob_exposure_amounts=[],
+            full_subject_premium=0.0,
+            written_line=1.0,
+            signed_line=1.0,
+            number_of_reinstatements=0,
+            reinstatement_cost={},
+        )
+        from pyre.treaty.contracts import RIContractMetadata
+
+        contract_metadata = RIContractMetadata(
+            contract_id="C-0001",
+            contract_description="Test",
+            cedent_name="Acme Re",
+            trigger_basis=ClaimTriggerBasis.LOD,
+            indexation_clause=IndexationClauseType.FULL_INDEXATION,
+            indexation_margin=0.0,
+            inception_date=date(2020, 1, 1),
+            expiration_date=date(2020, 12, 31),
+            fx_rates={"USD": 1.0},
+        )
+        contract = RIContract(contract_meta_data=contract_metadata, layers=[layer])
+
+        model_data = ExperienceModelData(
+            claims=Claims([claim]),
+            exposures=Exposures([exposure]),
+            ri_contract=contract,
+        )
+
+        model = BurnCostModel(model_data, layer.layer_id, development_pattern=pattern)
+
+        # Should construct and run without raising.
+        burn_costs = model.calculate_burn_cost()
+        self.assertIsInstance(burn_costs, dict)
+
+
 class TestTriangleFromClaims(unittest.TestCase):
     """Regression tests for Triangle.from_claims (previously raised
     AttributeError and then TypeError -- see claim.claims_meta_data.modelling_year
