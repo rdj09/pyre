@@ -16,7 +16,7 @@ class SeverityFit:
             # Return list of IBNER-projected incurred amounts for each claim
             return [claim.capped_claim_development_history.latest_incurred * self.ibner_dev_pattern[claim.claims_meta_data.modelling_year] for claim in self.data.trended_claims.claims]
         else:
-            return NotImplementedError("non ground up fitting hasn't been implemented yet")
+            raise NotImplementedError("non ground up fitting hasn't been implemented yet")
 
 
     def fit(self):
