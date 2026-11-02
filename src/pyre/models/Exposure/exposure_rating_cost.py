@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Callable, Dict, Optional
 from .exposure_curve_functions import ExposureCurveType, calculate_curve
 from ...exposures.exposures import Exposures
 from ...treaty.contracts import RIContract
@@ -13,11 +13,13 @@ class ExposureModel:
         ri_contract: RIContract,
         selected_curve: ExposureCurveType,
         curve_parameters: Dict,
+        ilf_function: Optional[Callable[[float], float]] = None,
     ):
         self._exposures = exposures
         self._ri_contract = ri_contract
         self._selected_curve = selected_curve
         self._curve_parameters = curve_parameters
+        self._ilf_function = ilf_function
 
     # selected_policy_limit = policy_limit_lower_Bound + band_mid_point * (
     #             policy_limit_upper_Bound - policy_limit_lower_Bound)
@@ -37,7 +39,31 @@ class ExposureModel:
     #       curve_position_treaty_higher = mbbefd_curve(curve_parameter,seleceted_treaty_top / selected_total_insured_value)
     #       return (curve_position_treaty_higher - curve_position_treaty_lower) / (curve_position_policy_higher - curve_position_policy_lower)
 
-    # TODO should attach to this class. Think about ILF option nad adjustment to calculation
+    def calculate_ilf_adjusted_rate(self, base_limit: float, target_limit: float) -> float:
+        """Scale a base-limit rate to a target limit using the configured ILF function.
+
+        Applies ``self._ilf_function(target_limit) / self._ilf_function(base_limit)``
+        (citation: Palmer, "An Introduction to Increased Limits Factors", CAS Study
+        Note) -- purely additive, optional adjustment layered on top of the
+        curve-based calculations below.
+
+        Args:
+            base_limit: The limit the base rate is calibrated to.
+            target_limit: The limit to scale the rate up/down to.
+
+        Returns:
+            float: The ILF-adjusted rate multiplier.
+
+        Raises:
+            ValueError: if no ``ilf_function`` was supplied at construction.
+        """
+        if self._ilf_function is None:
+            raise ValueError(
+                "calculate_ilf_adjusted_rate requires an ilf_function to be supplied "
+                "to ExposureModel.__init__"
+            )
+        return self._ilf_function(target_limit) / self._ilf_function(base_limit)
+
     def calculate_exposure_curve(
         self, curve_type: ExposureCurveType, parameters: Dict[str, Any], position: float
     ) -> float:

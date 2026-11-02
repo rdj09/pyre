@@ -243,5 +243,45 @@ class TestCalculateExposureCurveAdapter(unittest.TestCase):
         self.assertEqual(adapter_result, direct_result)
 
 
+class TestCalculateIlfAdjustedRate(unittest.TestCase):
+    """Covers task 14: optional ILF integration into ExposureModel."""
+
+    def test_ilf_adjusted_rate_differs_from_unadjusted_for_higher_limit(self):
+        from functools import partial
+
+        from pyre.models.Exposure.exposure_ILF_functions import pareto_ilf
+
+        # pareto_ilf(limit_1, limit_2, alpha, x_m) -- bind limit_1 (the basic
+        # limit) positionally and alpha/x_m by keyword, leaving limit_2 (the
+        # "limit" ExposureModel will call the function with) unbound.
+        model = ExposureModel(
+            exposures=None,
+            ri_contract=None,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters={"curve": 3.0},
+            ilf_function=partial(pareto_ilf, 100_000.0, alpha=1.5, x_m=100_000.0),
+        )
+
+        rate_at_base = model.calculate_ilf_adjusted_rate(
+            base_limit=100_000.0, target_limit=100_000.0
+        )
+        rate_at_higher = model.calculate_ilf_adjusted_rate(
+            base_limit=100_000.0, target_limit=500_000.0
+        )
+
+        self.assertGreater(rate_at_higher, rate_at_base)
+
+    def test_calculate_ilf_adjusted_rate_without_ilf_function_raises(self):
+        model = ExposureModel(
+            exposures=None,
+            ri_contract=None,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters={"curve": 3.0},
+        )
+
+        with self.assertRaises(ValueError):
+            model.calculate_ilf_adjusted_rate(base_limit=100_000.0, target_limit=500_000.0)
+
+
 if __name__ == "__main__":
     unittest.main()
