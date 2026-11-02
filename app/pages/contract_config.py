@@ -12,14 +12,12 @@ from app.service import build_contract_metadata, build_layer
 from app.state import WorkbenchState
 from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
 
-# SURPLUS_SHARE is excluded -- pyre's loss_to_layer_fn raises NotImplementedError
-# for it (no sum_insured concept modelled yet). Keeping it out of the selectable
-# options prevents a crash on "Run pricing" rather than catching it after the fact.
 SELECTABLE_LAYER_TYPES = [
     ContractType.EXCESS_OF_LOSS,
     ContractType.FRANCHISE_DEDUCTIBLE,
     ContractType.AGGREGATE_STOP_LOSS,
     ContractType.QUOTA_SHARE,
+    ContractType.SURPLUS_SHARE,
 ]
 
 LAYER_TITLES = {
@@ -96,6 +94,7 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
     full_subject_premium = pn.widgets.FloatInput(name="Full subject premium", value=0.0)
     written_line = pn.widgets.FloatInput(name="Written line", value=1.0)
     signed_line = pn.widgets.FloatInput(name="Signed line", value=1.0)
+    sum_insured = pn.widgets.FloatInput(name="Sum insured (SURPLUS_SHARE only)", value=0.0)
 
     add_layer_button = pn.widgets.Button(name="Add layer", button_type="default")
     save_contract_button = pn.widgets.Button(name="Save contract metadata", button_type="primary")
@@ -110,6 +109,7 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
             "full_subject_premium": full_subject_premium.value,
             "written_line": written_line.value,
             "signed_line": signed_line.value,
+            "sum_insured": sum_insured.value or None,
         }
         state.layers.append(build_layer(form))
         layer_rows.append({col: form.get(col) for col in LAYER_COLUMNS})
@@ -152,13 +152,14 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
         pn.Row(inception_date, expiration_date),
         "## Layers",
         pn.pane.Markdown(
-            "Excess of loss, franchise deductible, aggregate stop loss, and quota share "
-            "layers are supported. Surplus share is not yet available.",
+            "Excess of loss, franchise deductible, aggregate stop loss, quota share, "
+            "and surplus share layers are supported.",
             margin=(0, 0, 10, 0),
         ),
         pn.Row(layer_id, layer_name, layer_type),
         pn.Row(occurrence_attachment, occurrence_limit, full_subject_premium),
-        pn.Row(written_line, signed_line, add_layer_button),
+        pn.Row(written_line, signed_line, sum_insured),
+        add_layer_button,
         pn.pane.Markdown("*Add one or more layers above, then click Save contract metadata.*"),
         layer_table,
         save_contract_button,

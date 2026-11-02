@@ -216,18 +216,12 @@ def build_layer(form: dict[str, Any]) -> RILayer:
         number_of_reinstatements=int(form.get("number_of_reinstatements", 0)),
         reinstatement_cost=form.get("reinstatement_cost", {}),
         cession=float(form.get("cession", 1.0)),
+        sum_insured=float(form["sum_insured"]) if form.get("sum_insured") else None,
     )
 
 
 def run_pricing(claims: Claims, exposures: Exposures, ri_contract: RIContract) -> PricingResults:
-    """Run pyre's experience-rating calculation and shape the output as DataFrames.
-
-    Raises:
-        NotImplementedError: if any layer on the contract is SURPLUS_SHARE
-            (pyre does not yet support pricing that layer type). Callers
-            (the UI) should prevent selecting that layer type rather than
-            relying on catching this.
-    """
+    """Run pyre's experience-rating calculation and shape the output as DataFrames."""
     model_data = ExperienceModelData(claims=claims, exposures=exposures, ri_contract=ri_contract)
 
     by_layer_year = pd.DataFrame(

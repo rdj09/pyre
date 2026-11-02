@@ -93,6 +93,32 @@ class TestBuildContractAndLayer(unittest.TestCase):
         self.assertEqual(layer.occurrence_attachment, 100000)
         self.assertEqual(layer.occurrence_limit, 200000)
 
+    def test_build_layer_passes_through_sum_insured_for_surplus_share(self):
+        form = {
+            "layer_id": 1,
+            "layer_name": "Surplus 1",
+            "layer_type": "SURPLUS_SHARE",
+            "occurrence_attachment": 100_000,
+            "occurrence_limit": 400_000,
+            "full_subject_premium": 0.0,
+            "written_line": 1.0,
+            "signed_line": 1.0,
+            "sum_insured": 1_000_000,
+        }
+        layer = build_layer(form)
+        self.assertEqual(layer.sum_insured, 1_000_000)
+
+    def test_build_layer_sum_insured_defaults_to_none(self):
+        form = {
+            "layer_id": 1,
+            "layer_name": "XOL 1",
+            "layer_type": "EXCESS_OF_LOSS",
+            "occurrence_attachment": 0.0,
+            "occurrence_limit": 100_000,
+        }
+        layer = build_layer(form)
+        self.assertIsNone(layer.sum_insured)
+
 
 class TestRunPricing(unittest.TestCase):
     def setUp(self):
