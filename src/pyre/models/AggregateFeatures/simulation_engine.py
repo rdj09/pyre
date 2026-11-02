@@ -11,36 +11,36 @@ class Simulation:
     def save(self) -> None:
         pass
 
-    def profit_commsission():
+    def profit_commission(self):
         pass
 
-    def cashflows():
+    def cashflows(self):
         # premium and claims
         pass
 
-    def loss_cost():
+    def loss_cost(self):
         pass
 
-    def required_capital():
+    def required_capital(self):
         # risk adjusted capital
         pass
 
-    def investment_return():  # / discounting:
+    def investment_return(self):  # / discounting:
         # pattern and yeild assumptions from all cashflows
         pass
 
-    def tax_rate():
+    def tax_rate(self):
         # premium tax rate and proift?
         pass
 
-    def retrocession_cost():
+    def retrocession_cost(self):
         # additioanl costs from risk mitigation techniques
         pass
 
-    def retrocession_beneits():
+    def retrocession_benefits(self):
         pass
 
-    def required_premium_layer():
+    def required_premium_layer(self):
         # required_capital = required_capital()
         # investment_return = investment_return()
         # tax_rate = tax_rate()
@@ -51,7 +51,7 @@ class Simulation:
         # expenses_other_costs = 0.0
         pass
 
-    def required_premium_programme():
+    def required_premium_programme(self):
         # for x in range(blah):
         #     total += required_premium_layer()
         # return total
