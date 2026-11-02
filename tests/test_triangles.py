@@ -276,8 +276,30 @@ class TestGetSelectedDevelopmentPattern(unittest.TestCase):
         dev_periods = sorted(pattern.keys())
         self.assertAlmostEqual(pattern[dev_periods[-1]], 1.05, places=6)
 
+    def test_get_selected_development_pattern_by_origin_year_maps_each_year_to_its_own_maturity(self):
+        triangle = self._build_exponential_decay_triangle()
+
+        pattern_by_year = triangle.get_selected_development_pattern_by_origin_year(
+            CurveType.EXPONENTIAL
+        )
+
+        # (a) Keyed by origin_years, not dev periods.
+        self.assertEqual(sorted(pattern_by_year.keys()), sorted(triangle.origin_years))
+
+        # (b) Oldest (most mature) origin year's factor should be closer to
+        # 1.0 (fully run-off, tail_factor default) than the newest (least
+        # mature) origin year's factor, which should still be larger -- it
+        # has the most development left to go.
+        oldest_year = min(triangle.origin_years)
+        newest_year = max(triangle.origin_years)
+        oldest_factor = pattern_by_year[oldest_year]
+        newest_factor = pattern_by_year[newest_year]
+
+        self.assertLess(oldest_factor, newest_factor)
+        self.assertAlmostEqual(oldest_factor, 1.0, places=2)
+
     def test_development_pattern_feeds_burn_cost_model_without_error(self):
-        from pyre.models.Experience.burn_cost import BurnCostModel
+        from pyre.models.Experience.burn_cost import BurnCostModel, ProjectionMethods
         from pyre.models.Experience.experience_preparer import ExperienceModelData
         from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData
         from pyre.exposures.exposures import Exposure, ExposureMetaData, Exposures, ExposureValues
@@ -285,7 +307,9 @@ class TestGetSelectedDevelopmentPattern(unittest.TestCase):
         from pyre.enums import ClaimTriggerBasis, ContractType, IndexationClauseType
 
         triangle = self._build_exponential_decay_triangle()
-        pattern = triangle.get_selected_development_pattern(CurveType.EXPONENTIAL)
+        pattern_by_year = triangle.get_selected_development_pattern_by_origin_year(
+            CurveType.EXPONENTIAL
+        )
 
         claim = Claim(
             ClaimsMetaData(
@@ -347,11 +371,53 @@ class TestGetSelectedDevelopmentPattern(unittest.TestCase):
             ri_contract=contract,
         )
 
-        model = BurnCostModel(model_data, layer.layer_id, development_pattern=pattern)
+        # The claim's modelling year (2020) is the triangle's newest/least
+        # mature origin year (only dev period 1 observed), so its own
+        # cumulative-to-ultimate factor is large (still has lots of
+        # development left) -- this should materially change the burn cost
+        # versus the no-development-pattern default. Use the CHAINLADDER
+        # projection method explicitly (ultimate = latest_incurred *
+        # dev_factor) so the development pattern's effect is direct and
+        # unambiguous, rather than getting diluted by the Cape Cod prior's
+        # exposure normalisation.
+        modelling_year = 2020
+        projection_methods = {modelling_year: ProjectionMethods.CHAINLADDER}
 
-        # Should construct and run without raising.
-        burn_costs = model.calculate_burn_cost()
-        self.assertIsInstance(burn_costs, dict)
+        model_with_pattern = BurnCostModel(
+            model_data,
+            layer.layer_id,
+            projection_methods=projection_methods,
+            development_pattern=pattern_by_year,
+        )
+        burn_costs_with_pattern = model_with_pattern.calculate_burn_cost()
+        self.assertIsInstance(burn_costs_with_pattern, dict)
+
+        # Default: development_pattern omitted entirely -> BurnCostModel.__init__
+        # falls back to {year: 1.0 for year in modelling_years}, i.e. no
+        # development applied at all.
+        model_without_pattern = BurnCostModel(
+            model_data, layer.layer_id, projection_methods=projection_methods
+        )
+        burn_costs_without_pattern = model_without_pattern.calculate_burn_cost()
+
+        self.assertIn(modelling_year, burn_costs_with_pattern)
+        self.assertIn(modelling_year, burn_costs_without_pattern)
+
+        # The year-keyed factor actually applied for 2020 should be
+        # substantially above 1.0 (proving it's a real, non-trivial factor,
+        # not accidentally falling back to the 1.0 default).
+        self.assertGreater(pattern_by_year[modelling_year], 2.0)
+
+        # Prove the development pattern is really being applied: the two
+        # burn costs must differ by a clearly non-trivial amount, not just
+        # floating-point noise.
+        self.assertGreater(
+            abs(
+                burn_costs_with_pattern[modelling_year]
+                - burn_costs_without_pattern[modelling_year]
+            ),
+            0.1,
+        )
 
 
 class TestTriangleFromClaims(unittest.TestCase):

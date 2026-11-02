@@ -517,6 +517,55 @@ class Triangle:
 
         return pattern
 
+    def get_selected_development_pattern_by_origin_year(
+        self,
+        curve_type: CurveType,
+        tail_factor: float = 1.0,
+        c_values: List[float] = None,
+    ) -> Dict[int, float]:
+        """
+        Re-key the dev-period-keyed pattern from `get_selected_development_pattern`
+        onto each origin (modelling) year's OWN cumulative-to-ultimate factor at
+        that year's current, latest-observed maturity.
+
+        `get_selected_development_pattern` returns one factor per *development
+        period* (e.g. {1: 1.5, 2: 1.2, ..., 6: 1.0}), which cannot be looked up
+        by `BurnCostModel`'s `dev_factor = development_pattern.get(year, 1.0)`
+        -- that lookup is keyed by origin/modelling year (e.g. 2019, 2020), not
+        development period, so every lookup would miss and silently fall back
+        to the 1.0 default. This method bridges the two: for each origin year,
+        it finds that year's latest (maximum) observed development period and
+        looks up the cumulative-to-ultimate factor at that period -- i.e. how
+        much further *that specific year* still needs to develop given how
+        mature it currently is. This is the form `BurnCostModel`'s
+        `development_pattern` constructor argument actually expects.
+
+        Args:
+            curve_type (CurveType): Type of curve to fit (see `fit_curve`).
+            tail_factor (float, optional): Factor applied beyond the final
+                observed development period to project to ultimate. Defaults
+                to 1.0 (no development tail beyond the data).
+            c_values (List[float], optional): Candidate c values for the
+                inverse power fit. Defaults to `fit_curve`'s default.
+
+        Returns:
+            Dict[int, float]: Mapping of origin (modelling) year to that
+                year's own cumulative-to-ultimate development factor.
+        """
+        pattern_by_dev_period = self.get_selected_development_pattern(
+            curve_type, tail_factor, c_values
+        )
+
+        result: Dict[int, float] = {}
+        for origin_year in self.origin_years:
+            observed_periods = list(self.triangle.get(origin_year, {}).keys())
+            if not observed_periods:
+                continue
+            latest_dp = max(observed_periods)
+            result[origin_year] = pattern_by_dev_period.get(latest_dp, tail_factor)
+
+        return result
+
 
 # TODO IBNER methodology citation of source SCHNIEPER https://www.casact.org/sites/default/files/database/astin_vol21no1_111.pdf
 class IBNERPatternExtractor:
