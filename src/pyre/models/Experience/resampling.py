@@ -28,7 +28,7 @@ class resampling():
                                          to be resampled. The trended_claims property of this
                                          object will be used for resampling.
         """
-        self._claims = ExperienceModelData.trended_claims #trended loss prior to subject losses
+        self._claims = claims.trended_claims #trended loss prior to subject losses
 
 
     def resample(self) -> None:
