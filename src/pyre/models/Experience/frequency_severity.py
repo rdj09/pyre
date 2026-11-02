@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from math import log, pi, sqrt
+from math import lgamma, log, pi, sqrt
 from statistics import mean, pvariance
 from typing import Any, Dict, List, Union
 
@@ -116,6 +116,115 @@ class SeverityFit:
         return FitResult(
             distribution=SeverityDistribution.PARETO,
             parameters={"alpha": alpha, "x_m": x_m},
+            log_likelihood=log_likelihood,
+            aic=aic,
+        )
+
+
+class FrequencyFit:
+    def __init__(self, distributions: List[FrequencyDistribution], claim_counts: List[int]):
+        self.distributions = distributions
+        self.claim_counts = claim_counts
+
+    def fit(self) -> List[FitResult]:
+        """Fit each distribution in ``self.distributions`` to
+        ``self.claim_counts``.
+
+        Estimation methods follow Klugman, Panjer & Willmot, *Loss Models:
+        From Data to Decisions*, 4th ed., Ch. 13 "Parameter Estimation",
+        §13.2 "Method of Moments":
+
+        - ``FrequencyDistribution.POISSON``: maximum likelihood (which for
+          the Poisson coincides with the method of moments).
+          ``lambda_hat = mean(counts)``.
+        - ``FrequencyDistribution.NEGATIVE_BINOMIAL``: method of moments.
+          See :meth:`_fit_negative_binomial` for the derivation.
+
+        Returns one :class:`FitResult` per entry in ``self.distributions``,
+        in the same order, carrying the fitted parameters plus the resulting
+        log-likelihood and AIC (``aic = 2*k - 2*log_likelihood``, with
+        ``k = 1`` parameter for Poisson and ``k = 2`` for Negative Binomial).
+
+        Raises:
+            NotImplementedError: for any distribution other than ``POISSON``
+                or ``NEGATIVE_BINOMIAL`` (e.g. ``FrequencyDistribution.OTHER``).
+            ValueError: from :meth:`_fit_negative_binomial` if the sample is
+                not overdispersed (``variance <= mean``).
+        """
+        data = self.claim_counts
+        results: List[FitResult] = []
+        for distribution in self.distributions:
+            if distribution == FrequencyDistribution.POISSON:
+                results.append(self._fit_poisson(data))
+            elif distribution == FrequencyDistribution.NEGATIVE_BINOMIAL:
+                results.append(self._fit_negative_binomial(data))
+            else:
+                raise NotImplementedError(
+                    f"Fitting for frequency distribution {distribution} has not been "
+                    "implemented yet"
+                )
+        return results
+
+    @staticmethod
+    def _fit_poisson(data: List[int]) -> FitResult:
+        """Maximum likelihood fit of the Poisson distribution.
+
+        ``lambda_hat = mean(counts)`` — the Poisson's single parameter is
+        simultaneously its mean, so MLE and method-of-moments coincide.
+
+        See Klugman, Panjer & Willmot, *Loss Models*, 4th ed., Ch. 13 §13.2.
+        """
+        lambda_hat = mean(data)
+        log_likelihood = sum(-lambda_hat + k * log(lambda_hat) - lgamma(k + 1) for k in data)
+        aic = 2 * 1 - 2 * log_likelihood
+        return FitResult(
+            distribution=FrequencyDistribution.POISSON,
+            parameters={"lambda": lambda_hat},
+            log_likelihood=log_likelihood,
+            aic=aic,
+        )
+
+    @staticmethod
+    def _fit_negative_binomial(data: List[int]) -> FitResult:
+        """Method-of-moments fit of the Negative Binomial distribution.
+
+        Standard actuarial parameterization (Klugman, Panjer & Willmot,
+        *Loss Models*, 4th ed., Ch. 13 §13.2): ``mean = r*(1-p)/p`` and
+        ``variance = r*(1-p)/p**2``.
+
+        Derivation: dividing variance by mean cancels ``r*(1-p)``, leaving
+        ``variance/mean = 1/p``, so ``p_hat = m / v`` for sample mean ``m``
+        and sample variance ``v``. Substituting ``p_hat`` back into
+        ``mean = r*(1-p)/p`` and solving for ``r`` gives
+        ``r_hat = m * p_hat / (1 - p_hat)``, which simplifies (substituting
+        ``p_hat = m/v`` and ``1 - p_hat = (v-m)/v``) to the equivalent
+        closed form ``r_hat = m**2 / (v - m)``.
+
+        This is only valid when ``v > m`` (overdispersion — otherwise
+        ``p_hat`` falls outside ``(0, 1)`` and ``r_hat`` is non-positive).
+        Raises ``ValueError`` when the sample is not overdispersed.
+        """
+        m = mean(data)
+        v = pvariance(data, mu=m)
+        if v <= m:
+            raise ValueError(
+                "Negative Binomial method-of-moments fit requires overdispersed "
+                f"data (sample variance {v} must exceed sample mean {m})"
+            )
+        p_hat = m / v
+        r_hat = m * p_hat / (1 - p_hat)
+        log_likelihood = sum(
+            lgamma(r_hat + k)
+            - lgamma(r_hat)
+            - lgamma(k + 1)
+            + r_hat * log(p_hat)
+            + k * log(1 - p_hat)
+            for k in data
+        )
+        aic = 2 * 2 - 2 * log_likelihood
+        return FitResult(
+            distribution=FrequencyDistribution.NEGATIVE_BINOMIAL,
+            parameters={"r": r_hat, "p": p_hat},
             log_likelihood=log_likelihood,
             aic=aic,
         )
