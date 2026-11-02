@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
-from datetime import date
+from datetime import date, timedelta
 
 from ..enums import ExposureBasis
 from .._container import ItemContainer
@@ -173,13 +173,14 @@ class Exposure:
             analysis_date (date): The date for which to calculate the earned percentage.
 
         Returns:
-            float: The earned percentage (0.0 to 1.0). Returns 0.0 if the exposure term length is 0
-                  or if the exposure is aggregate.
+            float: The earned percentage (0.0 to 1.0). Returns 0.0 if the exposure term length is 0.
+                  For aggregate exposures, delegates to the parallelogram method
+                  (see ``_parallelogram_earned_pct``).
         """
         if self._exposure_meta.exposure_term_length_days == 0:
             return 0.0
         if self._exposure_meta.aggregate:  # No need for == True
-            return 0.0  # TODO: Implement parallelogram method when handling aggregate exposures
+            return self._parallelogram_earned_pct(analysis_date)
         return max(
             min(
                 (analysis_date - self._exposure_meta.exposure_period_start).days
@@ -188,6 +189,76 @@ class Exposure:
             ),
             0.0,
         )
+
+    def _parallelogram_earned_pct(self, analysis_date: date) -> float:
+        """Parallelogram method for aggregate exposures' earned percentage.
+
+        Reference: Werner, G. & Modlin, C., *Basic Ratemaking*, 5th ed.
+        (CAS, 2016), Chapter 5 ("Premium"), the Parallelogram ("geometric")
+        Method section -- the same uniform-writing, triangle/trapezoid-overlap
+        construction used there for on-levelling premium is applied here to
+        answer a different question: what fraction of an aggregate exposure
+        cohort has earned as of a given analysis_date.
+
+        Assumption: individual policies are written uniformly over
+        ``[exposure_period_start, exposure_period_end]`` (width T days, where
+        T = ``exposure_term_length_days``), and each policy has its own term
+        of T days, earning pro-rata (linearly) from its own writing date.
+
+        Geometric derivation (x = writing date offset from
+        exposure_period_start, in days; y = that one policy's own earned
+        fraction as of analysis_date):
+
+        For a policy written at offset x into the period, elapsed time as of
+        analysis_date is ``t - x`` (where ``t`` = days from
+        exposure_period_start to analysis_date), so its own earned fraction
+        is ``clip((t - x) / T, 0, 1)``. Averaging that uniformly over
+        ``x in [0, T]`` (the period has width T by construction, since T is
+        defined as ``exposure_period_end - exposure_period_start``) gives the
+        area, under that piecewise-linear function, of the earned
+        triangle/trapezoid divided by the full T x 1 rectangle:
+
+        - ``t <= 0`` (analysis_date <= exposure_period_start): no policy has
+          been written yet -- 0.0.
+        - ``0 < t <= T``: the earned region is a right triangle of base t
+          and height t/T, area ``t^2 / (2T)``; dividing by the period width T
+          gives ``t^2 / (2T^2)``.
+        - ``T < t < 2T``: the earned region is the T x 1 rectangle (full
+          triangle from the case above, now complete at area T/2) plus a
+          trapezoid, which by the complementary/mirror-image shape works out
+          to ``1 - (2T - t)^2 / (2T^2)``.
+        - ``t >= 2T`` (analysis_date >= exposure_period_end + T, i.e. the
+          policy written on exposure_period_end has itself fully earned):
+          1.0.
+
+        This is exactly the CDF of the sum of two independent
+        Uniform(0, T) random variables (the writing-date offset and the
+        elapsed-term offset), which is symmetric about its mean, t = T --
+        i.e. about analysis_date == exposure_period_end. At that date the
+        two pieces above agree and the earned fraction is exactly 0.5: the
+        classic result that exactly half of a uniformly-written annual
+        cohort's exposure has earned by the end of its underwriting period.
+
+        Args:
+            analysis_date (date): The date for which to calculate the earned
+                proportion.
+
+        Returns:
+            float: The earned proportion (0.0 to 1.0).
+        """
+        start = self._exposure_meta.exposure_period_start
+        end = self._exposure_meta.exposure_period_end
+        term = self._exposure_meta.exposure_term_length_days
+
+        if analysis_date <= start:
+            return 0.0
+        if analysis_date >= end + timedelta(days=term):
+            return 1.0
+
+        t = (analysis_date - start).days
+        if t <= term:
+            return (t * t) / (2.0 * term * term)
+        return 1.0 - ((2 * term - t) ** 2) / (2.0 * term * term)
 
     def earned_exposure_value(self, analysis_date: date) -> float:
         """Calculate the earned exposure value as of the given analysis date.
