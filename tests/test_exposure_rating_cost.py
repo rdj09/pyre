@@ -10,7 +10,11 @@ from pyre import (
     RIContractMetadata,
     RILayer,
 )
-from pyre.models.Exposure.exposure_curve_functions import ExposureCurveType, mbbefd_curve
+from pyre.models.Exposure.exposure_curve_functions import (
+    ExposureCurveType,
+    mbbefd_curve,
+    swissRe_c_values,
+)
 from pyre.models.Exposure.exposure_rating_cost import ExposureModel
 from pyre.treaty import ClaimTriggerBasis, ContractType, IndexationClauseType
 
@@ -181,6 +185,102 @@ class TestCalculateAllShares(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             model.calculate_all_shares()
+
+
+class TestCalculateExposureCurveAdapter(unittest.TestCase):
+    """Covers the calculate_curve adapter (task 13): ExposureModel.calculate_exposure_curve
+    must work uniformly for every ExposureCurveType member, not just MBBEFD."""
+
+    def test_calculate_exposure_curve_works_for_all_curve_types_without_typeerror(self):
+        cases = [
+            (ExposureCurveType.MBBEFD, {"curve": swissRe_c_values.COMMERCIAL_LINES_MEDIUM}),
+            (
+                ExposureCurveType.RIEBESELL,
+                {
+                    "attachment": 100_000,
+                    "limit": 400_000,
+                    "z_value": 0.1,
+                    "base_limit": 1_000_000,
+                },
+            ),
+            (
+                ExposureCurveType.MIXED_EXPONENTIAL,
+                {
+                    "parameters_mus": [10.0, 20.0, 30.0],
+                    "parameter_weights": [1.0, 1.0, 1.0],
+                },
+            ),
+        ]
+        for curve_type, params in cases:
+            with self.subTest(curve_type=curve_type):
+                model = ExposureModel(
+                    exposures=None,
+                    ri_contract=None,
+                    selected_curve=curve_type,
+                    curve_parameters=params,
+                )
+                result = model.calculate_exposure_curve(curve_type, params, position=0.5)
+                self.assertIsInstance(result, float)
+
+    def test_adapter_matches_calling_underlying_function_directly(self):
+        # Same inputs through the adapter and through mbbefd_curve() directly must
+        # produce the same value -- proves the adapter doesn't change behavior.
+        params = {"curve": swissRe_c_values.COMMERCIAL_LINES_MEDIUM}
+        model = ExposureModel(
+            exposures=None,
+            ri_contract=None,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters=params,
+        )
+
+        adapter_result = model.calculate_exposure_curve(
+            ExposureCurveType.MBBEFD, params, position=0.5
+        )
+        direct_result = mbbefd_curve(
+            curve=swissRe_c_values.COMMERCIAL_LINES_MEDIUM, curve_position=0.5
+        )
+
+        self.assertEqual(adapter_result, direct_result)
+
+
+class TestCalculateIlfAdjustedRate(unittest.TestCase):
+    """Covers task 14: optional ILF integration into ExposureModel."""
+
+    def test_ilf_adjusted_rate_differs_from_unadjusted_for_higher_limit(self):
+        from functools import partial
+
+        from pyre.models.Exposure.exposure_ILF_functions import pareto_ilf
+
+        # pareto_ilf(limit_1, limit_2, alpha, x_m) -- bind limit_1 (the basic
+        # limit) positionally and alpha/x_m by keyword, leaving limit_2 (the
+        # "limit" ExposureModel will call the function with) unbound.
+        model = ExposureModel(
+            exposures=None,
+            ri_contract=None,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters={"curve": 3.0},
+            ilf_function=partial(pareto_ilf, 100_000.0, alpha=1.5, x_m=100_000.0),
+        )
+
+        rate_at_base = model.calculate_ilf_adjusted_rate(
+            base_limit=100_000.0, target_limit=100_000.0
+        )
+        rate_at_higher = model.calculate_ilf_adjusted_rate(
+            base_limit=100_000.0, target_limit=500_000.0
+        )
+
+        self.assertGreater(rate_at_higher, rate_at_base)
+
+    def test_calculate_ilf_adjusted_rate_without_ilf_function_raises(self):
+        model = ExposureModel(
+            exposures=None,
+            ri_contract=None,
+            selected_curve=ExposureCurveType.MBBEFD,
+            curve_parameters={"curve": 3.0},
+        )
+
+        with self.assertRaises(ValueError):
+            model.calculate_ilf_adjusted_rate(base_limit=100_000.0, target_limit=500_000.0)
 
 
 if __name__ == "__main__":

@@ -11,11 +11,11 @@ the functions in `treaty/layer_loss_functions.py`:
 |---|---|---|
 | `EXCESS_OF_LOSS`, `AGGREGATE_STOP_LOSS` | `max(min(gross − attachment, limit), 0)` | Standard XOL layer recovery. |
 | `FRANCHISE_DEDUCTIBLE` | `gross if gross > attachment else 0`, capped at `limit` | Franchise deductible: whole loss ceded once attachment is pierced, not just the excess. |
-| `QUOTA_SHARE` | `gross` (unscaled) | Deliberate: QS share/cession is applied by the caller, not inside `loss_to_layer_fn` — see the inline comment in `contracts.py`. |
-| `SURPLUS_SHARE` | *not implemented* | Raises `NotImplementedError` — surplus share needs a per-risk `sum_insured` that `RILayer` does not model yet (see `layer_loss_functions.surplus_share_calculation`, which exists but is unreachable through this path). |
+| `QUOTA_SHARE` | `gross` (unscaled) | Deliberate: QS share/cession is applied by the caller, not inside `loss_to_layer_fn` — see the docstring note on `loss_to_layer_fn` in `contracts.py`. |
+| `SURPLUS_SHARE` | `ceded = min(max(sum_insured − retained_line, 0), surplus_limit) / sum_insured * gross` | Per-risk cession percentage capped at the surplus treaty's limit (`retained_line` = `occurrence_attachment`, `surplus_limit` = `occurrence_limit`). Requires `RILayer.sum_insured` to be set — `loss_to_layer_fn` raises `ValueError` if it is `None`. See `layer_loss_functions.surplus_share_calculation`. |
 
-Reference: Clark, D. (1996), *Basics of Reinsurance Pricing*, CAS Study
-Note — [casact.org](https://www.casact.org/sites/default/files/database/studynotes_clark_reinsure.pdf).
+Reference: Clark, D.R. (1996/2014), *Basics of Reinsurance Pricing*, CAS Study
+Note — [casact.org](https://www.casact.org/sites/default/files/old/studynotes_clark_2014.pdf).
 
 ## Core Classes
 
@@ -161,8 +161,9 @@ total_premium = sum(layer.signed_line_premium for layer in contract.layers)
 print(f"Total premium for all layers: {total_premium}")
 
 # Calculate recovery for a large loss across multiple layers
-# Note: loss_to_layer_fn raises NotImplementedError for SURPLUS_SHARE layers
-# (not modelled yet) -- wrap in try/except if a contract might contain one.
+# Note: loss_to_layer_fn raises ValueError for SURPLUS_SHARE layers that
+# don't have RILayer.sum_insured set -- wrap in try/except if a contract
+# might contain one without that field populated.
 loss_amount = 75000000
 total_recovery = 0
 for layer in contract.layers:

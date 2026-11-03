@@ -227,6 +227,199 @@ class TestTriangle(unittest.TestCase):
             triangle.fit_curve(curve_type="invalid_type")  # type: ignore
 
 
+class TestGetSelectedDevelopmentPattern(unittest.TestCase):
+    """Tests for Triangle.get_selected_development_pattern."""
+
+    def _build_exponential_decay_triangle(self):
+        """Build a synthetic triangle whose age-to-age factors follow an
+        exact exponential decay (rj = 1 + exp(a + b * dp)), so the fitted
+        curve recovers the pattern precisely regardless of averaging noise.
+        """
+        a_true, b_true = 0.0, -0.5
+        dev_periods = [1, 2, 3, 4, 5, 6]
+
+        # Age-to-age factor from each "from" period to the next one.
+        ata = {dp: 1 + exp(a_true + b_true * dp) for dp in dev_periods[:-1]}
+
+        # Full development chain starting at 100.0 for dev period 1.
+        full_chain = {1: 100.0}
+        for dp in dev_periods[1:]:
+            full_chain[dp] = full_chain[dp - 1] * ata[dp - 1]
+
+        # Classic triangle shape: origin year i (0-indexed) is observed
+        # through period (len(dev_periods) - i), so every origin year's
+        # observed factors match the same chain exactly.
+        origin_years = [2015, 2016, 2017, 2018, 2019, 2020]
+        triangle_data = {}
+        for i, oy in enumerate(origin_years):
+            max_dev = len(dev_periods) - i
+            triangle_data[oy] = {dp: full_chain[dp] for dp in dev_periods if dp <= max_dev}
+
+        return Triangle(triangle=triangle_data, origin_years=origin_years, dev_periods=dev_periods)
+
+    def test_get_selected_development_pattern_returns_cumulative_factors(self):
+        triangle = self._build_exponential_decay_triangle()
+
+        pattern = triangle.get_selected_development_pattern(CurveType.EXPONENTIAL)
+        dev_periods = sorted(pattern.keys())
+        # Cumulative-to-ultimate factors decrease monotonically toward 1.0
+        for earlier, later in zip(dev_periods, dev_periods[1:]):
+            self.assertGreaterEqual(pattern[earlier], pattern[later])
+        self.assertAlmostEqual(pattern[dev_periods[-1]], 1.0, places=2)
+
+    def test_tail_factor_applied_to_final_development_period(self):
+        triangle = self._build_exponential_decay_triangle()
+
+        pattern = triangle.get_selected_development_pattern(
+            CurveType.EXPONENTIAL, tail_factor=1.05
+        )
+        dev_periods = sorted(pattern.keys())
+        self.assertAlmostEqual(pattern[dev_periods[-1]], 1.05, places=6)
+
+    def test_get_selected_development_pattern_by_origin_year_maps_each_year_to_its_own_maturity(self):
+        triangle = self._build_exponential_decay_triangle()
+
+        pattern_by_year = triangle.get_selected_development_pattern_by_origin_year(
+            CurveType.EXPONENTIAL
+        )
+
+        # (a) Keyed by origin_years, not dev periods.
+        self.assertEqual(sorted(pattern_by_year.keys()), sorted(triangle.origin_years))
+
+        # (b) Oldest (most mature) origin year's factor should be closer to
+        # 1.0 (fully run-off, tail_factor default) than the newest (least
+        # mature) origin year's factor, which should still be larger -- it
+        # has the most development left to go.
+        oldest_year = min(triangle.origin_years)
+        newest_year = max(triangle.origin_years)
+        oldest_factor = pattern_by_year[oldest_year]
+        newest_factor = pattern_by_year[newest_year]
+
+        self.assertLess(oldest_factor, newest_factor)
+        self.assertAlmostEqual(oldest_factor, 1.0, places=2)
+
+    def test_development_pattern_feeds_burn_cost_model_without_error(self):
+        from pyre.models.Experience.burn_cost import BurnCostModel, ProjectionMethods
+        from pyre.models.Experience.experience_preparer import ExperienceModelData
+        from pyre.claims.claims import Claim, ClaimDevelopmentHistory, Claims, ClaimsMetaData
+        from pyre.exposures.exposures import Exposure, ExposureMetaData, Exposures, ExposureValues
+        from pyre.treaty.contracts import RIContract, RILayer
+        from pyre.enums import ClaimTriggerBasis, ContractType, IndexationClauseType
+
+        triangle = self._build_exponential_decay_triangle()
+        pattern_by_year = triangle.get_selected_development_pattern_by_origin_year(
+            CurveType.EXPONENTIAL
+        )
+
+        claim = Claim(
+            ClaimsMetaData(
+                claim_id="CLM001",
+                currency="USD",
+                contract_limit=2_000_000.0,
+                loss_date=date(2020, 3, 1),
+            ),
+            ClaimDevelopmentHistory(
+                development_months=[12],
+                cumulative_dev_paid=[50000.0],
+                cumulative_dev_incurred=[120000.0],
+            ),
+        )
+        exposure = Exposure(
+            ExposureMetaData(
+                exposure_id="EXP2020",
+                exposure_name="2020 Premium",
+                exposure_period_start=date(2020, 1, 1),
+                exposure_period_end=date(2020, 12, 31),
+                currency="USD",
+            ),
+            ExposureValues(exposure_value=1_000_000.0, attachment_point=0.0, limit=1_000_000.0),
+        )
+        layer = RILayer(
+            layer_id=1,
+            layer_name="XOL Layer",
+            layer_type=ContractType.EXCESS_OF_LOSS,
+            occurrence_attachment=0.0,
+            occurrence_limit=1_000_000.0,
+            aggregate_attachment=0.0,
+            aggregate_limit=0.0,
+            subject_lines_of_business=[],
+            subject_lob_exposure_amounts=[],
+            full_subject_premium=0.0,
+            written_line=1.0,
+            signed_line=1.0,
+            number_of_reinstatements=0,
+            reinstatement_cost={},
+        )
+        from pyre.treaty.contracts import RIContractMetadata
+
+        contract_metadata = RIContractMetadata(
+            contract_id="C-0001",
+            contract_description="Test",
+            cedent_name="Acme Re",
+            trigger_basis=ClaimTriggerBasis.LOD,
+            indexation_clause=IndexationClauseType.FULL_INDEXATION,
+            indexation_margin=0.0,
+            inception_date=date(2020, 1, 1),
+            expiration_date=date(2020, 12, 31),
+            fx_rates={"USD": 1.0},
+        )
+        contract = RIContract(contract_meta_data=contract_metadata, layers=[layer])
+
+        model_data = ExperienceModelData(
+            claims=Claims([claim]),
+            exposures=Exposures([exposure]),
+            ri_contract=contract,
+        )
+
+        # The claim's modelling year (2020) is the triangle's newest/least
+        # mature origin year (only dev period 1 observed), so its own
+        # cumulative-to-ultimate factor is large (still has lots of
+        # development left) -- this should materially change the burn cost
+        # versus the no-development-pattern default. Use the CHAINLADDER
+        # projection method explicitly (ultimate = latest_incurred *
+        # dev_factor) so the development pattern's effect is direct and
+        # unambiguous, rather than getting diluted by the Cape Cod prior's
+        # exposure normalisation.
+        modelling_year = 2020
+        projection_methods = {modelling_year: ProjectionMethods.CHAINLADDER}
+
+        model_with_pattern = BurnCostModel(
+            model_data,
+            layer.layer_id,
+            projection_methods=projection_methods,
+            development_pattern=pattern_by_year,
+        )
+        burn_costs_with_pattern = model_with_pattern.calculate_burn_cost()
+        self.assertIsInstance(burn_costs_with_pattern, dict)
+
+        # Default: development_pattern omitted entirely -> BurnCostModel.__init__
+        # falls back to {year: 1.0 for year in modelling_years}, i.e. no
+        # development applied at all.
+        model_without_pattern = BurnCostModel(
+            model_data, layer.layer_id, projection_methods=projection_methods
+        )
+        burn_costs_without_pattern = model_without_pattern.calculate_burn_cost()
+
+        self.assertIn(modelling_year, burn_costs_with_pattern)
+        self.assertIn(modelling_year, burn_costs_without_pattern)
+
+        # The year-keyed factor actually applied for 2020 should be
+        # substantially above 1.0 (proving it's a real, non-trivial factor,
+        # not accidentally falling back to the 1.0 default).
+        self.assertGreater(pattern_by_year[modelling_year], 2.0)
+
+        # Prove the development pattern is really being applied: the two
+        # burn costs must differ by a clearly non-trivial amount, not just
+        # floating-point noise.
+        self.assertGreater(
+            abs(
+                burn_costs_with_pattern[modelling_year]
+                - burn_costs_without_pattern[modelling_year]
+            ),
+            0.1,
+        )
+
+
 class TestTriangleFromClaims(unittest.TestCase):
     """Regression tests for Triangle.from_claims (previously raised
     AttributeError and then TypeError -- see claim.claims_meta_data.modelling_year

@@ -1,23 +1,30 @@
+import random
+from typing import List, Optional
+
 from ...models.Experience.experience_preparer import ExperienceModelData
-from random import choice
+from ...claims.claims import Claim
 
 
 class resampling():
     """
     A class for resampling claims data from an ExperienceModelData object.
 
-    This class provides functionality to randomly select claims from a set of trended claims
-    for the purpose of simulation or bootstrapping analysis. It uses the random.choice function
-    to select individual claims from the trended claims data.
+    This class provides functionality to randomly select claims (with replacement)
+    from a set of trended claims for the purpose of simulation or bootstrapping
+    analysis, following the nonparametric bootstrap of Efron & Tibshirani (1993),
+    "An Introduction to the Bootstrap", Chapter 2: a resampled claim set is built
+    by drawing n claims uniformly at random, with replacement, from the observed
+    (trended) claims pool.
 
     Attributes:
         _claims: A collection of trended claims from the ExperienceModelData object.
                 These are claims that have been adjusted to the contract inception year.
 
     Note:
-        Future enhancements planned include support for different return periods and
-        more sophisticated resampling methods. The implementation relies on the Claims
-        class having an iterator method to work with the random.choice function.
+        Support for "different return periods" (i.e. deriving a return-period-based
+        loss distribution from repeated resamples) remains deferred -- it is
+        under-specified (no agreed definition of how a single resample's result
+        maps to a return period) and is intentionally out of scope here.
     """
     def __init__(self, claims: ExperienceModelData) -> None:
         """
@@ -28,24 +35,34 @@ class resampling():
                                          to be resampled. The trended_claims property of this
                                          object will be used for resampling.
         """
-        self._claims = ExperienceModelData.trended_claims #trended loss prior to subject losses
+        self._claims = claims.trended_claims #trended loss prior to subject losses
 
 
-    def resample(self) -> None:
+    def resample(self, n: int = 1, random_seed: Optional[int] = None) -> List[Claim]:
         """
-        Randomly select a claim from the collection of trended claims.
+        Draw a bootstrap resample of n claims, with replacement, from the
+        collection of trended claims.
 
-        This method uses the random.choice function to select a single claim
-        from the trended claims data. Currently, it doesn't return the selected
-        claim but this behavior may change in future implementations.
+        This implements the nonparametric bootstrap described in Efron &
+        Tibshirani (1993), "An Introduction to the Bootstrap", Chapter 2:
+        each of the n draws is made independently and uniformly at random
+        (with replacement) from the observed claims, so the same claim may
+        appear more than once in the result and some claims may not appear
+        at all.
+
+        Parameters:
+            n (int): The number of claims to draw. Defaults to 1.
+            random_seed (Optional[int]): Seed for the random number generator,
+                to make the resample reproducible. If None, the shared
+                `random` module state is used (non-reproducible).
 
         Returns:
-            None: Currently doesn't return anything, but may be updated to return
-                 the selected claim in future implementations.
+            List[Claim]: A list of n claims drawn with replacement from the
+                trended claims pool.
 
         Note:
-            Future enhancements will include support for different return periods
-            and more sophisticated resampling methods.
+            Support for "different return periods" remains deferred -- see the
+            class docstring -- and is not implemented by this method.
         """
-        choice(self._claims)
-        # TODO fleshout further return periods etc but iter method of Claims should permit choice to function
+        rng = random.Random(random_seed) if random_seed is not None else random
+        return rng.choices(self._claims.claims, k=n)

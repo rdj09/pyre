@@ -16,12 +16,14 @@ def franchise_calculation(gross_amount: float, attachment: float, limit: float):
         return 0.0
 
 
-def surplus_share_calculation(gross_amount: float, sum_insured: float, attachment: float):
-    if sum_insured <= attachment:
-        return 0.0  # No ceded amount if the sum insured is within the retention
-    surplus = sum_insured - attachment
-    share = surplus / sum_insured
-    return share * gross_amount
+def surplus_share_calculation(
+    gross_amount: float, sum_insured: float, retained_line: float, surplus_limit: float
+):
+    if sum_insured <= 0:
+        return 0.0
+    surplus_over_retention = max(sum_insured - retained_line, 0.0)
+    ceded_portion = min(surplus_over_retention, surplus_limit)
+    return (ceded_portion / sum_insured) * gross_amount
 
 
 layer_loss_calculation = {

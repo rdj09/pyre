@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Dict, Sequence
-from ..treaty.layer_loss_functions import layer_loss_calculation
+from typing import Any, Dict, Optional, Sequence
+from ..treaty.layer_loss_functions import layer_loss_calculation, surplus_share_calculation
 from ..enums import ClaimYearType, ClaimTriggerBasis, IndexationClauseType, ContractType
 from ..exceptions.exceptions import ContractException
 
@@ -31,6 +31,7 @@ class RILayer:
     cession: float = 1.0
     inures_to_benefit_of: list = field(default_factory=list)
     interlocking_classes: list = field(default_factory=list)
+    sum_insured: Optional[float] = None
 
     @property
     def written_line_premium(self) -> float:
@@ -41,13 +42,22 @@ class RILayer:
         return self.cession * self.signed_line * self.full_subject_premium
 
     def loss_to_layer_fn(self, gross_amount: float) -> float:
+        """Dispatch to the loss-to-layer formula for this layer's `layer_type`.
+
+        Note: cession/inuring order is deliberately the caller's responsibility,
+        not computed here -- this returns the gross-to-layer recovery only
+        (see the QUOTA_SHARE branch, which returns gross_amount unscaled).
+        """
         func = layer_loss_calculation[self.layer_type]
         if self.layer_type == ContractType.QUOTA_SHARE:
-            return gross_amount  # TODO analysis typically easier to do at 100% - inuring and profitability at share consider elsewhere !!!!!!
+            return gross_amount
         if self.layer_type == ContractType.SURPLUS_SHARE:
-            raise NotImplementedError(
-                "SURPLUS_SHARE loss-to-layer calculation requires a sum_insured value "
-                "that RILayer does not currently carry; not supported until that is modelled."
+            if self.sum_insured is None:
+                raise ValueError(
+                    f"SURPLUS_SHARE layer {self.layer_id} requires sum_insured to be set"
+                )
+            return surplus_share_calculation(
+                gross_amount, self.sum_insured, self.occurrence_attachment, self.occurrence_limit
             )
         return func(gross_amount, self.occurrence_attachment, self.occurrence_limit)
 

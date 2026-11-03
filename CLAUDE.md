@@ -25,6 +25,7 @@ hatch run brand:build           # regenerate app/assets/ AND docs/assets/ (Freyj
 pip install -e .                # editable install for development
 pip install -e ".[panel]"       # install with the Panel treaty pricing workbench's deps
 pip install -e ".[excel]"       # install with headless Excel (.xlsx) read/write support
+pip install -e ".[curve-fitting]" # install with curve-fitting deps (numpy/scipy/pandas/matplotlib)
 pip install -e ".[panel,excel]" # same, plus the workbench's "Export to Excel" button
 hatch run panel:serve           # serve app/main.py at localhost (panel serve, --show --autoreload)
 ```
@@ -65,9 +66,10 @@ Commands above). Layout:
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
 
 v1 scope is a single-contract pricing workbench (not a general data explorer or
-rate-monitoring dashboard). `SURPLUS_SHARE` layers are intentionally excluded
-from the layer-type selector — `RILayer.loss_to_layer_fn` raises
-`NotImplementedError` for that type (no `sum_insured` concept modelled yet).
+rate-monitoring dashboard). `RILayer.loss_to_layer_fn` now supports
+`SURPLUS_SHARE` (requires `RILayer.sum_insured` to be set; raises `ValueError`
+otherwise) but the layer type is still excluded from the Panel layer-type
+selector pending UI re-enablement.
 
 ### Key design patterns (post-refactor, develop branch)
 
@@ -106,21 +108,30 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 162 tests collected
+├── tests/                     # unittest.TestCase style; 194 tests collected (193 pass, 1 skipped without the curve-fitting extra)
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
 ```
 
-## Known Test State (develop)
+## Known Test State (feature/complete-pyre-actuarial-todos)
 
-**Expected: 0 failed, 162 passed** (ignore `test_exposure_curve_fitting.py`,
-**with the `excel` extra installed**). Without `openpyxl`, `test_io_excel.py`'s
-29 tests skip instead of failing (133 passed, 29 skipped). No known
-pre-existing failures remain — if `pytest` is red on `develop`, it's new.
+**Expected: 0 failed, 193 passed** for
+`pytest -q --ignore=tests/test_exposure_curve_fitting.py` (confirmed this
+session; **with the `excel` extra installed** — `openpyxl` is present in
+this environment). No known pre-existing failures remain — if `pytest` is
+red on this branch, it's new.
 
-`test_exposure_curve_fitting.py` errors at **collection** (needs `scipy`,
-not installed) — always `--ignore` or skip it.
+(Note: this branch forked from `develop` before the model-versioning-backend
+work that produced the "162 passed" / "140 tests collected" figures seen on
+other branches/docs revisions — those numbers do not apply here.)
+
+`test_exposure_curve_fitting.py` reports **1 skipped** (not a collection
+error) without the `curve-fitting` extra (`numpy`/`scipy`/`pandas`/
+`matplotlib` not installed in this environment) — confirmed this session
+via `pytest tests/test_exposure_curve_fitting.py -v`. Install the
+`curve-fitting` extra (see Commands above) to run it for real; always
+`--ignore` or skip it otherwise.
 
 **Double-import trap**: some tests import via `src.pyre.*` instead of
 `pyre.*`. Under `pythonpath=["src", "."]` both resolve to distinct module
