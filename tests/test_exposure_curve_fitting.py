@@ -268,3 +268,39 @@ class TestFromFittedCurve:
 
         with pytest.raises(ValueError):
             ExposureModel.from_fitted_curve(fitter, exposures=exposures, ri_contract=contract)
+
+
+def test_fitted_curve_through_calculate_all_shares_e2e():
+    """Task 23: proves the full pipeline wires together end-to-end --
+    synthetic (position, value) observations -> ExposureCurveFitter.fit_all_curves
+    -> ExposureModel.from_fitted_curve -> calculate_all_shares.
+
+    Every resulting share must lie in [0, 1]. As a second check, two
+    same-width layers at different attachment points must price with the
+    lower-attaching layer getting the larger share -- the fitted curve is
+    concave (MBBEFD-generated data), so marginal exposure share shrinks
+    moving up the tower.
+    """
+    positions = numpy.linspace(0.1, 1.0, 20)
+    true_c = 3.0
+    values = [mbbefd_curve(true_c, pos) for pos in positions]
+    fitter = ExposureCurveFitter(positions, values)
+
+    exposure = _build_exposure("EXP001", attachment_point=0.0, limit=1_000_000.0)
+    exposures = Exposures([exposure])
+    layer_low = _build_layer(
+        layer_id=1, occurrence_attachment=100_000.0, occurrence_limit=200_000.0
+    )
+    layer_high = _build_layer(
+        layer_id=2, occurrence_attachment=500_000.0, occurrence_limit=200_000.0
+    )
+    contract = _build_contract([layer_low, layer_high])
+
+    model = ExposureModel.from_fitted_curve(fitter, exposures=exposures, ri_contract=contract)
+    shares = model.calculate_all_shares()
+
+    for layer_shares in shares.values():
+        share_values = list(layer_shares.values())
+        assert all(0.0 <= v <= 1.0 for v in share_values)
+
+    assert shares["EXP001"][1] > shares["EXP001"][2]
