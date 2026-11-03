@@ -1,12 +1,32 @@
+import dataclasses
+import json
 import math
 import random
 import statistics
+from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from ...enums import FrequencyDistribution, SeverityDistribution
 from ...treaty.contracts import RIContract
 from ..Experience.frequency_severity import FitResult
 from .aggregate_features import ModellingAssumptions
+
+
+@dataclass
+class SimulationResults:
+    """Snapshot of all per-layer and programme-level output of a
+    :class:`Simulation`, as produced by :meth:`Simulation.output` and
+    serialised to JSON by :meth:`Simulation.save`.
+    """
+
+    loss_cost: Dict[int, float]
+    required_capital: Dict[int, float]
+    required_premium_layer: Dict[int, float]
+    required_premium_programme: float
+    investment_return: Dict[int, float]
+    retrocession_benefits: Dict[int, float]
+    retrocession_cost: Dict[int, float]
+    profit_commission: Dict[int, float]
 
 
 def _sample_poisson(rng: random.Random, lam: float) -> int:
@@ -115,19 +135,6 @@ class Simulation:
             for layer_id, total in sim_ceded_by_layer.items():
                 self._ceded_losses[layer_id].append(total)
 
-    def output(self) -> None:
-        pass
-
-    def save(self) -> None:
-        pass
-
-    def profit_commission(self):
-        pass
-
-    def cashflows(self):
-        # premium and claims
-        pass
-
     def loss_cost(self) -> Dict[int, float]:
         """Mean simulated aggregate ceded loss per layer, across all
         simulated years."""
@@ -164,9 +171,7 @@ class Simulation:
         for layer_id, losses in self._ceded_losses.items():
             sorted_losses = sorted(losses)
             n = len(sorted_losses)
-            idx = min(
-                max(math.ceil(self.assumptions.capital_confidence_level * n) - 1, 0), n - 1
-            )
+            idx = min(max(math.ceil(self.assumptions.capital_confidence_level * n) - 1, 0), n - 1)
             var = sorted_losses[idx]
             if self.assumptions.use_tvar:
                 tail_measure = statistics.mean([x for x in sorted_losses if x >= var])
@@ -175,34 +180,142 @@ class Simulation:
             result[layer_id] = max(tail_measure - statistics.mean(losses), 0.0)
         return result
 
-    def investment_return(self):  # / discounting:
-        # pattern and yeild assumptions from all cashflows
-        pass
+    def investment_return(self) -> Dict[int, float]:
+        """Investment income earned by holding the expected loss cost for
+        ``assumptions.mean_payment_duration_years`` before payment, at
+        ``assumptions.investment_yield``. Cites Clark, D.R. (1996/2014),
+        Basics of Reinsurance Pricing, CAS Study Note, Section B
+        (investment income treatment) -- same citation already used for
+        SURPLUS_SHARE elsewhere in this repo.
+        """
+        loss_cost = self.loss_cost()
+        factor = (
+            1 + self.assumptions.investment_yield
+        ) ** self.assumptions.mean_payment_duration_years - 1
+        return {layer_id: lc * factor for layer_id, lc in loss_cost.items()}
 
-    def tax_rate(self):
-        # premium tax rate and proift?
-        pass
+    def cashflows(self) -> Dict[int, Dict[str, float]]:
+        """Purely informational/documentary summary of the premium inflow
+        and (mean-duration) claims outflow timing per layer -- not
+        load-bearing for :meth:`required_premium_layer`, which uses
+        :meth:`investment_return` directly.
+        """
+        loss_cost = self.loss_cost()
+        return {
+            layer_id: {
+                "premium_inflow_t0": lc,
+                "claims_outflow_mean_duration_years": self.assumptions.mean_payment_duration_years,
+            }
+            for layer_id, lc in loss_cost.items()
+        }
 
-    def retrocession_cost(self):
-        # additioanl costs from risk mitigation techniques
-        pass
+    def profit_commission(self) -> Dict[int, float]:
+        """Simplified: a configurable rate
+        (``assumptions.profit_commission_rate``, default 0.0) applied to
+        ``loss_cost``, approximating an expected profit-share cost without
+        the circularity of computing it against the premium this method's
+        own output feeds into. No source mandates a specific rate.
+        """
+        loss_cost = self.loss_cost()
+        return {
+            layer_id: self.assumptions.profit_commission_rate * lc
+            for layer_id, lc in loss_cost.items()
+        }
 
-    def retrocession_benefits(self):
-        pass
+    def retrocession_benefits(self) -> Dict[int, float]:
+        """Mean amount recovered from the retrocession program per primary
+        layer, for primary layers with a same-``layer_id`` counterpart in
+        ``retrocession_contract``.
 
-    def required_premium_layer(self):
-        # required_capital = required_capital()
-        # investment_return = investment_return()
-        # tax_rate = tax_rate()
-        # retrocession_cost = retrocession_cost()
-        # loss_cost = loss_cost()
-        # acquisition_cost = 0.0
-        # brokerage_cost = 0.0
-        # expenses_other_costs = 0.0
-        pass
+        Convention (a documented simplification -- no source pins a
+        number): a retrocession layer protects the primary layer with the
+        SAME ``layer_id``. The caller is responsible for constructing
+        ``retrocession_contract`` with layers whose ``layer_id``s match the
+        primary layers they're meant to protect.
 
-    def required_premium_programme(self):
-        # for x in range(blah):
-        #     total += required_premium_layer()
-        # return total
-        pass
+        Simplified convention: retro applies to each year's AGGREGATE
+        ceded loss for that primary layer (not per-claim), matching how a
+        real aggregate/annual retro program would sit over a primary
+        treaty's ceded result.
+        """
+        result = {layer_id: 0.0 for layer_id in self._ceded_losses}
+        if self.retrocession_contract is None:
+            return result
+        retro_layers_by_id = {layer.layer_id: layer for layer in self.retrocession_contract.layers}
+        for layer_id, yearly_ceded in self._ceded_losses.items():
+            retro_layer = retro_layers_by_id.get(layer_id)
+            if retro_layer is None:
+                continue
+            recoveries = [retro_layer.loss_to_layer_fn(amount) for amount in yearly_ceded]
+            result[layer_id] = statistics.mean(recoveries)
+        return result
+
+    def retrocession_cost(self) -> Dict[int, float]:
+        """Simplified expected cost of the retrocession program: a
+        configurable loading (``assumptions.retrocession_premium_loading``,
+        default 0.0 -- no source mandates a specific number) applied to
+        expected recoveries.
+        """
+        benefits = self.retrocession_benefits()
+        return {
+            layer_id: self.assumptions.retrocession_premium_loading * benefit
+            for layer_id, benefit in benefits.items()
+        }
+
+    def required_premium_layer(self, layer_id: int) -> float:
+        """Required premium for one layer: loss cost plus a capital
+        charge, net of investment income and retrocession, grossed up for
+        premium-based expense ratios (acquisition + brokerage) per the
+        standard CAS expense-loading treatment (Werner & Modlin, Basic
+        Ratemaking, 5th ed., CAS). ``profit_commission`` is treated as an
+        additional premium-based cost here too, folded into the same
+        grossing-up (it's computed off ``loss_cost``, not premium,
+        avoiding circularity -- see :meth:`profit_commission`).
+
+        This corrects the naive treatment of adding
+        ``acquisition_cost_ratio``/``brokerage_cost_ratio`` as if they were
+        dollar amounts: since they are ratios OF premium, the standard
+        "grossing up for expenses" treatment is
+        ``premium = everything_else / (1 - expense_ratio)``.
+        """
+        loss_cost = self.loss_cost()[layer_id]
+        capital_charge = self.assumptions.cost_of_capital * self.required_capital()[layer_id]
+        investment_credit = self.investment_return()[layer_id]
+        net_retro = self.retrocession_cost()[layer_id] - self.retrocession_benefits()[layer_id]
+        profit_comm = self.profit_commission()[layer_id]
+
+        numerator = loss_cost + capital_charge - investment_credit + net_retro + profit_comm
+        expense_ratio = (
+            self.assumptions.acquisition_cost_ratio + self.assumptions.brokerage_cost_ratio
+        )
+        if expense_ratio >= 1.0:
+            raise ValueError(
+                f"acquisition_cost_ratio + brokerage_cost_ratio ({expense_ratio}) must be < 1.0"
+            )
+        return numerator / (1.0 - expense_ratio)
+
+    def required_premium_programme(self) -> float:
+        """Sum of :meth:`required_premium_layer` across all layers."""
+        return sum(self.required_premium_layer(layer_id) for layer_id in self._ceded_losses)
+
+    def output(self) -> SimulationResults:
+        """Snapshot all per-layer and programme-level output into a
+        :class:`SimulationResults` dataclass."""
+        return SimulationResults(
+            loss_cost=self.loss_cost(),
+            required_capital=self.required_capital(),
+            required_premium_layer={
+                lid: self.required_premium_layer(lid) for lid in self._ceded_losses
+            },
+            required_premium_programme=self.required_premium_programme(),
+            investment_return=self.investment_return(),
+            retrocession_benefits=self.retrocession_benefits(),
+            retrocession_cost=self.retrocession_cost(),
+            profit_commission=self.profit_commission(),
+        )
+
+    def save(self, path: str) -> None:
+        """Write :meth:`output` to ``path`` as JSON via the stdlib ``json``
+        module (no new dependency)."""
+        with open(path, "w") as f:
+            json.dump(dataclasses.asdict(self.output()), f, indent=2)

@@ -17,6 +17,15 @@ class ModellingAssumptions:
     than a figure mandated by any particular capital-allocation methodology.
     ``use_tvar`` selects between TVaR (expected shortfall, the default) and
     VaR for the tail statistic underlying :meth:`Simulation.required_capital`.
+
+    ``mean_payment_duration_years`` is typically derived from the underlying
+    claims' ``ClaimDevelopmentHistory.mean_payment_duration`` by the caller
+    (e.g. an ``AggregateFeatures`` orchestrator with access to the real
+    claims data) and supplied here as a single assumption, since
+    ``Simulation`` itself works from a fitted distribution, not individual
+    claims. ``profit_commission_rate`` and ``retrocession_premium_loading``
+    default to 0.0 -- no profit commission and no retrocession loading
+    unless explicitly configured (safe/conservative defaults).
     """
 
     cost_of_capital: float
@@ -27,6 +36,9 @@ class ModellingAssumptions:
     tax_rate: float = 0.0
     acquisition_cost_ratio: float = 0.0
     brokerage_cost_ratio: float = 0.0
+    mean_payment_duration_years: float = 0.0
+    profit_commission_rate: float = 0.0
+    retrocession_premium_loading: float = 0.0
 
 
 # TODO tidy up and consider refactor and seperate processes
