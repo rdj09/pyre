@@ -107,21 +107,30 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 140 tests collected
+├── tests/                     # unittest.TestCase style; 194 tests collected (193 pass, 1 skipped without the curve-fitting extra)
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
 ```
 
-## Known Test State (develop)
+## Known Test State (feature/complete-pyre-actuarial-todos)
 
-**Expected: 0 failed, 131 passed** (ignore `test_exposure_curve_fitting.py`,
-**with the `excel` extra installed**). Without `openpyxl`, `test_io_excel.py`'s
-25 tests skip instead of failing (106 passed, 25 skipped). No known
-pre-existing failures remain — if `pytest` is red on `develop`, it's new.
+**Expected: 0 failed, 193 passed** for
+`pytest -q --ignore=tests/test_exposure_curve_fitting.py` (confirmed this
+session; **with the `excel` extra installed** — `openpyxl` is present in
+this environment). No known pre-existing failures remain — if `pytest` is
+red on this branch, it's new.
 
-`test_exposure_curve_fitting.py` errors at **collection** (needs `scipy`,
-not installed) — always `--ignore` or skip it.
+(Note: this branch forked from `develop` before the model-versioning-backend
+work that produced the "162 passed" / "140 tests collected" figures seen on
+other branches/docs revisions — those numbers do not apply here.)
+
+`test_exposure_curve_fitting.py` reports **1 skipped** (not a collection
+error) without the `curve-fitting` extra (`numpy`/`scipy`/`pandas`/
+`matplotlib` not installed in this environment) — confirmed this session
+via `pytest tests/test_exposure_curve_fitting.py -v`. Install the
+`curve-fitting` extra (see Commands above) to run it for real; always
+`--ignore` or skip it otherwise.
 
 **Double-import trap**: some tests import via `src.pyre.*` instead of
 `pyre.*`. Under `pythonpath=["src", "."]` both resolve to distinct module

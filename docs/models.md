@@ -8,10 +8,17 @@ aggregate loss features.
     `experience_preparer.py` (`ExperienceModelData`) and `trending.py` are
     the stable, tested entry points — they back the
     [treaty pricing workbench](workbench.md) and have unit test coverage.
-    `AggregateFeatures` (`Simulation`, parts of `Selections`) and
-    `SeverityFit` are early-stage scaffolding: signatures exist but some
-    methods are stubs or unfinished. This page says so explicitly wherever
-    that's the case, rather than showing a fabricated "working" example.
+    `SeverityFit`/`FrequencyFit` (distribution fitting) and
+    `AggregateFeatures`/`Simulation` (the Monte Carlo DFA engine) now have
+    real, tested implementations — see [Severity and frequency
+    fitting](#severity-and-frequency-fitting) and [Aggregate
+    Features](#aggregate-features) below. `Selections`' credibility
+    formulas are implemented and tested; the one piece still outstanding is
+    wiring experience/exposure *blending* through `AggregateFeatures.run()`
+    (it accepts `exposure_data`/`selections` constructor arguments for
+    interface completeness but does not yet use them — see that class's
+    docstring). This page says so explicitly wherever a real limitation
+    remains, rather than showing a fabricated "working" example.
 
 ## Submodules
 
@@ -19,7 +26,7 @@ aggregate loss features.
 |---|---|---|
 | `Experience/` | `experience_preparer.py`, `trending.py` (one level up), `burn_cost.py`, `frequency_severity.py`, `pareto_rating.py`, `resampling.py`, `curve_fitting.py` | Combine claims + exposures + contract into ceded-loss results; burn-cost and frequency/severity rating |
 | `Exposure/` | `exposure_curve_functions.py`, `exposure_curve_fitting.py`, `exposure_ILF_functions.py`, `exposure_ILF_fitting.py`, `exposure_rating_cost.py` | Exposure (increased limit factor / exposure curve) rating |
-| `AggregateFeatures/` | `aggregate_features.py`, `selections.py`, `simulation_engine.py` | Aggregate loss distribution modelling and credibility-weighted selections — **early-stage** |
+| `AggregateFeatures/` | `aggregate_features.py`, `selections.py`, `simulation_engine.py` | Aggregate loss distribution modelling (Monte Carlo DFA simulation) and credibility-weighted selections |
 
 ## Experience Rating
 
@@ -94,10 +101,46 @@ print(f"Loss ratio: {loss_ratio:.1%}")  # 16.7%
 This mirrors `tests/test_app_service.py::TestRunPricing`, which asserts
 these exact figures end-to-end.
 
-!!! warning "SURPLUS_SHARE layers"
-    `loss_to_layer_fn` — and therefore `subject_contract_claims` — raises
-    `NotImplementedError` for any `SURPLUS_SHARE` layer; it has no
-    `sum_insured` to work with yet.
+!!! note "SURPLUS_SHARE layers"
+    `loss_to_layer_fn` supports `SURPLUS_SHARE` layers — it raises
+    `ValueError` (not `NotImplementedError`) if `RILayer.sum_insured` is not
+    set, since the per-risk cession percentage cannot be computed without it.
+    See [Treaty: layer loss-to-layer formulas](treaty.md#layer-loss-to-layer-formulas)
+    for the formula, and the worked example below.
+
+#### Worked example: SURPLUS_SHARE cession
+
+Clark (1996/2014), *Basics of Reinsurance Pricing*, uses a risk with
+sum insured 1,000,000, a retained line of 100,000, and a surplus treaty
+limit of 400,000 to illustrate the cession percentage:
+
+```python
+from pyre.treaty.contracts import RILayer
+from pyre.treaty.contract_types import ContractType
+
+surplus_layer = RILayer(
+    layer_id=1, layer_name="Surplus Treaty", layer_type=ContractType.SURPLUS_SHARE,
+    occurrence_attachment=100_000,  # retained_line
+    occurrence_limit=400_000,       # surplus_limit
+    aggregate_attachment=0, aggregate_limit=0,
+    subject_lines_of_business=["Property"], subject_lob_exposure_amounts=[1_000_000],
+    full_subject_premium=0, written_line=1.0, signed_line=1.0,
+    number_of_reinstatements=0, reinstatement_cost={},
+    sum_insured=1_000_000,
+)
+
+cession_pct = surplus_layer.loss_to_layer_fn(1.0) / 1.0  # treat gross_amount=1.0 as a rate
+print(f"Cession: {cession_pct:.0%}")  # Cession: 40%
+
+# A ground-up loss of 250,000 on this risk:
+print(surplus_layer.loss_to_layer_fn(250_000))  # 100000.0 (= 40% of 250,000)
+```
+
+`surplus_over_retention = max(sum_insured - retained_line, 0) = 900,000`;
+`ceded_portion = min(surplus_over_retention, surplus_limit) = 400,000`;
+`cession = ceded_portion / sum_insured = 40%` — matching Clark's own
+worked numbers. See `pyre.treaty.layer_loss_functions.surplus_share_calculation`
+for the implementation.
 
 ### Trending
 
@@ -148,12 +191,37 @@ API reference below for the full parameter set. The standalone functions
 and `generalised_cape_cod_method` in the same module implement those
 projection methods individually.
 
-### Severity fitting
+### Severity and frequency fitting
 
-`SeverityFit` (in `frequency_severity.py`) is **not yet functional** —
-`fit()` computes IBNER-adjusted individual claim amounts internally but
-does not return or store fitted distribution parameters. Treat its
-signature as a placeholder for future work, not a working API.
+`SeverityFit` and `FrequencyFit` (in `frequency_severity.py`) fit parametric
+distributions and return a `FitResult` (`distribution`, `parameters`,
+`log_likelihood`, `aic`) per requested distribution:
+
+```python
+from pyre.enums import SeverityDistribution, FrequencyDistribution
+from pyre.models.Experience.frequency_severity import SeverityFit, FrequencyFit
+
+severity_results = SeverityFit(
+    distributions=[SeverityDistribution.LOGNORMAL, SeverityDistribution.PARETO],
+    data=data,  # an ExperienceModelData instance
+    ibner_dev_pattern={2023: 1.0},
+).fit()
+best_severity = min(severity_results, key=lambda r: r.aic)
+
+frequency_results = FrequencyFit(
+    distributions=[FrequencyDistribution.POISSON, FrequencyDistribution.NEGATIVE_BINOMIAL],
+    claim_counts=[3, 5, 2, 7],
+).fit()
+```
+
+`SeverityFit.fit()` supports `LOGNORMAL` (method of moments) and `PARETO`
+(single-parameter, maximum likelihood); `FrequencyFit.fit()` supports
+`POISSON` (maximum likelihood) and `NEGATIVE_BINOMIAL` (method of moments,
+requires overdispersed data — raises `ValueError` otherwise). Both raise
+`NotImplementedError` for any other enum member (e.g.
+`SeverityDistribution.OTHER`). See Klugman, Panjer & Willmot, *Loss Models:
+From Data to Decisions*, 4th ed., Ch. 13 "Parameter Estimation", for the
+estimation methods (already cited in the module's docstrings).
 
 `SeverityFit`'s `ibner_dev_pattern` argument is designed to be populated
 from `IBNERPatternExtractor.get_IBNER_pattern()`
@@ -234,22 +302,64 @@ value = exposure_model.calculate_exposure_curve(
 `ExposureModel._calculate_single_exposure_share` (the per-risk,
 stacking-aware share-of-layer calculation cited from
 [casact.org](https://www.casact.org/sites/default/files/presentation/reinsure_2009_handouts_cs1-rosin.pdf))
-is internal (`_`-prefixed) and still under active development — its control
-flow does not yet handle every attachment/limit combination correctly, so
-it is not documented as a public API here.
+now calls curves through the uniform `calculate_curve(curve_type, parameters,
+position)` adapter (`exposure_curve_functions.calculate_curve`), so the
+curve-call signature mismatch that previously broke `RIEBESELL`/
+`MIXED_EXPONENTIAL` is fixed — all three `ExposureCurveType` members work.
+`ExposureModel.calculate_ilf_adjusted_rate` additionally supports scaling a
+base-limit rate to a target limit via an optional `ilf_function`, as a
+separate, additive adjustment layered on top of the curve-based share.
 
-## Aggregate Features (early-stage)
+Known remaining limitations: `_calculate_single_exposure_share` only
+considers each layer's `occurrence_attachment`/`occurrence_limit` (aggregate
+layer limits are not reflected in the per-risk share), and it divides by
+`total_insured_value`, which raises `ZeroDivisionError` for a policy with
+`attachment_point + limit == 0`. It remains `_`-prefixed/internal and is
+not documented as a stable public API here.
 
-`AggregateFeatures`/`Simulation` (`simulation_engine.py`) are scaffolding —
-most `Simulation` methods are unimplemented stubs. `Selections` and its
-`CredibilityWeight` helper (`selections.py`) are more complete and
+## Aggregate Features
+
+`AggregateFeatures` (`aggregate_features.py`) orchestrates a frequency/severity
+fit from experience data into a Monte Carlo `Simulation` and returns its
+`SimulationResults`:
+
+```python
+from pyre.models.AggregateFeatures.aggregate_features import AggregateFeatures, ModellingAssumptions
+
+assumptions = ModellingAssumptions(
+    cost_of_capital=0.10, required_rate_of_return=0.12,
+)
+features = AggregateFeatures(
+    experience_data=data,  # an ExperienceModelData instance
+    exposure_data=exposure_model,  # an ExposureModel instance
+    selections=selections,  # a Selections instance
+    assumptions=assumptions,
+)
+results = features.run(n_simulations=10_000)
+```
+
+`Simulation` (`simulation_engine.py`) is a fully implemented Monte Carlo
+DFA engine: it samples claim counts and severities from the fitted
+`FrequencyFit`/`SeverityFit` distributions (`POISSON`/`NEGATIVE_BINOMIAL`
+and `LOGNORMAL`/`PARETO` respectively — the same ones `SeverityFit`/
+`FrequencyFit` support, see
+[above](#severity-and-frequency-fitting)), applies each layer's
+`loss_to_layer_fn`, and computes `loss_cost`, `required_capital` (VaR or
+TVaR, per `ModellingAssumptions.use_tvar`), `investment_return`,
+`cashflows`, `profit_commission`, `retrocession_benefits`/
+`retrocession_cost`, and `required_premium_layer`/
+`required_premium_programme`. `AggregateFeatures.run()` currently only
+drives experience-side fitting through `Simulation` — it accepts
+`exposure_data`/`selections` constructor arguments for interface
+completeness but does not yet blend them in via `Selections`' credibility
+weighting (that blended run is separate, out-of-scope work — see the
+class's own docstring).
+
+`Selections` and its `CredibilityWeight` helper (`selections.py`)
 implement standard credibility formulas (limited fluctuation, Bühlmann,
 Bühlmann–Straub, greatest-accuracy, and Bayesian credibility) for blending
 experience and exposure rating indications — see the class docstrings and
-API reference below for exact signatures. No end-to-end example is given
-here since `Selections` depends on both `ExperienceModelData` and
-`ExposureModel`, and the aggregate simulation layer they would ultimately
-feed into is not yet implemented.
+API reference below for exact signatures.
 
 ## API Reference
 
