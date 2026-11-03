@@ -111,7 +111,7 @@ class TestCalculateExperienceWeight(unittest.TestCase):
 class TestFullCredibilityStandard(unittest.TestCase):
     def test_full_credibility_standard_matches_cas_exam_5_standard(self):
         """1,082 claims is the well-known Poisson full-credibility standard for
-        +/-5% at 95% confidence (Mahler & Dean, Ch.8, Foundations of Casualty
+        +/-5% at 90% confidence (Mahler & Dean, Ch.8, Foundations of Casualty
         Actuarial Science, 4th ed., CAS)."""
         cw = CredibilityWeight(experience_data=Mock(), exposure_data=Mock())
         default = inspect.signature(cw.limited_fluctuation_credibility).parameters[

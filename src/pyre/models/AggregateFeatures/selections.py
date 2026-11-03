@@ -183,8 +183,10 @@ class CredibilityWeight:
         Calculate credibility using the Limited Fluctuation (Classical) Credibility method.
         Based on the formula Z = min(sqrt(n/n_full), 1) where n_full is the full credibility standard.
 
-        The default full_credibility_standard of 1082 corresponds to a 95% confidence level
-        with a 5% margin of error assuming a Poisson frequency process.
+        The default full_credibility_standard of 1082 corresponds to a 90% confidence level
+        with a 5% margin of error assuming a Poisson frequency process (z=1.645 is the
+        normal critical value for 90% two-sided / 95% one-sided confidence; 95% two-sided
+        would require z=1.96, giving a full credibility standard of ~1537, not 1082).
 
         Args:
             claim_count: Number of claims

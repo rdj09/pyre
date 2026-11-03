@@ -154,11 +154,18 @@ def test_fit_all_curves_returns_r_squared_for_every_successful_fit():
     results = fitter.fit_all_curves()
 
     assert "MBBEFD" in results
-    # Every successfully-fitted curve's result tuple ends in an R-squared
-    # value, and a near-exact MBBEFD fit on MBBEFD-generated data should be
-    # very high.
+    # R-squared is mathematically bounded above by 1.0 for every curve
+    # type (it can never explain more than 100% of the variance), but it
+    # is NOT bounded below by 0.0 in general for a nonlinear least-squares
+    # fit -- that lower bound only holds for OLS linear regression. Data
+    # generated from MBBEFD and fit with a mismatched curve type (e.g.
+    # MIXED_EXPONENTIAL) can legitimately score R-squared < 0 (SS_res >
+    # SS_total), so only assert the upper bound for every curve, and
+    # reserve the >= 0.0 lower bound for MBBEFD itself -- the curve type
+    # this data was actually generated from, which should fit very well.
     for params in results.values():
-        assert 0.0 <= params[-1] <= 1.0 + 1e-9
+        assert params[-1] <= 1.0 + 1e-9
+    assert 0.0 <= results["MBBEFD"][-1]
     assert results["MBBEFD"][-1] > 0.999
 
 

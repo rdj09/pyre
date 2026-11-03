@@ -186,6 +186,43 @@ class TestAggregateFeaturesRun(unittest.TestCase):
         self.assertGreaterEqual(results.required_premium_programme, 0.0)
 
 
+class TestClaimCountsByModellingYear(unittest.TestCase):
+    """``_claim_counts_by_modelling_year`` feeds the frequency fit and must
+    include every modelling year with exposure, defaulting claim-free years
+    to a count of 0 -- otherwise claim-free years are silently dropped,
+    biasing the fitted frequency distribution's mean upward (especially for
+    excess layers where claim-free years are common and real)."""
+
+    def test_claim_free_modelling_years_are_included_with_zero_count(self):
+        # Exposure spans 2018-2020 (3 modelling years), but claims only
+        # exist in 2018 and 2020 -- 2019 is claim-free.
+        claims_list = [
+            _claim("CLM001", 2018, 100_000.0),
+            _claim("CLM002", 2018, 50_000.0),
+            _claim("CLM003", 2020, 75_000.0),
+        ]
+        exposures_list = [_exposure(year) for year in (2018, 2019, 2020)]
+
+        experience_data = _experience_model_data(claims_list, exposures_list)
+        exposure_data = _exposure_model(exposures_list)
+        selections = Selections(experience_data=experience_data, exposure_data=exposure_data)
+        assumptions = ModellingAssumptions(cost_of_capital=0.1, required_rate_of_return=0.08)
+
+        af = AggregateFeatures(
+            experience_data=experience_data,
+            exposure_data=exposure_data,
+            selections=selections,
+            assumptions=assumptions,
+        )
+
+        claim_counts = af._claim_counts_by_modelling_year()
+
+        self.assertEqual(set(claim_counts), {2018, 2019, 2020})
+        self.assertEqual(claim_counts[2018], 2)
+        self.assertEqual(claim_counts[2019], 0)
+        self.assertEqual(claim_counts[2020], 1)
+
+
 class TestAggregateFeaturesPricingPathE2E(unittest.TestCase):
     """End-to-end wiring test: the real CSV-parsing fixtures from
     ``tests/test_app_service.py`` (``CLAIMS_CSV``/``EXPOSURES_CSV``, parsed

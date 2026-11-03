@@ -253,8 +253,8 @@ class Simulation:
     def retrocession_cost(self) -> Dict[int, float]:
         """Simplified expected cost of the retrocession program: a
         configurable loading (``assumptions.retrocession_premium_loading``,
-        default 0.0 -- no source mandates a specific number) applied to
-        expected recoveries.
+        default 1.0 -- break-even, no source mandates a specific number)
+        applied to expected recoveries.
         """
         benefits = self.retrocession_benefits()
         return {

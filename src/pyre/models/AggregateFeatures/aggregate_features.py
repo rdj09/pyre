@@ -28,9 +28,29 @@ class ModellingAssumptions:
     (e.g. an ``AggregateFeatures`` orchestrator with access to the real
     claims data) and supplied here as a single assumption, since
     ``Simulation`` itself works from a fitted distribution, not individual
-    claims. ``profit_commission_rate`` and ``retrocession_premium_loading``
-    default to 0.0 -- no profit commission and no retrocession loading
-    unless explicitly configured (safe/conservative defaults).
+    claims. ``profit_commission_rate`` defaults to 0.0 -- no profit
+    commission unless explicitly configured (a safe/conservative default).
+
+    ``retrocession_premium_loading`` defaults to 1.0, i.e. break-even: the
+    retrocession program's expected cost (``retrocession_cost``, loading *
+    ``retrocession_benefits``) exactly equals its expected benefit, for
+    zero net effect on required premium by default. A default of 0.0
+    would instead make protection look free -- ``retrocession_cost`` would
+    be 0.0 while ``retrocession_benefits`` stayed positive, so
+    ``required_premium_layer``'s netting of cost against benefits would
+    reduce required premium by the FULL expected benefit while charging
+    nothing for it. 1.0 is the safer default; set an explicit loading
+    (typically > 1.0, reflecting a real market rate with a risk margin)
+    when a retrocession program should be priced as a real cost rather
+    than assumed break-even.
+
+    ``required_rate_of_return`` and ``tax_rate`` are currently reserved,
+    unused fields: :meth:`Simulation.required_premium_layer` does not read
+    either of them in this plan's scope (it is driven by ``cost_of_capital``
+    instead). They are accepted here as placeholders for a future
+    return-on-capital / after-tax pricing refinement, not silently-broken
+    parameters -- the same "accepted but not yet wired in" status as
+    ``AggregateFeatures.exposure_data``/``selections``.
     """
 
     cost_of_capital: float
@@ -43,7 +63,7 @@ class ModellingAssumptions:
     brokerage_cost_ratio: float = 0.0
     mean_payment_duration_years: float = 0.0
     profit_commission_rate: float = 0.0
-    retrocession_premium_loading: float = 0.0
+    retrocession_premium_loading: float = 1.0
 
 
 class AggregateFeatures:
@@ -84,7 +104,18 @@ class AggregateFeatures:
         return self._experience_data.ri_contract
 
     def _claim_counts_by_modelling_year(self) -> Dict[int, int]:
-        claims_by_year: Dict[int, int] = {}
+        """Claim counts for EVERY modelling year with exposure -- the full
+        universe of "periods" the frequency distribution should be fit
+        over -- defaulting any claim-free year to a count of 0.
+
+        Counting only years that have at least one claim (the previous
+        behaviour) silently drops claim-free modelling years from the
+        frequency fit, biasing the fitted mean upward -- especially for
+        excess layers where claim-free years are common and real.
+        """
+        claims_by_year: Dict[int, int] = {
+            year: 0 for year in self._experience_data.exposures.modelling_years
+        }
         for claim in self._experience_data.trended_claims.claims:
             year = claim.claims_meta_data.modelling_year
             claims_by_year[year] = claims_by_year.get(year, 0) + 1

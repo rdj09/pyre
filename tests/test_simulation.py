@@ -318,6 +318,35 @@ class TestSimulationRetrocession(unittest.TestCase):
         costs = sim.retrocession_cost()
         self.assertAlmostEqual(costs[1], 0.1 * benefits[1], places=6)
 
+    def test_default_retrocession_loading_is_break_even_not_free(self):
+        """With a retrocession_contract supplied and default assumptions
+        (retrocession_premium_loading not overridden), the program should
+        be break-even by default -- cost equal to benefits, zero net
+        effect on required premium -- not free (cost=0.0 while benefits
+        are positive, which would misleadingly reduce required premium by
+        the full expected benefit at no cost)."""
+        freq_fit = _poisson_fit(2.0)
+        sev_fit = _pareto_fit(alpha=5.0, x_m=10_000.0)
+        contract = _xol_contract(occurrence_attachment=0.0, occurrence_limit=1e12)
+        retro_contract = _xol_contract(occurrence_attachment=1_000.0, occurrence_limit=1e12)
+
+        assumptions = ModellingAssumptions(cost_of_capital=0.1, required_rate_of_return=0.08)
+        sim = Simulation(
+            freq_fit,
+            sev_fit,
+            ri_contract=contract,
+            assumptions=assumptions,
+            n_simulations=2000,
+            random_seed=21,
+            retrocession_contract=retro_contract,
+        )
+        sim.run()
+
+        benefits = sim.retrocession_benefits()
+        costs = sim.retrocession_cost()
+        self.assertGreater(benefits[1], 0.0)
+        self.assertEqual(costs[1], benefits[1])
+
     def test_retrocession_benefits_zero_for_layer_id_without_matching_retro_layer(self):
         freq_fit = _poisson_fit(2.0)
         sev_fit = _pareto_fit(alpha=5.0, x_m=10_000.0)
