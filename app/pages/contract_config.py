@@ -55,24 +55,56 @@ LAYER_COLUMNS = [
 def build_contract_config_page(state: WorkbenchState) -> pn.Column:
     status = pn.pane.Alert("Contract not yet configured.", alert_type="warning")
 
-    contract_id = pn.widgets.TextInput(name="Contract ID", value="C-0001")
-    contract_description = pn.widgets.TextInput(name="Description", value="")
-    cedent_name = pn.widgets.TextInput(name="Cedent", value="")
+    contract_id = pn.widgets.TextInput(
+        name="Contract ID",
+        value=state.contract_metadata.contract_id if state.contract_metadata else "C-0001",
+    )
+    contract_description = pn.widgets.TextInput(
+        name="Description",
+        value=state.contract_metadata.contract_description if state.contract_metadata else "",
+    )
+    cedent_name = pn.widgets.TextInput(
+        name="Cedent",
+        value=state.contract_metadata.cedent_name if state.contract_metadata else "",
+    )
     trigger_basis = pn.widgets.Select(
         name="Trigger basis",
         options=[t.name for t in ClaimTriggerBasis],
-        value=ClaimTriggerBasis.LOD.name,
+        value=(
+            state.contract_metadata.trigger_basis.name
+            if state.contract_metadata
+            else ClaimTriggerBasis.LOD.name
+        ),
     )
     indexation_clause = pn.widgets.Select(
         name="Indexation clause",
         options=[t.name for t in IndexationClauseType],
-        value=IndexationClauseType.FULL_INDEXATION.name,
+        value=(
+            state.contract_metadata.indexation_clause.name
+            if state.contract_metadata
+            else IndexationClauseType.FULL_INDEXATION.name
+        ),
     )
-    indexation_margin = pn.widgets.FloatInput(name="Indexation margin", value=0.0)
-    inception_date = pn.widgets.DatePicker(name="Inception date", value=date.today())
-    expiration_date = pn.widgets.DatePicker(name="Expiration date", value=date.today())
+    indexation_margin = pn.widgets.FloatInput(
+        name="Indexation margin",
+        value=state.contract_metadata.indexation_margin if state.contract_metadata else 0.0,
+    )
+    inception_date = pn.widgets.DatePicker(
+        name="Inception date",
+        value=state.contract_metadata.inception_date if state.contract_metadata else date.today(),
+    )
+    expiration_date = pn.widgets.DatePicker(
+        name="Expiration date",
+        value=state.contract_metadata.expiration_date if state.contract_metadata else date.today(),
+    )
 
-    layer_rows: list[dict] = []
+    layer_rows: list[dict] = [
+        {
+            col: getattr(layer, col) if col != "layer_type" else layer.layer_type.name
+            for col in LAYER_COLUMNS
+        }
+        for layer in state.layers
+    ]
     layer_table = pn.widgets.Tabulator(
         pd.DataFrame(layer_rows, columns=LAYER_COLUMNS),
         show_index=False,
@@ -82,8 +114,9 @@ def build_contract_config_page(state: WorkbenchState) -> pn.Column:
         formatters=LAYER_FORMATTERS,
     )
 
-    layer_id = pn.widgets.IntInput(name="Layer ID", value=1)
-    layer_name = pn.widgets.TextInput(name="Layer name", value="Layer 1")
+    next_layer_id = max((layer.layer_id for layer in state.layers), default=0) + 1
+    layer_id = pn.widgets.IntInput(name="Layer ID", value=next_layer_id)
+    layer_name = pn.widgets.TextInput(name="Layer name", value=f"Layer {next_layer_id}")
     layer_type = pn.widgets.Select(
         name="Layer type",
         options=[t.name for t in SELECTABLE_LAYER_TYPES],

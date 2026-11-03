@@ -20,6 +20,7 @@ class WorkbenchState:
     claims: Optional[Claims] = None
     exposures: Optional[Exposures] = None
     results: Optional[PricingResults] = None
+    loaded_version_id: Optional[int] = None
 
     def build_contract(self) -> RIContract:
         if self.contract_metadata is None:
