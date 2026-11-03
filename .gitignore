@@ -26,3 +26,5 @@ app/__pycache__/*
 app/pages/__pycache__/*
 .cache/montserrat/
 data/
+.venv/
+**/__pycache__/ 

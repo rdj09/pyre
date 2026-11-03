@@ -2,6 +2,14 @@
 
 Guidance for Claude Code when working in this repository.
 
+**Keep this file lean.** Trust the module map, architecture notes, and
+branch policy below rather than re-deriving them by exploring the tree each
+session. When something here goes stale, fix that one line in place —
+don't grow the file with history, branch-specific caveats, or narrative
+about how a fact was confirmed. If a fact is cheaply re-derivable from the
+code (exact line numbers, full file contents), don't duplicate it here —
+point at the file instead.
+
 ## Project Overview
 
 **pyRE** — Python package for non-life reinsurance pricing and analysis. Pure Python 3.10+, no external runtime dependencies. Build system: Hatch. Docs: MkDocs/Material → GitHub Pages. License: MIT. Version: 0.0.1 (Beta).
@@ -66,10 +74,9 @@ Commands above). Layout:
 | `examples/panel_demo/` | Bundled demo CSVs loaded by the "Load demo data" button. |
 
 v1 scope is a single-contract pricing workbench (not a general data explorer or
-rate-monitoring dashboard). `RILayer.loss_to_layer_fn` now supports
-`SURPLUS_SHARE` (requires `RILayer.sum_insured` to be set; raises `ValueError`
-otherwise) but the layer type is still excluded from the Panel layer-type
-selector pending UI re-enablement.
+rate-monitoring dashboard). `RILayer.loss_to_layer_fn` supports `SURPLUS_SHARE`
+(requires `RILayer.sum_insured`; raises `ValueError` otherwise) and it is
+selectable in the Panel UI (`app/pages/contract_config.py`).
 
 ### Key design patterns (post-refactor, develop branch)
 
@@ -108,30 +115,22 @@ pyre/
 │   ├── io_excel/               # optional, requires pip install -e ".[excel]"
 │   ├── rate_monitoring/
 │   └── exceptions/
-├── tests/                     # unittest.TestCase style; 194 tests collected (193 pass, 1 skipped without the curve-fitting extra)
+├── tests/                     # unittest.TestCase style; 217 passed (full suite, excel extra installed); +1 skipped in test_exposure_curve_fitting.py without the curve-fitting extra
 ├── docs/                      # MkDocs source
 ├── pyproject.toml             # Hatch, ruff, mypy, pytest, coverage config
 └── mkdocs.yml
 ```
 
-## Known Test State (feature/complete-pyre-actuarial-todos)
+## Known Test State
 
-**Expected: 0 failed, 193 passed** for
-`pytest -q --ignore=tests/test_exposure_curve_fitting.py` (confirmed this
-session; **with the `excel` extra installed** — `openpyxl` is present in
-this environment). No known pre-existing failures remain — if `pytest` is
-red on this branch, it's new.
+`main`/`develop`: `pytest` → **217 passed** (with `excel` extra installed;
+no `--ignore` needed). `test_exposure_curve_fitting.py` self-skips (1
+skipped, not a collection error) without the `curve-fitting` extra — install
+it (see Commands) to run it for real. A red suite on `main`/`develop` is a
+new regression — don't assume pre-existing failure without checking `git log`.
 
-(Note: this branch forked from `develop` before the model-versioning-backend
-work that produced the "162 passed" / "140 tests collected" figures seen on
-other branches/docs revisions — those numbers do not apply here.)
-
-`test_exposure_curve_fitting.py` reports **1 skipped** (not a collection
-error) without the `curve-fitting` extra (`numpy`/`scipy`/`pandas`/
-`matplotlib` not installed in this environment) — confirmed this session
-via `pytest tests/test_exposure_curve_fitting.py -v`. Install the
-`curve-fitting` extra (see Commands above) to run it for real; always
-`--ignore` or skip it otherwise.
+If this count drifts from reality (new tests added since), trust a fresh
+`pytest` run over this file — don't propagate a stale number further.
 
 **Double-import trap**: some tests import via `src.pyre.*` instead of
 `pyre.*`. Under `pythonpath=["src", "."]` both resolve to distinct module
