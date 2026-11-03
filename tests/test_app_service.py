@@ -156,6 +156,61 @@ class TestRunPricing(unittest.TestCase):
         self.assertAlmostEqual(by_year.loc[2023, "ceded_incurred"], 200000.0)
         self.assertAlmostEqual(by_year.loc[2023, "loss_ratio"], 200000.0 / 1200000.0)
 
+    def test_run_pricing_with_surplus_share_layer_matches_clark_cession(self):
+        """End-to-end: a SURPLUS_SHARE layer's cession flows through run_pricing.
+
+        Reuses the shared CLAIMS_CSV/EXPOSURES_CSV fixtures (no dedicated CSV
+        needed) -- surplus_share_calculation's cession fraction depends only
+        on sum_insured/retained_line/surplus_limit, not on the loss amount,
+        so it applies uniformly to every claim/dev point and the arithmetic
+        stays clean against the shared fixture.
+
+        Hand computation (Clark's risk-5 cession, per Task 5's
+        surplus_share_calculation(gross_amount, sum_insured, retained_line,
+        surplus_limit)):
+            sum_insured = 1,000,000
+            retained_line (occurrence_attachment) = 100,000
+            surplus_limit (occurrence_limit) = 400,000
+            surplus_over_retention = max(sum_insured - retained_line, 0)
+                                    = max(1,000,000 - 100,000, 0) = 900,000
+            ceded_portion = min(surplus_over_retention, surplus_limit)
+                          = min(900,000, 400,000) = 400,000
+            cession fraction = ceded_portion / sum_insured
+                             = 400,000 / 1,000,000 = 0.40 (40%)
+
+        CLAIMS_CSV's only claim in modelling_year 2023 is CLM003, whose
+        latest (development_month=12) cumulative_incurred is 350,000 and
+        contract_limit (2,000,000) is well above that, so capping has no
+        effect:
+            expected_ceded_incurred = 350,000 * 0.40 = 140,000.0
+        """
+        metadata = build_contract_metadata(
+            {
+                "contract_id": "C-0003",
+                "trigger_basis": "LOD",
+                "indexation_clause": "FULL_INDEXATION",
+                "inception_date": date(2023, 1, 1),
+                "expiration_date": date(2023, 12, 31),
+            }
+        )
+        layer = build_layer(
+            {
+                "layer_id": 1,
+                "layer_name": "Surplus 1",
+                "layer_type": "SURPLUS_SHARE",
+                "occurrence_attachment": 100_000,
+                "occurrence_limit": 400_000,
+                "sum_insured": 1_000_000,
+                "full_subject_premium": 0.0,
+            }
+        )
+        contract = RIContract(contract_meta_data=metadata, layers=[layer])
+
+        results = run_pricing(self.claims, self.exposures, contract)
+        by_year = results.by_layer_year.set_index("modelling_year")
+
+        self.assertAlmostEqual(by_year.loc[2023, "ceded_incurred"], 140000.0, places=2)
+
     def test_run_pricing_with_surplus_share_layer_without_sum_insured_raises(self):
         # SURPLUS_SHARE is now implemented (pyre.treaty.contracts.RILayer
         # .loss_to_layer_fn), but still requires sum_insured to be set --
